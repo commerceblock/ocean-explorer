@@ -8,7 +8,7 @@ ul(class='nav nav-tabs mb-3')
 
 div(class="tab-content")
 	div(id="tab-summary", class="tab-pane active", role="tabpanel")
-		if (result.getblock.hash == genesisBlockHash)
+		if (result.getblock.height == 0)
 			div(class="alert alert-success", style="padding-bottom: 0;")
 				h4(class="alert-heading h5") This is the Ocean Genesis Block!
 				:markdown-it
@@ -26,9 +26,9 @@ div(class="tab-content")
 					if (result.getblock.previousblockhash)
 						a(href=("/block/" + result.getblock.previousblockhash)) #{result.getblock.previousblockhash}
 
-					else if (result.getblock.hash == genesisBlockHash)
+					else if (result.getblock.height == 0)
 						span This is the 
-						a(href="https://en.bitcoin.it/wiki/Genesis_block") Ocean Genesis Block
+						a(href="https://www.commerceblock.com") Ocean Genesis Block
 
 			tr
 				th(class="table-active properties-header") Next Block Hash
@@ -114,15 +114,11 @@ div(class="tab-content")
 					span #{(offset + 1)} - #{Math.min(offset + limit, txCount)}
 
 		each tx, txIndex in result.transactions
-			//pre
-			//	code #{JSON.stringify(tx, null, 4)}
 			div(class="card mb-3")
 				div(class="card-header")
 					if (tx && tx.txid)
 						a(href=("/tx/" + tx.txid), class="monospace") #{tx.txid}
 				div(class="card-body")
-					//pre
-					//	code #{JSON.stringify(result.txInputsByTransaction[tx.txid], null, 4)}
 					if (true)
 						div(class="row")
 							div(class="col-md-6")
@@ -145,25 +141,19 @@ div(class="tab-content")
 													span(class="tag monospace") coinbase
 													span(class="monospace")  Newly minted CBT
 												td(class="monospace") #{new Decimal(0)}
-
 										if (tx.vin[0].issuance)
 											- totalInputValue = totalInputValue.plus(new Decimal(tx.vin[0].issuance.assetamount));
 											tr
 												th 1
 												td
-													span(class="tag monospace") issuance
+													span(class="tag tag-issuance monospace") issuance
 													span(class="monospace")  Newly issued CBT
 												td(class="monospace") #{new Decimal(tx.vin[0].issuance.assetamount)}
-
 										each txInput, txInputIndex in result.txInputsByTransaction[tx.txid]
 											if (txInput)
 												- var vout = txInput.vout[tx.vin[txInputIndex].vout];
-
 												tr
 													th #{(txInputIndex + 1)}
-													//pre
-													//	code #{JSON.stringify(txInput)}
-
 													td
 														if (vout.scriptPubKey && vout.scriptPubKey.addresses)
 															div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
@@ -173,7 +163,6 @@ div(class="tab-content")
 														if (vout.value)
 															- totalInputValue = totalInputValue.plus(new Decimal(vout.value));
 															span(class="monospace") #{vout.value}
-
 										- var coinbaseCount = tx.vin[0].coinbase || tx.vin[0].issuance  ? 1 : 0;
 										if ((tx.vin.length - coinbaseCount) > result.txInputsByTransaction[tx.txid].length)
 											tr
@@ -187,8 +176,6 @@ div(class="tab-content")
 												td
 												td
 													strong(class="monospace") #{totalInputValue}
-
-
 							div(class="col-md-6")
 								h6 Output (#{tx.vout.length.toLocaleString()})
 								- var totalOutputValue = new Decimal(0);
@@ -198,7 +185,6 @@ div(class="tab-content")
 											th
 											th Output
 											th Amount
-
 									tbody
 										each vout, voutIndex in tx.vout
 											tr
@@ -208,10 +194,10 @@ div(class="tab-content")
 														if (vout.scriptPubKey.addresses)
 															a(id="output-" + voutIndex)
 																div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
-														else if (vout.scriptPubKey.type == 'nonstandard')
-															span(class="monospace") NON STANDARD
-														else if (vout.scriptPubKey.type == 'nulldata')
-															span(class="monospace") NULL DATA
+														else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
+															span()
+														else if (vout.scriptPubKey.type == 'fee')
+															span(class="tag tag-fee monospace") fees
 														else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
 															span(class="monospace") OP_RETURN:
 															span(class="monospace text-muted") #{utils.hex2ascii(vout.scriptPubKey.asm.substring("OP_RETURN ".length))}
@@ -219,15 +205,11 @@ div(class="tab-content")
 													span(class="monospace") #{vout.value}
 													if (vout.value)
 														- totalOutputValue = totalOutputValue.plus(vout.value);
-
 										tr
 											td
 											td
 											td
 												strong(class="monospace") #{totalOutputValue}
-			//pre
-			//	code #{JSON.stringify(tx, null, 4)}
-
 		if (txCount > limit)
 			- var pageNumber = offset / limit + 1;
 			- var pageCount = Math.floor(txCount / limit);

@@ -54,18 +54,17 @@ app.locals.sourcecodeVersion = null;
 app.use(function(req, res, next) {
 	// make session available in templates
 	res.locals.session = req.session;
-	res.locals.debug = env.debug;
 
-	if (env.bitcoind && env.bitcoind.rpc) {
-		req.session.host = env.bitcoind.host;
-		req.session.port = env.bitcoind.port;
-		req.session.username = env.bitcoind.rpc.username;
+	if (env.ocean && env.ocean.rpc) {
+		req.session.host = env.ocean.host;
+		req.session.port = env.ocean.port;
+		req.session.username = env.ocean.rpc.username;
 
 		global.client = new bitcoin({
-  		host: env.bitcoind.host,
-  		port: env.bitcoind.port,
-  		username: env.bitcoind.rpc.username,
-  		password: env.bitcoind.rpc.password,
+  		host: env.ocean.host,
+  		port: env.ocean.port,
+  		username: env.ocean.rpc.username,
+  		password: env.ocean.rpc.password,
   		timeout: 5000
     });
 	}

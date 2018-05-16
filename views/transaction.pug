@@ -46,7 +46,7 @@ block content
 
 		div(class="tab-content")
 			div(id="tab-summary", class="tab-pane active", role="tabpanel")
-				if (txid == genesisCoinbaseTransactionId)
+				if (result.getrawtransaction.blocktime == 1514764800)
 					div(class="alert alert-warning", style="padding-bottom: 0;")
 						h4(class="alert-heading h5") This transaction doesn't really exist!
 						:markdown-it
@@ -71,10 +71,6 @@ block content
 						else
 							td(class="monospace") N/A
 								span(class="text-muted")  (unconfirmed)
-
-					//tr
-					//	th(class="table-active properties-header") Transaction ID
-					//	td #{txid}
 
 					tr
 						th(class="table-active properties-header") Version
@@ -177,8 +173,6 @@ block content
 
 												tr
 													th #{(txInputIndex + 1)}
-													//pre
-													//	code #{JSON.stringify(txInput)}
 
 													td
 														if (vout.scriptPubKey && vout.scriptPubKey.addresses)
@@ -216,10 +210,10 @@ block content
 														if (vout.scriptPubKey.addresses)
 															a(id="output-" + voutIndex)
 																div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
-														else if (vout.scriptPubKey.type == 'nonstandard')
-															span(class="monospace") NON STANDARD
-														else if (vout.scriptPubKey.type == 'nulldata')
-															span(class="monospace") NULL DATA
+														else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
+															span()
+														else if (vout.scriptPubKey.type == 'fee')
+															span(class="tag tag-fee monospace") fees
 														else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
 															span(class="monospace") OP_RETURN:
 															span(class="monospace text-muted") #{utils.hex2ascii(vout.scriptPubKey.asm.substring("OP_RETURN ".length))}
@@ -280,5 +274,3 @@ block content
 				div(class="highlight")
 					pre
 						code(class="language-json", data-lang="json") #{JSON.stringify(result.getrawtransaction, null, 4)}
-
-				//pre #{JSON.stringify(result.txInputs, null, 4)}

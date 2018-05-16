@@ -30,10 +30,22 @@ code, .monospace {
 
 .tag {
 	border-radius: 4px;
-	background-color: #0275d8;
+	background-color: #000080;
 	color: white;
 	padding: 2px 5px;
 	margin-right: 4px;
+}
+
+.tag-issuance {
+	background-color: #008000;
+}
+
+.tag-fee {
+	background-color: #FF0000;
+}
+
+.tag-null {
+	background-color: #C0C0C0;
 }
 
 #subheader a {

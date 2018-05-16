@@ -1,7 +1,7 @@
 var utils = require("./utils.js");
 
-var genesisBlockHash = "f2b80b27fdcd3b9047de882c4ad0c72a9d875919aedccba7f6cdc6c994fcdf02";
-var genesisCoinbaseTransactionId = "e15c8430358d4daffb74c88aecf72e5e88beb92a4a74d7fc195818216b422b36";
+var genesisBlockHash = "";
+var genesisCoinbaseTransactionId = "";
 
 function getGenesisBlockHash() {
 	return genesisBlockHash;
@@ -64,22 +64,6 @@ function getMempoolInfo() {
 		client.command('getmempoolinfo', function(err, result, resHeaders) {
 			if (err) {
 				console.log("Error 23407rhwe07fg: " + err);
-
-				reject(err);
-
-				return;
-			}
-
-			resolve(result);
-		});
-	});
-}
-
-function getUptimeSeconds() {
-	return new Promise(function(resolve, reject) {
-		client.command('uptime', function(err, result, resHeaders) {
-			if (err) {
-				console.log("Error 3218y6gr3986sdd: " + err);
 
 				reject(err);
 
@@ -384,122 +368,6 @@ function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
 	});
 }
 
-function getHelp() {
-	return new Promise(function(resolve, reject) {
-		client.command('help', function(err, result, resHeaders) {
-			if (err) {
-				console.log("Error 32907th429ghf: " + err);
-
-				reject(err);
-
-				return;
-			}
-
-			var lines = result.split("\n");
-			var sections = [];
-
-			lines.forEach(function(line) {
-				if (line.startsWith("==")) {
-					var sectionName = line.substring(2);
-					sectionName = sectionName.substring(0, sectionName.length - 2).trim();
-
-					sections.push({name:sectionName, methods:[]});
-
-				} else if (line.trim().length > 0) {
-					var methodName = line.trim();
-
-					if (methodName.includes(" ")) {
-						methodName = methodName.substring(0, methodName.indexOf(" "));
-					}
-
-					sections[sections.length - 1].methods.push({name:methodName, content:line.trim()});
-				}
-			});
-
-			resolve(sections);
-		});
-	});
-}
-
-function getRpcMethodHelp(methodName) {
-	return new Promise(function(resolve, reject) {
-		client.command('help', methodName, function(err, result, resHeaders) {
-			if (err) {
-				console.log("Error 237hwerf07wehg: " + err);
-
-				reject(err);
-
-				return;
-			}
-
-			var output = {};
-			output.string = result;
-
-			var str = result;
-
-			var lines = str.split("\n");
-			var argumentLines = [];
-			var catchArgs = false;
-			lines.forEach(function(line) {
-				if (line.trim().length == 0) {
-					catchArgs = false;
-				}
-
-				if (catchArgs) {
-					argumentLines.push(line);
-				}
-
-				if (line.trim() == "Arguments:") {
-					catchArgs = true;
-				}
-			});
-
-			var args = [];
-			var argX = null;
-			// looking for line starting with "N. " where N is an integer (1-2 digits)
-			argumentLines.forEach(function(line) {
-				var regex = /^([0-9]+)\.\s*"?(\w+)"?\s*\((\w+),?\s*(\w+),?\s*(.+)?\s*\)\s*(.+)?$/;
-
-				var match = regex.exec(line);
-
-				if (match) {
-					argX = {};
-					argX.name = match[2];
-					argX.detailsLines = [];
-
-					argX.properties = [];
-
-					if (match[3]) {
-						argX.properties.push(match[3]);
-					}
-
-					if (match[4]) {
-						argX.properties.push(match[4]);
-					}
-
-					if (match[5]) {
-						argX.properties.push(match[5]);
-					}
-
-					if (match[6]) {
-						argX.description = match[6];
-					}
-
-					args.push(argX);
-				}
-
-				if (!match && argX) {
-					argX.detailsLines.push(line);
-				}
-			});
-
-			output.args = args;
-
-			resolve(output);
-		});
-	});
-}
-
 module.exports = {
 	getGenesisBlockHash: getGenesisBlockHash,
 	getGenesisCoinbaseTransactionId: getGenesisCoinbaseTransactionId,
@@ -514,8 +382,5 @@ module.exports = {
 	getBlockData: getBlockData,
 	getRawTransaction: getRawTransaction,
 	getRawTransactions: getRawTransactions,
-	getMempoolStats: getMempoolStats,
-	getUptimeSeconds: getUptimeSeconds,
-	getHelp: getHelp,
-	getRpcMethodHelp: getRpcMethodHelp
+	getMempoolStats: getMempoolStats
 };
