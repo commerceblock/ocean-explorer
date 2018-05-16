@@ -1,0 +1,29 @@
+extends layout
+
+block headContent
+	title Home
+
+block content
+	h1 Ocean Explorer
+	hr
+
+	:markdown-it
+		**Ocean Explorer** is an [open-source](http://github.com/commerceblock/ocean-explorer) project designed for [Ocean](https://github.com/commerceblock/ocean) clients. The current implementation is staged on the [Ocean Testnet Demo](https://github.com/commerceblock/ocean-demo).
+
+	if (latestBlocks)
+		div(class="row mt-5")
+			div(class="col")
+				h3 Latest Blocks
+					if (getblockchaininfo.initialblockdownload)
+						small  (#{(getblockchaininfo.headers - getblockchaininfo.blocks).toLocaleString()} behind)
+
+			div(class="col")
+				span(style="float: right;")
+					a(href="/blocks") Browse Blocks &raquo;
+
+		hr
+
+		- var blocks = latestBlocks;
+		- var blockOffset = 0;
+
+		include includes/blocks-list.pug

@@ -1,0 +1,12 @@
+a.btn.btn-primary.btn-sm(href="#myModal", data-toggle="modal") unblind
+
+#myModal.modal.fade(tabindex="-1", role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h4.modal-title Unblind transaction
+        button.close(type="button", data-dismiss="modal", aria-hidden="true") &times;
+      .modal-body
+        p Perform unblinding
+      .modal-footer
+        button.btn.btn-default(type="button", data-dismiss="modal") Close

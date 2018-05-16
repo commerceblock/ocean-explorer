@@ -1,0 +1,11 @@
+extends layout
+
+block headContent
+	title Block #{blockHash}
+
+block content
+	h1(class="h2") Block 
+		small(style="width: 100%;", class="monospace") ##{result.getblock.height.toLocaleString()}
+	hr
+
+	include includes/block-content.pug
