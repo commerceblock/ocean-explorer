@@ -55,6 +55,7 @@ router.get("/node-details", function(req, res) {
 
 				rpcApi.getNetTotals().then(function(getnettotals) {
 					res.locals.getnettotals = getnettotals;
+					res.locals.uptimeSeconds = process.uptime()
 					res.render("node-details");
 
 				}).catch(function(err) {

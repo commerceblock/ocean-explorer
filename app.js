@@ -61,12 +61,12 @@ app.use(function(req, res, next) {
 		req.session.username = env.ocean.rpc.username;
 
 		global.client = new bitcoin({
-  		host: env.ocean.host,
-  		port: env.ocean.port,
-  		username: env.ocean.rpc.username,
-  		password: env.ocean.rpc.password,
-  		timeout: 5000
-    });
+	  		host: env.ocean.host,
+	  		port: env.ocean.port,
+	  		username: env.ocean.rpc.username,
+	  		password: env.ocean.rpc.password,
+	  		timeout: 5000
+	    });
 	}
 
 	res.locals.env = env;
@@ -108,9 +108,6 @@ app.use(function(req, res, next) {
 
 		req.session.query = null;
 	}
-
-	// make some var available to all request
-	// ex: req.cheeseStr = "cheese";
 
 	next();
 });

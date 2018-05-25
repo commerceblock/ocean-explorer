@@ -50,7 +50,7 @@ div(class="tab-content")
 
 			tr
 				th(class="table-active properties-header") Timestamp
-				td(class="monospace") #{moment.utc(new Date(result.getblock.time * 1000)).format("Y-MM-DD HH:mm:ss")} (utc)
+				td(class="monospace") #{moment.utc(new Date(result.getblock.time * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
 
 			tr
 				th(class="table-active properties-header") Transaction Count

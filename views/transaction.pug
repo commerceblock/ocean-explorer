@@ -67,7 +67,7 @@ block content
 					tr
 						th(class="table-active properties-header") Timestamp
 						if (result.getrawtransaction.time)
-							td(class="monospace") #{moment.utc(new Date(result.getrawtransaction["time"] * 1000)).format("Y-MM-DD HH:mm:ss")} (utc)
+							td(class="monospace") #{moment.utc(new Date(result.getrawtransaction["time"] * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
 						else
 							td(class="monospace") N/A
 								span(class="text-muted")  (unconfirmed)
@@ -95,7 +95,7 @@ block content
 									a(href=("/block-height/" + result.getrawtransaction.locktime))  #{result.getrawtransaction.locktime}
 									span  or later
 								else
-									span Spendable after #{moment.utc(new Date(result.getrawtransaction.locktime * 1000)).format("Y-MM-DD HH:mm:ss")} (utc)
+									span Spendable after #{moment.utc(new Date(result.getrawtransaction.locktime * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
 
 					tr
 						th(class="table-active properties-header") Confirmations
