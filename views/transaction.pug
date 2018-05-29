@@ -46,7 +46,7 @@ block content
 
 		div(class="tab-content")
 			div(id="tab-summary", class="tab-pane active", role="tabpanel")
-				if (result.getrawtransaction.blocktime == 1514764800)
+				if (result.getrawtransaction.vin[0].coinbase && result.getrawtransaction.blockhash == genesisBlockHash)
 					div(class="alert alert-warning", style="padding-bottom: 0;")
 						h4(class="alert-heading h5") This transaction doesn't really exist!
 						:markdown-it
@@ -148,6 +148,7 @@ block content
 											tr
 												th(style="width: 40px;")
 												th Input
+												th Asset
 												th Amount
 										tbody
 
@@ -156,21 +157,23 @@ block content
 												th 1
 												td
 													span(class="tag monospace") coinbase
-													span(class="monospace") Newly minted CBT
+												td(class="monospace") #{genesisAsset}
 												td(class="monospace") #{new Decimal(0)}
 										
 										if (result.getrawtransaction.vin[0].issuance)
+											- asset = (result.getrawtransaction.vin[0].issuance['asset'] in assets) ? (assets[result.getrawtransaction.vin[0].issuance['asset']]) : (utils.getDummyAsset(result.getrawtransaction.vin[0].issuance['asset']));
 											tr
 												th 1
 												td
-													span(class="tag monospace") issuance
-													span(class="monospace") Newly issued CBT
+													span(class="tag tag-issuance monospace") issuance
+												td
+													span(class="monospace") #{asset}
 												td(class="monospace") #{new Decimal(result.getrawtransaction.vin[0].issuance.assetamount)}
 
 										each txInput, txInputIndex in result.txInputs
 											if (txInput)
 												- var vout = txInput.vout[result.getrawtransaction.vin[txInputIndex].vout];
-
+												- asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
 												tr
 													th #{(txInputIndex + 1)}
 
@@ -180,13 +183,18 @@ block content
 															span(class="monospace text-muted") via tx
 															a(href=("/tx/" + txInput.txid + "#output-" + result.getrawtransaction.vin[txInputIndex].vout), class="monospace") #{txInput.txid.substring(0, 14)}..., Output ##{result.getrawtransaction.vin[txInputIndex].vout + 1}
 													td
+														span(class="monospace") #{asset}
+													td
 														if (vout.value)
 															span(class="monospace") #{vout.value}
 														else
 															if (!result.getrawtransaction.vin[0].coinbase)
 																include includes/unblind-modal.pug
+															else
+																span(class="monospace") #{new Decimal(0)}
 
 										tr
+											td
 											td
 											td
 											td
@@ -199,6 +207,7 @@ block content
 										tr
 											th
 											th Output
+											th Asset
 											th Amount
 
 									tbody
@@ -218,13 +227,22 @@ block content
 															span(class="monospace") OP_RETURN:
 															span(class="monospace text-muted") #{utils.hex2ascii(vout.scriptPubKey.asm.substring("OP_RETURN ".length))}
 												td
+													if (result.getrawtransaction.vin[0].coinbase)
+														span(class="monospace") #{genesisAsset}
+													else
+														- asset = (vout.asset in assets) ? (assets[vout.asset]) : (utils.getDummyAsset(vout.asset));
+														span(class="monospace") #{asset}
+												td
 													if (vout.value)
 														span(class="monospace") #{vout.value}
 													else
 														if (!result.getrawtransaction.vin[0].coinbase)
 															include includes/unblind-modal.pug
+														else
+															span(class="monospace") #{new Decimal(0)}
 
 										tr
+											td
 											td
 											td
 											td

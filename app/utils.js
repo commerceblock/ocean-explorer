@@ -1,5 +1,7 @@
 var Decimal = require("decimal.js");
 Decimal8 = Decimal.clone({ precision:8, rounding:8 });
+var dummy_assets = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'XLM', 'ADA', 'TRX', 'MIOTA',
+					'GOLD', 'SILVER', 'GAS', 'OIL', 'COPPER'];
 
 function doSmartRedirect(req, res, defaultUrl) {
 	if (req.session.redirectUrl) {
@@ -97,6 +99,18 @@ function formatBytes(bytesInt) {
 	return bytesInt + " B";
 }
 
+function getDummyAsset(hex) {
+	// dummy assets - will be replaced by actual asset - asset hash pairs in main net release
+	var sum = 0;
+	for (var i = 0; i < hex.length; i++) {
+		c = hex[i];
+		if ('0123456789'.indexOf(c) !== -1) {
+			sum += parseInt(c);
+		}
+	}
+	return dummy_assets[sum % dummy_assets.length]
+}
+
 module.exports = {
 	doSmartRedirect: doSmartRedirect,
 	redirectToConnectPageIfNeeded: redirectToConnectPageIfNeeded,
@@ -104,5 +118,6 @@ module.exports = {
 	getBlockReward: getBlockReward,
 	splitArrayIntoChunks: splitArrayIntoChunks,
 	getRandomString: getRandomString,
-	formatBytes: formatBytes
+	formatBytes: formatBytes,
+	getDummyAsset: getDummyAsset
 };
