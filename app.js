@@ -4,22 +4,19 @@
 
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require("express-session");
+var csession = require('cookie-session');
 var env = require("./app/env.js");
-var simpleGit = require('simple-git');
 var utils = require("./app/utils.js");
 var moment = require("moment");
 var Decimal = require('decimal.js');
 var bitcoin = require("bitcoin-core");
 var pug = require("pug");
-var momentDurationFormat = require("moment-duration-format");
 var rpcApi = require("./app/rpcApi.js");
-
-
+var momentDurationFormat = require("moment-duration-format");
 var baseActionsRouter = require('./routes/baseActionsRouter');
 
 var app = express();
@@ -35,21 +32,26 @@ app.engine('pug', (path, options, fn) => {
 
 app.set('view engine', 'pug');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({
-	secret: env.cookiePassword,
-	resave: false,
-	saveUninitialized: false
-}));
+if (app.get('env') === 'development') {
+	app.use(session({
+		secret: env.cookiePassword,
+		resave: false,
+		saveUninitialized: false
+	}));
+} else {
+	app.use(csession({
+		secret: env.cookiePassword,
+		resave: false,
+		saveUninitialized: false,
+		secure: true
+	}));
+}
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-app.locals.sourcecodeVersion = null;
 
 app.use(function(req, res, next) {
 	// make session available in templates
@@ -81,12 +83,6 @@ app.use(function(req, res, next) {
 		if (utils.redirectToConnectPageIfNeeded(req, res)) {
 			return;
 		}
-	}
-
-	if (!req.session.sourcecodeVersion) {
-		simpleGit(".").log(["-n 1"], function(err, log) {
-			app.locals.sourcecodeVersion = log.all[0].hash.substring(0, 10);
-		});
 	}
 
 	if (req.session.userMessage) {
@@ -148,7 +144,5 @@ app.use(function(err, req, res, next) {
 app.locals.moment = moment;
 app.locals.Decimal = Decimal;
 app.locals.utils = utils;
-
-
 
 module.exports = app;

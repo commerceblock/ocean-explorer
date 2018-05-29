@@ -4,11 +4,10 @@ hr {
 
 html {
   position: relative;
-  min-height: 100%;
+  min-height: 101%;
 }
 body {
 		/*font: 14px 'Open Sans', "Lucida Grande", Helvetica, Arial, sans-serif;*/
-
   /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
@@ -30,6 +29,28 @@ body > .container {
   padding-right: 15px;
   padding-left: 15px;
 }
+
+.corner-ribbon{
+  width: 200px;
+  background: #e43;
+  position: absolute;
+  top: 25px;
+  left: -50px;
+  text-align: center;
+  line-height: 40px;
+  letter-spacing: 2px;
+  color: #f0f0f0;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+
+.corner-ribbon.top-left{
+  top: 25px;
+  left: -50px;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+.corner-ribbon.red{background: #e43;}
 
 a { color: #28a428; }
 a:link { color: #28a428; }

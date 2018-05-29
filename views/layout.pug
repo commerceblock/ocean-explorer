@@ -20,6 +20,10 @@ html
 	body
 		nav(class="navbar navbar-expand-lg navbar-custom mb-5")
 			div(class="container")
+				if (env.testnet)
+					div(class="corner-ribbon top-left sticky red shadow")
+						span testnet
+						
 				a(class="navbar-brand", color=yellow, href="/")
 					span
 						img(src="/img/logo/logo-small.png", class="header-image")
