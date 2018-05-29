@@ -9,21 +9,8 @@ var rpcApi = require("./../app/rpcApi");
 
 router.get("/", function(req, res) {
 	if (req.session.host == null || req.session.host.trim() == "" || req.session.failed) {
-		if (req.cookies['rpc-host']) {
-			res.locals.host = req.cookies['rpc-host'];
-		}
-
-		if (req.cookies['rpc-port']) {
-			res.locals.port = req.cookies['rpc-port'];
-		}
-
-		if (req.cookies['rpc-username']) {
-			res.locals.username = req.cookies['rpc-username'];
-		}
-
-		res.render("connect");
-		res.end();
-		return;
+		res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
+		res.render("index");
 	}
 
 	rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {
