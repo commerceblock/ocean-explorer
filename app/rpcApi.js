@@ -1,16 +1,5 @@
 var utils = require("./utils.js");
 
-var genesisBlockHash = "";
-var genesisCoinbaseTransactionId = "";
-
-function getGenesisBlockHash() {
-	return genesisBlockHash;
-}
-
-function getGenesisCoinbaseTransactionId() {
-	return genesisCoinbaseTransactionId;
-}
-
 function getBlockchainInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getblockchaininfo', function(err, result, resHeaders) {
@@ -369,8 +358,6 @@ function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
 }
 
 module.exports = {
-	getGenesisBlockHash: getGenesisBlockHash,
-	getGenesisCoinbaseTransactionId: getGenesisCoinbaseTransactionId,
 	getBlockchainInfo: getBlockchainInfo,
 	getNetworkInfo: getNetworkInfo,
 	getNetTotals: getNetTotals,

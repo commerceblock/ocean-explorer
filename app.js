@@ -18,8 +18,13 @@ var pug = require("pug");
 var rpcApi = require("./app/rpcApi.js");
 var momentDurationFormat = require("moment-duration-format");
 var baseActionsRouter = require('./routes/baseActionsRouter');
+var serveStatic = require('serve-static')
 
 var app = express();
+var genesisBlockHash = "54e0d36bf404dc0a8cea4a080f8b485404c9001149cdd863e9350fa7f05fac53";
+var genesisCoinbaseTransactionId = "f1c270c6ca139803d8556a2463b23be1c2170e69c5d3ae55e381b9c7e490938f";
+var genesisBlockTime = 1514764800;
+var genesisAsset = "CBT";
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -50,8 +55,8 @@ if (app.get('env') === 'development') {
 		secure: true
 	}));
 }
-app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(serveStatic(path.join(__dirname, 'public')))
 
 app.use(function(req, res, next) {
 	// make session available in templates
@@ -75,9 +80,6 @@ app.use(function(req, res, next) {
 
 	res.locals.host = req.session.host;
 	res.locals.port = req.session.port;
-
-	res.locals.genesisBlockHash = rpcApi.getGenesisBlockHash();
-	res.locals.genesisCoinbaseTransactionId = rpcApi.getGenesisCoinbaseTransactionId();
 
 	if (!["/", "/connect"].includes(req.originalUrl)) {
 		if (utils.redirectToConnectPageIfNeeded(req, res)) {
@@ -144,5 +146,12 @@ app.use(function(err, req, res, next) {
 app.locals.moment = moment;
 app.locals.Decimal = Decimal;
 app.locals.utils = utils;
+
+app.locals.genesisAsset = genesisAsset;
+app.locals.genesisBlockHash = genesisBlockHash;
+app.locals.assets = {};
+app.locals.assets[genesisCoinbaseTransactionId] =  genesisAsset;
+// more assets will be added once asset issuance is official in the main net
+
 
 module.exports = app;
