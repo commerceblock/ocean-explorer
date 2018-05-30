@@ -21,8 +21,8 @@ var baseActionsRouter = require('./routes/baseActionsRouter');
 var serveStatic = require('serve-static')
 
 var app = express();
-var genesisBlockHash = "54e0d36bf404dc0a8cea4a080f8b485404c9001149cdd863e9350fa7f05fac53";
-var genesisCoinbaseTransactionId = "f1c270c6ca139803d8556a2463b23be1c2170e69c5d3ae55e381b9c7e490938f";
+var genesisBlockHash = "357abd41543a09f9290ff4b4ae008e317f252b80c96492bd9f346cced0943a7f";
+var genesisAssetHex = "594672d939519a7baede83035eafbf37a0536eeb6e02ca0a054913142d21f690";
 var genesisBlockTime = 1514764800;
 var genesisAsset = "CBT";
 
@@ -150,8 +150,9 @@ app.locals.utils = utils;
 app.locals.genesisAsset = genesisAsset;
 app.locals.genesisBlockHash = genesisBlockHash;
 app.locals.assets = {};
-app.locals.assets[genesisCoinbaseTransactionId] =  genesisAsset;
-// more assets will be added once asset issuance is official in the main net
 
+// Currently include testnet assets - Should be configured appropriately for any mainnet issuance
+app.locals.assets[genesisAssetHex] =  genesisAsset; // for 3-of-5 testnet
+app.locals.assets["f1c270c6ca139803d8556a2463b23be1c2170e69c5d3ae55e381b9c7e490938f"] = genesisAsset; // for 2-of-3 local
 
 module.exports = app;
