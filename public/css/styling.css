@@ -82,6 +82,12 @@ code, .monospace {
     color: #453B3B;
 }
 
+a.btn.btn-primary.btn-sm {
+    color: white;
+    background-color: blue;
+    border-color: blue;
+}
+
 .input-group-btn .btn.btn-primary {
     color: #453B3B;
     background-color: #80b847;

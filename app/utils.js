@@ -101,6 +101,10 @@ function formatBytes(bytesInt) {
 
 function getDummyAsset(hex) {
 	// dummy assets - will be replaced by actual asset - asset hash pairs in main net release
+	if (!hex) {
+		return "";
+	}
+
 	var sum = 0;
 	for (var i = 0; i < hex.length; i++) {
 		c = hex[i];
