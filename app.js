@@ -49,10 +49,9 @@ if (app.get('env') === 'development') {
 	}));
 } else {
 	app.use(csession({
-		secret: env.cookiePassword,
-		resave: false,
-		saveUninitialized: false,
-		secure: true
+		name: 'session',
+		secret: env.cookiePassword
+		// secure: true		// need HTTPS
 	}));
 }
 
@@ -74,8 +73,7 @@ app.use(function(req, res, next) {
 	  		password: env.ocean.rpc.password,
 	  		timeout: 5000
 	    });
-	}
-
+	}	
 	res.locals.env = env;
 
 	res.locals.host = req.session.host;
@@ -138,7 +136,7 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
 	res.status(err.status || 500);
 	res.render('error', {
-		message: err.message,
+		message: "Invalid",
 		error: {}
 	});
 });

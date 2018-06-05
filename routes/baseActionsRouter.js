@@ -9,7 +9,7 @@ var rpcApi = require("./../app/rpcApi");
 
 router.get("/", function(req, res) {
 	if (req.session.host == null || req.session.host.trim() == "" || req.session.failed) {
-		res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
+		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("index");
 	}
 
@@ -26,9 +26,12 @@ router.get("/", function(req, res) {
 		rpcApi.getBlocksByHeight(blockHeights).then(function(latestBlocks) {
 			res.locals.latestBlocks = latestBlocks;
 			res.render("index");
+		}).catch(function(err) {
+			res.locals.userMessage = "Unable to connect to Ocean Node";
+			res.render("index");
 		});
 	}).catch(function(err) {
-		res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
+		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("index");
 	});
 });
@@ -46,15 +49,15 @@ router.get("/node-details", function(req, res) {
 					res.render("node-details");
 
 				}).catch(function(err) {
-					res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
+					res.locals.userMessage = "Unable to connect to Ocean Node";
 					res.render("node-details");
 				});
 		}).catch(function(err) {
-			res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
+			res.locals.userMessage = "Unable to connect to Ocean Node";
 			res.render("node-details");
 		});
 	}).catch(function(err) {
-		res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
+		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("node-details");
 	});
 });
@@ -67,10 +70,12 @@ router.get("/mempool-summary", function(req, res) {
 			res.locals.mempoolstats = mempoolstats;
 
 			res.render("mempool-summary");
+		}).catch(function(err) {
+			res.locals.userMessage = "Unable to connect to Ocean Node";
+			res.render("mempool-summary");
 		});
 	}).catch(function(err) {
-		res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
-
+		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("mempool-summary");
 	});
 });
@@ -165,9 +170,12 @@ router.get("/blocks", function(req, res) {
 		rpcApi.getBlocksByHeight(blockHeights).then(function(blocks) {
 			res.locals.blocks = blocks;
 			res.render("blocks");
+		}).catch(function(err) {
+			res.locals.userMessage = "Unable to connect to Ocean Node";
+			res.render("blocks");
 		});
 	}).catch(function(err) {
-		res.locals.userMessage = "Unable to connect to Ocean Node at " + client.host + ":" + client.port;
+		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("blocks");
 	});
 });
@@ -175,7 +183,6 @@ router.get("/blocks", function(req, res) {
 router.post("/search", function(req, res) {
 	if (!req.body.query) {
 		req.session.userMessage = "Enter a block height, block hash, or transaction id.";
-
 		res.redirect("/");
 		return;
 	}
@@ -188,39 +195,32 @@ router.post("/search", function(req, res) {
 		rpcApi.getRawTransaction(query).then(function(tx) {
 			if (tx) {
 				res.redirect("/tx/" + query);
-
 				return;
 			}
 
 			rpcApi.getBlockByHash(query).then(function(blockByHash) {
 				if (blockByHash) {
 					res.redirect("/block/" + query);
-
 					return;
 				}
 
 				req.session.userMessage = "No results found for query: " + query;
-
 				res.redirect("/");
 			}).catch(function(err) {
 				req.session.userMessage = "No results found for query: " + query;
-
 				res.redirect("/");
 			});
 		}).catch(function(err) {
 			rpcApi.getBlockByHash(query).then(function(blockByHash) {
 				if (blockByHash) {
 					res.redirect("/block/" + query);
-
 					return;
 				}
 
 				req.session.userMessage = "No results found for query: " + query;
-
 				res.redirect("/");
 			}).catch(function(err) {
 				req.session.userMessage = "No results found for query: " + query;
-
 				res.redirect("/");
 			});
 		});
@@ -229,23 +229,18 @@ router.post("/search", function(req, res) {
 		rpcApi.getBlockByHeight(parseInt(query)).then(function(blockByHeight) {
 			if (blockByHeight) {
 				res.redirect("/block-height/" + query);
-
 				return;
 			}
 
 			req.session.userMessage = "No results found for query: " + query;
-
 			res.redirect("/");
 		}).catch(function(err) {
-				req.session.userMessage = "No results found for query: " + query;
-
-				res.redirect("/");
+			req.session.userMessage = "No results found for query: " + query;
+			res.redirect("/");
 		});
 	} else {
 		req.session.userMessage = "Invalid query: " + query;
-
 		res.redirect("/");
-
 		return;
 	}
 });
@@ -274,12 +269,7 @@ router.get("/block-height/:blockHeight", function(req, res) {
 	res.locals.offset = offset;
 	res.locals.paginationBaseUrl = "/block-height/" + blockHeight;
 
-	client.command('getblockhash', blockHeight, function(err, result, resHeaders) {
-		if (err) {
-			req.session.userMessage = "Block does not exist";
-			res.redirect("/blocks");
-		}
-
+	rpcApi.getBlockHash(blockHeight).then(function(result) {
 		res.locals.result.getblockhash = result;
 
 		rpcApi.getBlockData(client, result, limit, offset).then(function(result) {
@@ -287,7 +277,13 @@ router.get("/block-height/:blockHeight", function(req, res) {
 			res.locals.result.transactions = result.transactions;
 			res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
 			res.render("block-height");
+		}).catch(function(err) {
+			res.locals.userMessage = "Failed to load block with height = " + blockHeight;
+			res.render("block-height");
 		});
+	}).catch(function(err) {
+		res.locals.userMessage = "Failed to load block with height = " + blockHeight;
+		res.render("block-height");
 	});
 });
 
@@ -319,6 +315,9 @@ router.get("/block/:blockHash", function(req, res) {
 		res.locals.result.transactions = result.transactions;
 		res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
 		res.render("block");
+	}).catch(function(err) {
+		res.locals.userMessage = "Failed to load block with blockhash = " + blockHash;
+		res.render("block");
 	});
 });
 
@@ -337,7 +336,7 @@ router.get("/tx/:transactionId", function(req, res) {
 	rpcApi.getRawTransaction(txid).then(function(rawTxResult) {
 		res.locals.result.getrawtransaction = rawTxResult;
 
-		client.command('getblock', rawTxResult.blockhash, function(err3, result3, resHeaders3) {
+		rpcApi.getBlockByHash(rawTxResult.blockhash).then(function(result3) {
 			res.locals.result.getblock = result3;
 			var txids = [];
 			for (var i = 0; i < rawTxResult.vin.length; i++) {
@@ -348,11 +347,16 @@ router.get("/tx/:transactionId", function(req, res) {
 			rpcApi.getRawTransactions(txids).then(function(txInputs) {
 				res.locals.result.txInputs = txInputs;
 				res.render("transaction");
+			}).catch(function(err) {
+				res.locals.userMessage = "Failed to load transaction with txid = " + txid;
+				res.render("transaction");
 			});
-		});
+		}).catch(function(err) {
+			res.locals.userMessage = "Failed to load transaction with txid = " + txid;
+			res.render("transaction");
+		});;
 	}).catch(function(err) {
-		res.locals.userMessage = "Failed to load transaction with txid = " + txid + " (" + err + ")";
-
+		res.locals.userMessage = "Failed to load transaction with txid = " + txid;
 		res.render("transaction");
 	});
 });

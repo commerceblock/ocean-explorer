@@ -4,10 +4,8 @@ function getBlockchainInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getblockchaininfo', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error 3207fh0f: " + err);
-
+				console.log("Error @getblockchaininfo: " + err);
 				reject(err);
-
 				return;
 			}
 
@@ -20,10 +18,8 @@ function getNetworkInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getnetworkinfo', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error 239r7ger7gy: " + err);
-
+				console.log("Error @getnetworkinfo: " + err);
 				reject(err);
-
 				return;
 			}
 
@@ -36,10 +32,8 @@ function getNetTotals() {
 	return new Promise(function(resolve, reject) {
 		client.command('getnettotals', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error as07uthf40ghew: " + err);
-
+				console.log("Error @getnettotals: " + err);
 				reject(err);
-
 				return;
 			}
 
@@ -52,10 +46,8 @@ function getMempoolInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getmempoolinfo', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error 23407rhwe07fg: " + err);
-
+				console.log("Error @getmempoolinfo: " + err);
 				reject(err);
-
 				return;
 			}
 
@@ -68,10 +60,8 @@ function getMempoolStats() {
 	return new Promise(function(resolve, reject) {
 		client.command('getrawmempool', true, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error 428thwre0ufg: " + err);
-
+				console.log("Error @getrawmempool: " + err);
 				reject(err);
-
 				return;
 			}
 
@@ -152,19 +142,15 @@ function getBlockByHeight(blockHeight) {
 	return new Promise(function(resolve, reject) {
 		client.command('getblockhash', blockHeight, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error 0928317yr3w: " + err);
-
+				console.log("Error @getblockhash: " + err);
 				reject(err);
-
 				return;
 			}
 
 			client.command('getblock', result, function(err2, result2, resHeaders2) {
 				if (err2) {
-					console.log("Error 320fh7e0hg: " + err2);
-
+					console.log("Error @getblock: " + err2);
 					reject(err2);
-
 					return;
 				}
 
@@ -187,6 +173,12 @@ function getBlocksByHeight(blockHeights) {
 		}
 
 		client.command(batch, function(err, result, resHeaders) {
+			if (err) {
+				console.log("Error @getblockhash: " + err);
+				reject(err);
+				return;
+			}
+
 			var blockHashes = result.slice();
 			if (blockHashes.length == batch.length) {
 				var batch2 = [];
@@ -199,7 +191,9 @@ function getBlocksByHeight(blockHeights) {
 
 				client.command(batch2, function(err2, result2, resHeaders2) {
 					if (err2) {
-						console.log("Error 138ryweufdf: " + err2);
+						console.log("Error @getblock: " + err2);
+						reject(err2);
+						return;
 					}
 					var blocks = result2.slice();
 					if (blocks.length == batch2.length) {
@@ -217,10 +211,24 @@ function getBlockByHash(blockHash) {
 	return new Promise(function(resolve, reject) {
 		client.command('getblock', blockHash, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error 0u2fgewue: " + err);
-
+				console.log("Error @getblock: " + err);
 				reject(err);
+				return;
+			}
 
+			resolve(result);
+		});
+	});
+}
+
+function getBlockHash(blockHeight) {
+	console.log("getBlockHash: " + blockHeight);
+
+	return new Promise(function(resolve, reject) {
+		client.command('getblockhash', blockHeight, function(err, result, resHeaders) {
+			if (err) {
+				console.log("Error @getblockhash: " + err);
+				reject(err);
 				return;
 			}
 
@@ -251,10 +259,8 @@ function getRawTransaction(txid) {
 	return new Promise(function(resolve, reject) {
 		client.command('getrawtransaction', txid, 1, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error 329813yre823: " + err);
-
+				console.log("Error @getrawtransaction: " + err);
 				reject(err);
-
 				return;
 			}
 
@@ -308,7 +314,9 @@ function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accu
 
 	client.command(batches[currentIndex], function(err, result, resHeaders) {
 		if (err) {
-			console.log("Error f83024hf4: " + err);
+			console.log("Error @getrawtransaction: " + err);
+			reject(err);
+			return;
 		}
 
 		accumulatedResults.push(...result);
@@ -322,10 +330,8 @@ function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
 	return new Promise(function(resolve, reject) {
 		client.command('getblock', blockHash, function(err2, result2, resHeaders2) {
 			if (err2) {
-				console.log("Error 3017hfwe0f: " + err2);
-
+				console.log("Error @getblock: " + err2);
 				reject(err2);
-
 				return;
 			}
 
@@ -365,6 +371,7 @@ module.exports = {
 	getBlockByHeight: getBlockByHeight,
 	getBlocksByHeight: getBlocksByHeight,
 	getBlockByHash: getBlockByHash,
+	getBlockHash: getBlockHash,
 	getTransactionInputs: getTransactionInputs,
 	getBlockData: getBlockData,
 	getRawTransaction: getRawTransaction,
