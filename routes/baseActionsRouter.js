@@ -32,7 +32,7 @@ function loadIndex(req, res) {
 }
 
 router.get("/", function(req, res, next) {
-	if (req.session.host == null || req.session.host.trim() == "" || req.session.failed) {
+	if (client == null) {
 		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("index");
 	}
@@ -195,8 +195,6 @@ router.post("/search", function(req, res, next) {
 }, loadIndex);
 
 router.get("/block-height/:blockHeight", function(req, res, next) {
-	var client = global.client;
-
 	var blockHeight = parseInt(req.params.blockHeight);
 
 	res.locals.blockHeight = blockHeight;

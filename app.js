@@ -7,8 +7,6 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var session = require("express-session");
-var csession = require('cookie-session');
 var env = require("./app/env.js");
 var utils = require("./app/utils.js");
 var moment = require("moment");
@@ -40,31 +38,14 @@ app.set('view engine', 'pug');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-if (app.get('env') === 'development') {
-	app.use(session({
-		secret: env.cookiePassword,
-		resave: false,
-		saveUninitialized: false
-	}));
-} else {
-	app.use(csession({
-		name: 'session',
-		secret: env.cookiePassword
-		// secure: true		// need HTTPS
-	}));
-}
 
 app.use(serveStatic(path.join(__dirname, 'public')))
 
 app.use(function(req, res, next) {
-	// make session available in templates
-	res.locals.session = req.session;
-
 	if (env.ocean && env.ocean.rpc) {
-		req.session.host = env.ocean.host;
-		req.session.port = env.ocean.port;
-		req.session.username = env.ocean.rpc.username;
+		res.locals.host = env.ocean.host;
+		res.locals.port  = env.ocean.port;
+		res.locals.username = env.ocean.rpc.username;
 
 		global.client = new bitcoin({
 	  		host: env.ocean.host,
@@ -75,35 +56,6 @@ app.use(function(req, res, next) {
 	    });
 	}	
 	res.locals.env = env;
-
-	res.locals.host = req.session.host;
-	res.locals.port = req.session.port;
-
-	if (!["/", "/connect"].includes(req.originalUrl)) {
-		if (utils.redirectToConnectPageIfNeeded(req, res)) {
-			return;
-		}
-	}
-
-	if (req.session.userMessage) {
-		res.locals.userMessage = req.session.userMessage;
-
-		if (req.session.userMessageType) {
-			res.locals.userMessageType = req.session.userMessageType;
-
-		} else {
-			res.locals.userMessageType = "info";
-		}
-
-		req.session.userMessage = null;
-		req.session.userMessageType = null;
-	}
-
-	if (req.session.query) {
-		res.locals.query = req.session.query;
-
-		req.session.query = null;
-	}
 
 	next();
 });
@@ -136,7 +88,7 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
 	res.status(err.status || 500);
 	res.render('error', {
-		message: "Invalid",
+		message: "Internal Server Error",
 		error: {}
 	});
 });
