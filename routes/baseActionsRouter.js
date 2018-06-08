@@ -7,34 +7,37 @@ var env = require("./../app/env");
 var bitcoin = require("bitcoin-core")
 var rpcApi = require("./../app/rpcApi");
 
-router.get("/", function(req, res) {
+function loadIndex(req, res) {
+    rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {
+        res.locals.getblockchaininfo = getblockchaininfo;
+
+        var blockHeights = [];
+        if (getblockchaininfo.blocks) {
+            for (var i = 0; i < 10 && i <= getblockchaininfo.blocks; i++) {
+                blockHeights.push(getblockchaininfo.blocks - i);
+            }
+        }
+
+        rpcApi.getBlocksByHeight(blockHeights).then(function(latestBlocks) {
+            res.locals.latestBlocks = latestBlocks;
+            res.render("index");
+        }).catch(function(err) {
+            res.locals.userMessage = "Unable to connect to Ocean Node";
+            res.render("index");
+        });
+    }).catch(function(err) {
+        res.locals.userMessage = "Unable to connect to Ocean Node";
+        res.render("index");
+    });
+}
+
+router.get("/", function(req, res, next) {
 	if (req.session.host == null || req.session.host.trim() == "" || req.session.failed) {
 		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("index");
 	}
-
-	rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {
-		res.locals.getblockchaininfo = getblockchaininfo;
-
-		var blockHeights = [];
-		if (getblockchaininfo.blocks) {
-			for (var i = 0; i < 10 && i <= getblockchaininfo.blocks; i++) {
-				blockHeights.push(getblockchaininfo.blocks - i);
-			}
-		}
-
-		rpcApi.getBlocksByHeight(blockHeights).then(function(latestBlocks) {
-			res.locals.latestBlocks = latestBlocks;
-			res.render("index");
-		}).catch(function(err) {
-			res.locals.userMessage = "Unable to connect to Ocean Node";
-			res.render("index");
-		});
-	}).catch(function(err) {
-		res.locals.userMessage = "Unable to connect to Ocean Node";
-		res.render("index");
-	});
-});
+    return next();
+}, loadIndex);
 
 router.get("/node-details", function(req, res) {
 	rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {
@@ -78,56 +81,6 @@ router.get("/mempool-summary", function(req, res) {
 		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("mempool-summary");
 	});
-});
-
-router.post("/connect", function(req, res) {
-	var host = req.body.host;
-	var port = req.body.port;
-	var username = req.body.username;
-	var password = req.body.password;
-
-	res.cookie('rpc-host', host);
-	res.cookie('rpc-port', port);
-	res.cookie('rpc-username', username);
-
-	req.session.host = host;
-	req.session.port = port;
-	req.session.username = username;
-
-	var client = new bitcoin({
-		host: host,
-		port: port,
-		username: username,
-		password: password,
-		timeout: 30000	});
-
-	console.log("created client: " + client);
-
-	global.client = client;
-
-	req.session.userMessage = "<strong>Connected via RPC</strong>: " + username + " @ " + host + ":" + port;
-	req.session.userMessageType = "success";
-
-	res.redirect("/");
-});
-
-router.get("/disconnect", function(req, res) {
-	res.cookie('rpc-host', "");
-	res.cookie('rpc-port', "");
-	res.cookie('rpc-username', "");
-
-	req.session.host = "";
-	req.session.port = "";
-	req.session.username = "";
-
-	console.log("destroyed client.");
-
-	global.client = null;
-
-	req.session.userMessage = "Disconnected from node.";
-	req.session.userMessageType = "success";
-
-	res.redirect("/");
 });
 
 router.get("/blocks", function(req, res) {
@@ -180,16 +133,13 @@ router.get("/blocks", function(req, res) {
 	});
 });
 
-router.post("/search", function(req, res) {
+router.post("/search", function(req, res, next) {
 	if (!req.body.query) {
-		req.session.userMessage = "Enter a block height, block hash, or transaction id.";
-		res.redirect("/");
-		return;
+        res.locals.userMessage = "Enter a block height, block hash, or transaction id.";
+		return next()
 	}
 
 	var query = req.body.query.toLowerCase();
-
-	req.session.query = req.body.query;
 
 	if (query.length == 64) {
 		rpcApi.getRawTransaction(query).then(function(tx) {
@@ -204,11 +154,11 @@ router.post("/search", function(req, res) {
 					return;
 				}
 
-				req.session.userMessage = "No results found for query: " + query;
-				res.redirect("/");
+				res.locals.userMessage = "No results found for query: " + query;
+				return next();
 			}).catch(function(err) {
-				req.session.userMessage = "No results found for query: " + query;
-				res.redirect("/");
+				res.locals.userMessage = "No results found for query: " + query;
+				return next();
 			});
 		}).catch(function(err) {
 			rpcApi.getBlockByHash(query).then(function(blockByHash) {
@@ -217,11 +167,11 @@ router.post("/search", function(req, res) {
 					return;
 				}
 
-				req.session.userMessage = "No results found for query: " + query;
-				res.redirect("/");
+				res.locals.userMessage = "No results found for query: " + query;
+				return next();
 			}).catch(function(err) {
-				req.session.userMessage = "No results found for query: " + query;
-				res.redirect("/");
+				res.locals.userMessage = "No results found for query: " + query;
+				return next();
 			});
 		});
 
@@ -232,20 +182,19 @@ router.post("/search", function(req, res) {
 				return;
 			}
 
-			req.session.userMessage = "No results found for query: " + query;
-			res.redirect("/");
+			res.locals.userMessage = "No results found for query: " + query;
+			return next();
 		}).catch(function(err) {
-			req.session.userMessage = "No results found for query: " + query;
-			res.redirect("/");
+			res.locals.userMessage = "No results found for query: " + query;
+			return next();
 		});
 	} else {
-		req.session.userMessage = "Invalid query: " + query;
-		res.redirect("/");
-		return;
+		res.locals.userMessage = "Invalid query: " + query;
+		return next();
 	}
-});
+}, loadIndex);
 
-router.get("/block-height/:blockHeight", function(req, res) {
+router.get("/block-height/:blockHeight", function(req, res, next) {
 	var client = global.client;
 
 	var blockHeight = parseInt(req.params.blockHeight);
@@ -279,15 +228,15 @@ router.get("/block-height/:blockHeight", function(req, res) {
 			res.render("block-height");
 		}).catch(function(err) {
 			res.locals.userMessage = "Failed to load block with height = " + blockHeight;
-			res.render("block-height");
+			return next();
 		});
 	}).catch(function(err) {
 		res.locals.userMessage = "Failed to load block with height = " + blockHeight;
-		res.render("block-height");
+		return next();
 	});
-});
+}, loadIndex);
 
-router.get("/block/:blockHash", function(req, res) {
+router.get("/block/:blockHash", function(req, res, next) {
 	var blockHash = req.params.blockHash;
 
 	res.locals.blockHash = blockHash;
@@ -309,7 +258,6 @@ router.get("/block/:blockHash", function(req, res) {
 	res.locals.offset = offset;
 	res.locals.paginationBaseUrl = "/block/" + blockHash;
 
-	// TODO handle RPC error
 	rpcApi.getBlockData(client, blockHash, limit, offset).then(function(result) {
 		res.locals.result.getblock = result.getblock;
 		res.locals.result.transactions = result.transactions;
@@ -317,11 +265,11 @@ router.get("/block/:blockHash", function(req, res) {
 		res.render("block");
 	}).catch(function(err) {
 		res.locals.userMessage = "Failed to load block with blockhash = " + blockHash;
-		res.render("block");
+		return next();
 	});
-});
+}, loadIndex);
 
-router.get("/tx/:transactionId", function(req, res) {
+router.get("/tx/:transactionId", function(req, res, next) {
 	var txid = req.params.transactionId;
 
 	var output = -1;
@@ -349,16 +297,16 @@ router.get("/tx/:transactionId", function(req, res) {
 				res.render("transaction");
 			}).catch(function(err) {
 				res.locals.userMessage = "Failed to load transaction with txid = " + txid;
-				res.render("transaction");
+				return next();
 			});
 		}).catch(function(err) {
 			res.locals.userMessage = "Failed to load transaction with txid = " + txid;
-			res.render("transaction");
+			return next();
 		});;
 	}).catch(function(err) {
 		res.locals.userMessage = "Failed to load transaction with txid = " + txid;
-		res.render("transaction");
+		return next();
 	});
-});
+}, loadIndex);
 
 module.exports = router;
