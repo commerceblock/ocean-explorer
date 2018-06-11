@@ -47,23 +47,24 @@ html
 								input(type="text", class="form-control form-control-sm", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
 								span(class="input-group-btn")
 									input(type="submit", class="btn btn-primary", value="Search")
+		div(class="main-content")
+		
+			div(class="container")
+				if (userMessage)
+					div(class="alert", class=(userMessageType ? ("alert-"  + userMessageType) : "alert-info"), role="alert")
+						span !{userMessage}
 
-		div(class="container")
-			if (userMessage)
-				div(class="alert", class=(userMessageType ? ("alert-"  + userMessageType) : "alert-info"), role="alert")
-					span !{userMessage}
-
-		div(class="container")
-			block content
+			div(class="container")
+				block content
 
 		footer(class="footer")
 			div(class="container")
 				span
-					a(href="https://www.commerceblock.com")  CommerceBlock
+					a(href="https://www.commerceblock.com") CommerceBlock
 				span &nbsp;&copy;2018
 				span &nbsp;&ndash;&nbsp;
 				span Source code available on github
-					a(href="https://github.com/commerceblock/ocean-explorer")  commerceblock/ocean-explorer
+					a(href="https://github.com/commerceblock/ocean-explorer") commerceblock/ocean-explorer
 					
 
 
