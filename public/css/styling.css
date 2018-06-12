@@ -6,7 +6,7 @@
      font-size: 14px;
      font-size: 1rem;
      line-height: 25.2px;
-     line-height: 1.7rem;
+     line-height: 1.2rem;
      font-family: Raleway, sans-serif!important;
      color: #585858;
      position: relative;
@@ -92,7 +92,7 @@
 	 z-index:100000;
 }
  .footer > .container {
-     padding: 8px;
+     padding: 0px;
 }
  .footer a {
      padding: 20px 15px;
@@ -167,6 +167,9 @@
 	 min-height:72vh;
 	 margin-top: 135px;
 	 font-size: 14px!important;
+}
+.row.mt-5 {
+    margin-top: 0.5rem !important;
 }
  body > .container {
      padding: 0px 15px 5px;
