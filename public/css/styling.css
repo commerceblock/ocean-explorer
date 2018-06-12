@@ -6,7 +6,7 @@
      font-size: 14px;
      font-size: 1rem;
      line-height: 25.2px;
-     line-height: 2.52rem;
+     line-height: 1.7rem;
      font-family: Raleway, sans-serif!important;
      color: #585858;
      position: relative;
@@ -89,9 +89,10 @@
      line-height: 60px;
     /* Vertically center the text there */
      background-color: #014225;
+	 z-index:100000;
 }
  .footer > .container {
-     padding: 15px;
+     padding: 8px;
 }
  .footer a {
      padding: 20px 15px;
@@ -140,6 +141,7 @@
 	 position: fixed;
      width: 100%;
      top: 0;
+	 z-index:100000;
 }
  .navbar-custom .navbar-brand {
      color: #000000;
@@ -161,9 +163,10 @@
 ***********************************************************************************/
 
 .main-content {
-    margin-bottom: 50px;
-	min-height:72vh;
-	margin-top: 135px;
+     margin-bottom: 14vh;
+	 min-height:72vh;
+	 margin-top: 135px;
+	 font-size: 14px!important;
 }
  body > .container {
      padding: 0px 15px 5px;
@@ -287,3 +290,49 @@
      background-color: #1e7b1e;
      border-color: #1e7b1e;
 }
+
+/***********************************************************************************
+									   MEDIA 
+***********************************************************************************/
+
+@media (max-width: 1200px) {
+	@-moz-document url-prefix() { 
+		.col-md-6 {
+			 flex: unset;
+			 max-width: 100%;
+		}
+	}
+}
+
+@media (max-width: 992px) {
+table, .table {
+     table-layout: fixed;
+     word-wrap: break-word;
+}
+.col-md-6 {
+     flex: unset;
+     max-width: 100%;
+}
+.footer a {
+     padding: 5px;
+     font-weight: 600;
+}
+}
+@media (max-width: 768px) {
+.footer > .container {
+    padding: 8px;
+    max-width: 100%;
+    word-wrap: break-word;
+    font-size: 12px;
+}
+}
+
+@media (max-width: 576px) {
+.footer {
+     line-height: 30px;
+}
+.footer span {
+	 display:inline-block;
+}
+}
+
