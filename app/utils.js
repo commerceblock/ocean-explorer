@@ -1,7 +1,5 @@
 var Decimal = require("decimal.js");
 Decimal8 = Decimal.clone({ precision:8, rounding:8 });
-var dummy_assets = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'XLM', 'ADA', 'TRX', 'MIOTA',
-					'GOLD', 'SILVER', 'GAS', 'OIL', 'COPPER'];
 
 function hex2ascii(hex) {
 	var str = "";

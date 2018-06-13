@@ -2,7 +2,7 @@ extends layout
 
 block headContent
 	title Mempool Summary
-	
+
 block content
 	h1 Mempool Summary
 	hr
@@ -34,7 +34,7 @@ block content
 		if (false)
 			#{JSON.stringify(mempoolstats)}
 
-		- var feeBucketLabels = [ "0 - 5 sat/B", "6 - 10 sat/B", "11 - 25 sat/B", "26 - 50 sat/B", "51 - 75 sat/B", "76 - 100 sat/B", "101 - 150 sat/B", "151+ sat/B" ];
+		- var feeBucketLabels = [ "0 - 5 mcbt/B", "6 - 10 mcbt/B", "11 - 25 mcbt/B", "26 - 50 mcbt/B", "51 - 75 mcbt/B", "76 - 100 mcbt/B", "101 - 150 mcbt/B", "151+ mcbt/B" ];
 		- var feeBucketTxCounts = [ mempoolstats.fee_0_5, mempoolstats.fee_6_10, mempoolstats.fee_11_25, mempoolstats.fee_26_50, mempoolstats.fee_51_75, mempoolstats.fee_76_100, mempoolstats.fee_101_150, mempoolstats.fee_151_max ];
 		- var totalfeeBuckets = [ mempoolstats.totalfee_0_5, mempoolstats.totalfee_6_10, mempoolstats.totalfee_11_25, mempoolstats.totalfee_26_50, mempoolstats.totalfee_51_75, mempoolstats.totalfee_76_100, mempoolstats.totalfee_101_150, mempoolstats.totalfee_151_max ];
 		- var bgColors = [ "bg-primary", "bg-success", "bg-info", "bg-warning", "bg-danger", "bg-primary progress-bar-striped", "bg-success progress-bar-striped", "bg-info progress-bar-striped" ];
@@ -95,4 +95,3 @@ block content
 			        }
 			    }
 			});
-				

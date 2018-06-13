@@ -117,7 +117,7 @@ block content
 							td(class="monospace")
 								strong #{fee}
 								br
-								span ~#{new DecimalRounded(fee).dividedBy(result.getrawtransaction.size).times(100000000)} sat/B
+								span ~#{new DecimalRounded(fee).dividedBy(result.getrawtransaction.size).times(100000000)} mcbt/B
 
 				if (result.getrawtransaction.vin[0].coinbase)
 					div(class="card mb-3")
@@ -159,7 +159,7 @@ block content
 													span(class="tag monospace") coinbase
 												td(class="monospace") #{genesisAsset}
 												td(class="monospace") #{new Decimal(0)}
-										
+
 										if (result.getrawtransaction.vin[0].issuance)
 											- asset = (result.getrawtransaction.vin[0].issuance['asset'] in assets) ? (assets[result.getrawtransaction.vin[0].issuance['asset']]) : (utils.getDummyAsset(result.getrawtransaction.vin[0].issuance['asset']));
 											tr
