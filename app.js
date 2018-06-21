@@ -3,6 +3,7 @@
 'use strict';
 
 var express = require('express');
+var http = require('http')
 var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -56,6 +57,25 @@ app.use(function(req, res, next) {
 	    });
 	}
 	res.locals.env = env;
+
+    // get latest block height by sending a GET request to the attestation API
+    http.request({host: env.attestation.host,
+                  port: env.attestation.port,
+                  path: '/bestblockheight/',
+                  method: 'GET'}, function(res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            var parsedResponse
+            try {
+                parsedResponse = JSON.parse(chunk)
+                global.attestedheight = parsedResponse["blockheight"]
+            } catch(err) {
+                console.log("ERROR ATTESTATION_API: Failed parsing http response")
+            }
+        });
+    }).on('error', function(err) {
+        console.log("Error ATTESTATION_API: Request Failed")
+    }).end();
 
 	next();
 });
