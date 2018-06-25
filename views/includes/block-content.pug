@@ -215,13 +215,17 @@ div(class="tab-content")
                                                         if (vout.scriptPubKey.addresses)
                                                             a(id="output-" + voutIndex)
                                                                 div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
-                                                        else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
-                                                            span()
                                                         else if (vout.scriptPubKey.type == 'fee')
                                                             span(class="tag tag-fee monospace") fees
                                                         else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
-                                                            span(class="monospace") OP_RETURN:
-                                                            span(class="monospace text-muted") #{utils.hex2ascii(vout.scriptPubKey.asm.substring("OP_RETURN ".length))}
+                                                            div(class="monospace", style="word-break: break-word;")
+                                                                span(class="monospace") OP_RETURN:
+                                                                span(class="monospace text-muted") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
+                                                        else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
+                                                            if (vout.value > 0)
+                                                                span(class="tag tag-destruction monospace") destruction
+                                                            else
+                                                                span()
                                                 td
                                                     if (tx.vin[0].coinbase)
                                                         span(class="monospace") #{genesisAsset}
