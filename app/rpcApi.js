@@ -251,7 +251,9 @@ function getTransactionInputs(rpcClient, transaction, inputLimit=0) {
 
 		getRawTransactions(txids).then(function(inputTransactions) {
 			resolve({ txid:transaction.txid, inputTransactions:inputTransactions });
-		});
+		}).catch(function(err) {
+            reject(err);
+        });
 	});
 }
 
@@ -292,16 +294,18 @@ function getRawTransactions(txids) {
 		var requestBatches = utils.splitArrayIntoChunks(requests, 20);
 		executeBatchesSequentially(requestBatches, function(results) {
 			resolve(results);
-		});
+		}, function(error) {
+            reject(error);
+        });
 	});
 }
 
-function executeBatchesSequentially(batches, resultFunc) {
+function executeBatchesSequentially(batches, resultFunc, errorFunc) {
 	console.log("Starting " + batches.length + "batches");
-	executeBatchesSequentiallyInternal(0, batches, 0, [], resultFunc);
+	executeBatchesSequentiallyInternal(0, batches, 0, [], resultFunc, errorFunc);
 }
 
-function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accumulatedResults, resultFunc) {
+function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accumulatedResults, resultFunc, errorFunc) {
 	if (currentIndex == batches.length) {
 		console.log("Finishing batch " + batchId + "...");
 
@@ -315,12 +319,12 @@ function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accu
 	client.command(batches[currentIndex], function(err, result, resHeaders) {
 		if (err) {
 			console.log("Error @getrawtransaction: " + err);
-			reject(err);
+			errorFunc(err)
 			return;
 		}
 
 		accumulatedResults.push(...result);
-		executeBatchesSequentiallyInternal(batchId, batches, currentIndex + 1, accumulatedResults, resultFunc);
+		executeBatchesSequentiallyInternal(batchId, batches, currentIndex + 1, accumulatedResults, resultFunc, errorFunc);
 	});
 }
 
@@ -358,7 +362,9 @@ function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
 
 					resolve({ getblock:result2, transactions:transactions, txInputsByTransaction:txInputsByTransaction });
 				});
-			});
+			}).catch(function(err) {
+                reject(err);
+            });
 		});
 	});
 }
