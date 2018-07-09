@@ -11,5 +11,12 @@ module.exports = {
     attestation:{
         host:"localhost",
         port:8080
-    }
+    },
+    dbsettings: {
+        "user": "",
+        "password": "",
+        "database": "testnet1",
+        "address": "localhost",
+        "port": 27017
+  },
 };
