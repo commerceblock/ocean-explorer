@@ -1,17 +1,48 @@
-var mongoose = require('mongoose')
-  , env = require("../app/env.js")
-  , bitcoin = require("bitcoin-core")
-  , rpcApi = require("../app/rpcApi")
-  , Block = require("../models/block")
-  , Tx = require("../models/tx");
+/*
+ *  DbBuilder script
+ *
+ */
 
-client = new bitcoin({
-    host: env.ocean.host,
-    port: env.ocean.port,
-    username: env.ocean.rpc.username,
-    password: env.ocean.rpc.password,
-    timeout: 5000
-});
+var mongoose = require('mongoose')
+  , env = require("../helpers/env.js")
+  , bitcoin = require("bitcoin-core")
+  , rpcApi = require("../controllers/rpc")
+  , Block = require("../models/block")
+  , Tx = require("../models/tx")
+  , Info = require("../models/info")
+  , dbApi = require("../controllers/database");
+
+// dbbuilder.js usage
+function usage() {
+    console.log('Usage: node scripts/dbbuilder.js [mode]');
+    console.log('');
+    console.log('[mode]:');
+    console.log('init      Clear indexes and rebuild database starting from genesis block');
+    console.log('update    Update database from the last build to the latest chain block');
+    console.log('check     Check database and add transactions/blocks that are missing');
+    console.log('');
+    process.exit(0);
+}
+
+var mode = 'check'
+if (process.argv.length < 2) {
+    usage();
+} else {
+    switch(process.argv[2])
+    {
+        case 'update':
+          mode = 'update';
+          break;
+        case 'check':
+          mode = 'check';
+          break;
+        case 'init':
+          mode = 'init';
+          break;
+        default:
+          usage();
+    }
+}
 
 var dbConnect = 'mongodb://';
 if (env.dbsettings.user && env.dbsettings.password) {
@@ -26,7 +57,19 @@ mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
       console.log('Unable to connect to database: %s', dbConnect);
       exit();
     }
+
+    client = new bitcoin({
+        host: env.ocean.host,
+        port: env.ocean.port,
+        username: env.ocean.rpc.username,
+        password: env.ocean.rpc.password,
+        timeout: 5000
+    });
+
+    doWork(client);
 });
+
+mongoose.Promise = Promise
 
 var db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error"));
@@ -34,39 +77,56 @@ db.once("open", function(callback) {
     console.log("Connection succeeded.");
 });
 
-var height = 0
-
-rpcApi.getBlockHash(height).then(function(blockhash) {
-    rpcApi.getBlockData(client, blockhash, 20, 0).then(function(result) {
-        var block = new Block({
-            hash: blockhash,
-            height: height,
-            rpcdata: result.getblock
-        });
-        block.save(function(error) {
-            if (error) {
-                console.error(error)
-            } else {
-                console.log("Block saved")
-            }
-        })
-
-        for (var i = 0; i < result.transactions.length; i++) {
-            var tx = new Tx({
-                txid: result.transactions[i]["txid"],
-                rpcdata: result.transactions[i]
-            })
-            tx.save(function(error) {
-                if (error) {
-                console.error(error)
-                } else {
-                    console.log("Tx saved")
-                }
-            })
+function doWork(client) {
+    dbApi.get_blockchain_info(function(prevInfo, error){
+        if (error) {
+            console.error(error)
+            process.exit(0);
         }
-    }).catch(function(err) {
-        console.log("Failed to load block");
+
+        dbApi.update_blockchain_info(function(info, error){
+            if (error) {
+                console.error(error);
+                process.exit(0);
+            }
+
+            if (mode == 'init') {
+                Tx.remove({}, function(errTx) {
+                    Block.remove({}, function(errBlock) {
+                        dbApi.update_blockchain_data(0, info.blockcount, function(error){
+                            if (error) {
+                                process.exit(0);
+                            } else {
+                                console.log("Finished " + mode);
+                                process.exit(0);
+                            }
+                        });
+                    })
+                })
+            } else if (mode == 'check') {
+                dbApi.update_blockchain_data(0, info.blockcount, function(error){
+                    if (error) {
+                        process.exit(0);
+                    } else {
+                        console.log("Finished " + mode);
+                        process.exit(0);
+                    }
+                });
+            } else if (mode == 'update') {
+                var prevHeight = 0
+                if (prevInfo) {
+                    prevHeight = prevInfo.blockcount
+                }
+                console.log("Update starting at height " + prevHeight);
+                dbApi.update_blockchain_data(prevHeight, info.blockcount, function(error){
+                    if (error) {
+                        process.exit(0);
+                    } else {
+                        console.log("Finished " + mode);
+                        process.exit(0);
+                    }
+                });
+            }
+        });
     });
-}).catch(function(err) {
-    console.log("Failed to load block");
-});
+}

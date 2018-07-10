@@ -2,10 +2,10 @@ var express = require('express');
 var router = express.Router();
 var util = require('util');
 var moment = require('moment');
-var utils = require('./../app/utils');
-var env = require("./../app/env");
+var utils = require('./../helpers/utils');
+var env = require("./../helpers/env");
 var bitcoin = require("bitcoin-core")
-var rpcApi = require("./../app/rpcApi");
+var rpcApi = require("./../controllers/rpc");
 
 function loadIndex(req, res) {
     rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {

@@ -1,10 +1,10 @@
-var utils = require("./utils.js");
+var utils = require("../helpers/utils.js");
 
 function getBlockchainInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getblockchaininfo', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getblockchaininfo: " + err);
+				console.error("Error @getblockchaininfo: " + err);
 				reject(err);
 				return;
 			}
@@ -18,7 +18,7 @@ function getNetworkInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getnetworkinfo', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getnetworkinfo: " + err);
+				console.error("Error @getnetworkinfo: " + err);
 				reject(err);
 				return;
 			}
@@ -32,7 +32,7 @@ function getNetTotals() {
 	return new Promise(function(resolve, reject) {
 		client.command('getnettotals', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getnettotals: " + err);
+				console.error("Error @getnettotals: " + err);
 				reject(err);
 				return;
 			}
@@ -46,7 +46,7 @@ function getMempoolInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getmempoolinfo', function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getmempoolinfo: " + err);
+				console.error("Error @getmempoolinfo: " + err);
 				reject(err);
 				return;
 			}
@@ -60,7 +60,7 @@ function getMempoolStats() {
 	return new Promise(function(resolve, reject) {
 		client.command('getrawmempool', true, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getrawmempool: " + err);
+				console.error("Error @getrawmempool: " + err);
 				reject(err);
 				return;
 			}
@@ -142,14 +142,14 @@ function getBlockByHeight(blockHeight) {
 	return new Promise(function(resolve, reject) {
 		client.command('getblockhash', blockHeight, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getblockhash: " + err);
+				console.error("Error @getblockhash: " + err);
 				reject(err);
 				return;
 			}
 
 			client.command('getblock', result, function(err2, result2, resHeaders2) {
 				if (err2) {
-					console.log("Error @getblock: " + err2);
+					console.error("Error @getblock: " + err2);
 					reject(err2);
 					return;
 				}
@@ -174,7 +174,7 @@ function getBlocksByHeight(blockHeights) {
 
 		client.command(batch, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getblockhash: " + err);
+				console.error("Error @getblockhash: " + err);
 				reject(err);
 				return;
 			}
@@ -191,7 +191,7 @@ function getBlocksByHeight(blockHeights) {
 
 				client.command(batch2, function(err2, result2, resHeaders2) {
 					if (err2) {
-						console.log("Error @getblock: " + err2);
+						console.error("Error @getblock: " + err2);
 						reject(err2);
 						return;
 					}
@@ -205,13 +205,29 @@ function getBlocksByHeight(blockHeights) {
 	});
 }
 
+function getBlockCount() {
+    console.log("getBlockCount");
+
+    return new Promise(function(resolve, reject) {
+        client.command('getblockcount', function(err, result, resHeaders) {
+            if (err) {
+                console.error("Error @getBlockCount: " + err);
+                reject(err);
+                return;
+            }
+
+            resolve(result);
+        });
+    });
+}
+
 function getBlockByHash(blockHash) {
 	console.log("getBlockByHash: " + blockHash);
 
 	return new Promise(function(resolve, reject) {
 		client.command('getblock', blockHash, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getblock: " + err);
+				console.error("Error @getblock: " + err);
 				reject(err);
 				return;
 			}
@@ -227,7 +243,7 @@ function getBlockHash(blockHeight) {
 	return new Promise(function(resolve, reject) {
 		client.command('getblockhash', blockHeight, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getblockhash: " + err);
+				console.error("Error @getblockhash: " + err);
 				reject(err);
 				return;
 			}
@@ -261,7 +277,7 @@ function getRawTransaction(txid) {
 	return new Promise(function(resolve, reject) {
 		client.command('getrawtransaction', txid, 1, function(err, result, resHeaders) {
 			if (err) {
-				console.log("Error @getrawtransaction: " + err);
+				console.error("Error @getrawtransaction: " + err);
 				reject(err);
 				return;
 			}
@@ -318,7 +334,7 @@ function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accu
 
 	client.command(batches[currentIndex], function(err, result, resHeaders) {
 		if (err) {
-			console.log("Error @getrawtransaction: " + err);
+			console.error("Error @getrawtransaction: " + err);
 			errorFunc(err)
 			return;
 		}
@@ -334,7 +350,7 @@ function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
 	return new Promise(function(resolve, reject) {
 		client.command('getblock', blockHash, function(err2, result2, resHeaders2) {
 			if (err2) {
-				console.log("Error @getblock: " + err2);
+				console.error("Error @getblock: " + err2);
 				reject(err2);
 				return;
 			}
@@ -378,6 +394,7 @@ module.exports = {
 	getBlocksByHeight: getBlocksByHeight,
 	getBlockByHash: getBlockByHash,
 	getBlockHash: getBlockHash,
+    getBlockCount: getBlockCount,
 	getTransactionInputs: getTransactionInputs,
 	getBlockData: getBlockData,
 	getRawTransaction: getRawTransaction,
