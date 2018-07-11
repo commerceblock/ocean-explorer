@@ -317,20 +317,16 @@ function getRawTransactions(txids) {
 }
 
 function executeBatchesSequentially(batches, resultFunc, errorFunc) {
-	console.log("Starting " + batches.length + "batches");
 	executeBatchesSequentiallyInternal(0, batches, 0, [], resultFunc, errorFunc);
 }
 
 function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accumulatedResults, resultFunc, errorFunc) {
 	if (currentIndex == batches.length) {
-		console.log("Finishing batch " + batchId + "...");
-
 		resultFunc(accumulatedResults);
 		return;
 	}
 
 	var batchId = utils.getRandomString(20, 'aA#');
-	console.log("Executing batch #" + (currentIndex + 1) + " (of " + batches.length + ") with id " + batchId);
 
 	client.command(batches[currentIndex], function(err, result, resHeaders) {
 		if (err) {
@@ -377,7 +373,9 @@ function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
 					}
 
 					resolve({ getblock:result2, transactions:transactions, txInputsByTransaction:txInputsByTransaction });
-				});
+				}).catch(function(err) {
+                    reject(err);
+                });
 			}).catch(function(err) {
                 reject(err);
             });

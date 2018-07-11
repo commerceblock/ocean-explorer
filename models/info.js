@@ -3,8 +3,9 @@ var mongoose = require('mongoose'),
 
 var InfoSchema = new Schema({
     chain:          { type: String, index: { unique: true } },
-    blockcount:     Number,
-    bestblockhash:  String,
+    blockchaininfo: Object,
+    networkinfo:    Object,
+    nettotals:      Object
 });
 
 module.exports = mongoose.model('Info', InfoSchema);

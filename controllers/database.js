@@ -67,18 +67,28 @@ module.exports = {
         });
     },
     update_blockchain_info: function(cb) {
-        rpcApi.getBlockCount().then(function(blockcount) {
-            var newinfo = {
-                chain: "ocean_main",
-                blockcount: blockcount,
-                bestblockhash: "test"
-            };
-            Info.findOneAndUpdate({chain: 'ocean_main'}, newinfo, {upsert : true, new: true}, function(err, infoentry){
-                if (err) {
+        rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {
+            rpcApi.getNetworkInfo().then(function(getnetworkinfo) {
+                rpcApi.getNetTotals().then(function(getnettotals) {
+                    var newinfo = {
+                        chain: getblockchaininfo.chain,
+                        blockchaininfo: getblockchaininfo,
+                        networkinfo: getnetworkinfo,
+                        nettotals: getnettotals
+                    };
+
+                    Info.findOneAndUpdate({chain: getblockchaininfo.chain}, newinfo, {upsert : true, new: true}, function(err, infoentry){
+                        if (err) {
+                            return cb(null, err);
+                        } else {
+                            return cb(infoentry, null);
+                        }
+                    });
+                }).catch(function(err) {
                     return cb(null, err);
-                } else {
-                    return cb(infoentry, null);
-                }
+                });
+            }).catch(function(err) {
+                return cb(null, err);
             });
         }).catch(function(err) {
             return cb(null, err);

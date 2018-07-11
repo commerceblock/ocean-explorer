@@ -63,7 +63,6 @@ mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
         port: env.ocean.port,
         username: env.ocean.rpc.username,
         password: env.ocean.rpc.password,
-        timeout: 5000
     });
 
     doWork(client);
@@ -93,7 +92,7 @@ function doWork(client) {
             if (mode == 'init') {
                 Tx.remove({}, function(errTx) {
                     Block.remove({}, function(errBlock) {
-                        dbApi.update_blockchain_data(0, info.blockcount, function(error){
+                        dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error){
                             if (error) {
                                 process.exit(0);
                             } else {
@@ -104,7 +103,7 @@ function doWork(client) {
                     })
                 })
             } else if (mode == 'check') {
-                dbApi.update_blockchain_data(0, info.blockcount, function(error){
+                dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error){
                     if (error) {
                         process.exit(0);
                     } else {
@@ -115,10 +114,10 @@ function doWork(client) {
             } else if (mode == 'update') {
                 var prevHeight = 0
                 if (prevInfo) {
-                    prevHeight = prevInfo.blockcount
+                    prevHeight = prevInfo.blockchaininfo.blocks
                 }
                 console.log("Update starting at height " + prevHeight);
-                dbApi.update_blockchain_data(prevHeight, info.blockcount, function(error){
+                dbApi.update_blockchain_data(prevHeight, info.blockchaininfo.blocks, function(error){
                     if (error) {
                         process.exit(0);
                     } else {
