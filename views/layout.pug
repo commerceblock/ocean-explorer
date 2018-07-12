@@ -23,7 +23,7 @@ html
 				if (env.testnet)
 					div(class="corner-ribbon top-left sticky red shadow")
 						span testnet
-						
+
 				a(class="navbar-brand", color=yellow, href="/")
 					span
 						img(src="/img/logo/logo-small.png", class="header-image")
@@ -48,7 +48,7 @@ html
 								span(class="input-group-btn")
 									input(type="submit", class="btn btn-primary", value="Search")
 		div(class="main-content")
-		
+
 			div(class="container")
 				if (userMessage)
 					div(class="alert", class=(userMessageType ? ("alert-"  + userMessageType) : "alert-info"), role="alert")
@@ -65,8 +65,6 @@ html
 				span &nbsp;&ndash;&nbsp;
 				span Source code available on github
 					a(href="https://github.com/commerceblock/ocean-explorer") commerceblock/ocean-explorer
-					
-
 
 		script(src="https://code.jquery.com/jquery-3.2.1.min.js", integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=", crossorigin="anonymous")
 		script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q", crossorigin="anonymous")

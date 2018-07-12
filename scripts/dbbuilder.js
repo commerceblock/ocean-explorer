@@ -1,8 +1,7 @@
 /*
- *  DbBuilder script
- *
+ * @dbbuilder.js Build blockchain database script
+ * @author Nikolaos Kostoulas 2018
  */
-
 var mongoose = require('mongoose')
   , env = require("../helpers/env.js")
   , bitcoin = require("bitcoin-core")
@@ -44,6 +43,7 @@ if (process.argv.length < 2) {
     }
 }
 
+// Db connection details
 var dbConnect = 'mongodb://';
 if (env.dbsettings.user && env.dbsettings.password) {
     dbConnect += env.dbsettings.user + ':' + env.dbsettings.password
@@ -77,13 +77,8 @@ db.once("open", function(callback) {
 });
 
 function doWork(client) {
-    dbApi.get_blockchain_info(function(prevInfo, error){
-        if (error) {
-            console.error(error)
-            process.exit(0);
-        }
-
-        dbApi.update_blockchain_info(function(info, error){
+    dbApi.get_blockchain_info().then(function(prevInfo) {
+        dbApi.update_blockchain_info(function(info, error) {
             if (error) {
                 console.error(error);
                 process.exit(0);
@@ -92,7 +87,7 @@ function doWork(client) {
             if (mode == 'init') {
                 Tx.remove({}, function(errTx) {
                     Block.remove({}, function(errBlock) {
-                        dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error){
+                        dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height
                             if (error) {
                                 process.exit(0);
                             } else {
@@ -103,7 +98,7 @@ function doWork(client) {
                     })
                 })
             } else if (mode == 'check') {
-                dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error){
+                dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height
                     if (error) {
                         process.exit(0);
                     } else {
@@ -117,7 +112,7 @@ function doWork(client) {
                     prevHeight = prevInfo.blockchaininfo.blocks
                 }
                 console.log("Update starting at height " + prevHeight);
-                dbApi.update_blockchain_data(prevHeight, info.blockchaininfo.blocks, function(error){
+                dbApi.update_blockchain_data(prevHeight, info.blockchaininfo.blocks, function(error) { // from prev height to latest height
                     if (error) {
                         process.exit(0);
                     } else {
@@ -127,5 +122,10 @@ function doWork(client) {
                 });
             }
         });
+    }).catch(function(error) {
+        if (error) {
+            console.error(error)
+            process.exit(0);
+        }
     });
 }

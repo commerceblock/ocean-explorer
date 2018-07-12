@@ -18,6 +18,7 @@ var rpcApi = require("./controllers/rpc.js");
 var momentDurationFormat = require("moment-duration-format");
 var baseActionsRouter = require('./routes/router');
 var serveStatic = require('serve-static')
+var mongoose = require('mongoose')
 
 var app = express();
 var genesisBlockHash = "357abd41543a09f9290ff4b4ae008e317f252b80c96492bd9f346cced0943a7f";
@@ -41,6 +42,32 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(serveStatic(path.join(__dirname, 'public')))
+
+
+// TO DO PROPER !
+var dbConnect = 'mongodb://';
+if (env.dbsettings.user && env.dbsettings.password) {
+    dbConnect += env.dbsettings.user + ':' + env.dbsettings.password
+}
+dbConnect = dbConnect + '@' + env.dbsettings.address;
+dbConnect = dbConnect + ':' + env.dbsettings.port;
+dbConnect = dbConnect + '/' + env.dbsettings.database;
+
+mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
+    if (err) {
+      console.log('Unable to connect to database: %s', dbConnect);
+      exit();
+    }
+});
+
+mongoose.Promise = Promise
+
+var db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error"));
+db.once("open", function(callback) {
+    console.log("Connection succeeded.");
+});
+//
 
 app.use(function(req, res, next) {
 	if (env.ocean && env.ocean.rpc) {

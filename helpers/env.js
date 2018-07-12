@@ -1,3 +1,7 @@
+/*
+ * @env.js Environment parameters and connection details to various interfaces
+ *
+ */
 module.exports = {
 	testnet: true,
 	ocean:{

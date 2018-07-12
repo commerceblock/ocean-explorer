@@ -1,5 +1,10 @@
+/*
+ * @rpc.js Controller API for requests to RPC client chain
+ *
+ */
 var utils = require("../helpers/utils.js");
 
+// 'getblockchaininfo' RPC call
 function getBlockchainInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getblockchaininfo', function(err, result, resHeaders) {
@@ -14,6 +19,7 @@ function getBlockchainInfo() {
 	});
 }
 
+// 'getnetworkinfo' RPC call
 function getNetworkInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getnetworkinfo', function(err, result, resHeaders) {
@@ -28,6 +34,7 @@ function getNetworkInfo() {
 	});
 }
 
+// 'getnettotals' RPC call
 function getNetTotals() {
 	return new Promise(function(resolve, reject) {
 		client.command('getnettotals', function(err, result, resHeaders) {
@@ -42,6 +49,7 @@ function getNetTotals() {
 	});
 }
 
+// 'getmempoolinfo' RPC call
 function getMempoolInfo() {
 	return new Promise(function(resolve, reject) {
 		client.command('getmempoolinfo', function(err, result, resHeaders) {
@@ -56,6 +64,7 @@ function getMempoolInfo() {
 	});
 }
 
+// 'getmempoolstats' RPC call
 function getMempoolStats() {
 	return new Promise(function(resolve, reject) {
 		client.command('getrawmempool', true, function(err, result, resHeaders) {
@@ -136,6 +145,7 @@ function getMempoolStats() {
 	});
 }
 
+// Method that uses 'getblockhash' and 'getblock' RPCs to get block by block height
 function getBlockByHeight(blockHeight) {
 	console.log("getBlockByHeight: " + blockHeight);
 
@@ -160,6 +170,7 @@ function getBlockByHeight(blockHeight) {
 	});
 }
 
+// Method that uses 'getblockhash' and 'getblock' RPCs to get blocks using list of block heights
 function getBlocksByHeight(blockHeights) {
 	console.log("getBlocksByHeight: " + blockHeights);
 
@@ -205,6 +216,7 @@ function getBlocksByHeight(blockHeights) {
 	});
 }
 
+// 'getblockcount' RPC call
 function getBlockCount() {
     console.log("getBlockCount");
 
@@ -221,6 +233,7 @@ function getBlockCount() {
     });
 }
 
+// 'getblock' RPC call
 function getBlockByHash(blockHash) {
 	console.log("getBlockByHash: " + blockHash);
 
@@ -237,6 +250,7 @@ function getBlockByHash(blockHash) {
 	});
 }
 
+// 'getblockhash' RPC call
 function getBlockHash(blockHeight) {
 	console.log("getBlockHash: " + blockHeight);
 
@@ -253,6 +267,7 @@ function getBlockHash(blockHeight) {
 	});
 }
 
+// Method that gets all the transactions for the vins of a transaction
 function getTransactionInputs(rpcClient, transaction, inputLimit=0) {
 	console.log("getTransactionInputs: " + transaction.txid);
 
@@ -273,6 +288,7 @@ function getTransactionInputs(rpcClient, transaction, inputLimit=0) {
 	});
 }
 
+// 'getrawtransaction' RPC call
 function getRawTransaction(txid) {
 	return new Promise(function(resolve, reject) {
 		client.command('getrawtransaction', txid, 1, function(err, result, resHeaders) {
@@ -287,6 +303,7 @@ function getRawTransaction(txid) {
 	});
 }
 
+// Method that gets transactions for a list of txids using 'getrawtranscation' RPC call
 function getRawTransactions(txids) {
 	console.log("getRawTransactions: " + txids);
 
@@ -316,6 +333,7 @@ function getRawTransactions(txids) {
 	});
 }
 
+// Methods to get transactions in batches
 function executeBatchesSequentially(batches, resultFunc, errorFunc) {
 	executeBatchesSequentiallyInternal(0, batches, 0, [], resultFunc, errorFunc);
 }
@@ -340,7 +358,8 @@ function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accu
 	});
 }
 
-function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
+// Method to get block data (txes, txVins, block) using 'getblock' and 'getrawtransaction' RPC calls
+function getBlockData(rpcClient, blockHash) {
 	console.log("getBlockData: " + blockHash);
 
 	return new Promise(function(resolve, reject) {
@@ -352,7 +371,7 @@ function getBlockData(rpcClient, blockHash, txLimit, txOffset) {
 			}
 
 			var txids = [];
-			for (var i = txOffset; i < Math.min(txOffset + txLimit, result2.tx.length); i++) {
+			for (var i = 0; i < result2.tx.length; i++) {
 				txids.push(result2.tx[i]);
 			}
 

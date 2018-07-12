@@ -1,3 +1,7 @@
+/*
+ * @utils.js Various util methods
+ *
+ */
 var Decimal = require("decimal.js");
 Decimal8 = Decimal.clone({ precision:8, rounding:8 });
 
