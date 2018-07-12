@@ -43,8 +43,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(serveStatic(path.join(__dirname, 'public')))
 
-
-// TO DO PROPER !
+// connect to mongo db database using mongoose
 var dbConnect = 'mongodb://';
 if (env.dbsettings.user && env.dbsettings.password) {
     dbConnect += env.dbsettings.user + ':' + env.dbsettings.password
@@ -53,6 +52,7 @@ dbConnect = dbConnect + '@' + env.dbsettings.address;
 dbConnect = dbConnect + ':' + env.dbsettings.port;
 dbConnect = dbConnect + '/' + env.dbsettings.database;
 
+// connect to MongDB - should automatically try to reconnect if connection fails
 mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
     if (err) {
       console.log('Unable to connect to database: %s', dbConnect);
@@ -67,7 +67,6 @@ db.on("error", console.error.bind(console, "connection error"));
 db.once("open", function(callback) {
     console.log("Connection succeeded.");
 });
-//
 
 app.use(function(req, res, next) {
 	if (env.ocean && env.ocean.rpc) {

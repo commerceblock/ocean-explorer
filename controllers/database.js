@@ -1,11 +1,18 @@
 /*
- * @database.js Read from database - Write to database Controller
+ * @database.js Main database controller
+ * Functionality to write blockchain info and block/tx data to database
+ * Functionality to read info/data using index lookup and $in queries
+ *
  * @author Nikolaos Kostoulas 2018
+ *
  */
+
 var rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
-  , Info = require("../models/info");
+  , Info = require("../models/info")
+  , env = require("../helpers/env")
+  , bitcoin = require("bitcoin-core");
 
 // Save new block using the Block model
 async function save_block(block) {
@@ -20,7 +27,7 @@ async function save_block(block) {
 // Create new block using the Block model and call save method
 async function new_block(blockhash, height, blockdata) {
     try {
-        block = await Block.findOne({hash: blockhash});
+        block = await Block.findOne({hash: blockhash}); // check first if block exists
         if (block) {
             return;
         }
@@ -48,7 +55,7 @@ async function save_tx(tx) {
 // Create new tx using the Tx model and call save method
 async function new_tx(txid, txdata, blockheight, blockhash) {
     try {
-        tx = await Tx.findOne({txid: txid});
+        tx = await Tx.findOne({txid: txid}); // check first if tx exists
         if (tx) {
             return;
         }
@@ -146,6 +153,14 @@ module.exports = {
     },
     // Update blockchain info in the Info collection by doing multiple rpc calls to client chain
     update_blockchain_info: function(cb) {
+        // establish rpc connection to client
+        client = new bitcoin({
+            host: env.ocean.host,
+            port: env.ocean.port,
+            username: env.ocean.rpc.username,
+            password: env.ocean.rpc.password,
+        });
+        // chain multiple rpc calls to receive blockchain info required
         rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {
             rpcApi.getNetworkInfo().then(function(getnetworkinfo) {
                 rpcApi.getNetTotals().then(function(getnettotals) {
@@ -159,6 +174,8 @@ module.exports = {
                                 mempoolinfo: getmempoolinfo,
                                 mempoolstats: getmempoolstats
                             };
+                            // update info - should be one entry only
+                            // if info does not exist - create
                             Info.findOneAndUpdate({chain: getblockchaininfo.chain}, newinfo, {upsert : true, new: true}, function(err, infoentry){
                                 if (err) {
                                     return cb(null, err);
@@ -186,6 +203,13 @@ module.exports = {
     update_blockchain_data: async function(firstHeight, lastHeight, cb) {
         for (var height=firstHeight; height<=lastHeight; height++) {
             try {
+                // establish rpc connection to client
+                client = new bitcoin({
+                    host: env.ocean.host,
+                    port: env.ocean.port,
+                    username: env.ocean.rpc.username,
+                    password: env.ocean.rpc.password,
+                });
                 // Get block and save
                 blockhash = await rpcApi.getBlockHash(height);
                 result = await rpcApi.getBlockData(client, blockhash);
@@ -195,9 +219,8 @@ module.exports = {
                 for (var i = 0; i < result.transactions.length; i++) {
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
                 }
-
             } catch (error) {
-                console.log("Failed to load data");
+                console.log("Failed to store block data");
                 return cb(error)
             }
         }

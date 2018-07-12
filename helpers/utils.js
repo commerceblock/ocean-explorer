@@ -2,9 +2,11 @@
  * @utils.js Various util methods
  *
  */
+
 var Decimal = require("decimal.js");
 Decimal8 = Decimal.clone({ precision:8, rounding:8 });
 
+// Hex two asccii method
 function hex2ascii(hex) {
 	var str = "";
 	for (var i = 0; i < hex.length; i += 2) {
@@ -14,6 +16,7 @@ function hex2ascii(hex) {
 	return str;
 }
 
+// Split array into chunks method used by RPC to do work in batches
 function splitArrayIntoChunks(array, chunkSize) {
 	var j = array.length;
 	var chunks = [];
@@ -25,6 +28,7 @@ function splitArrayIntoChunks(array, chunkSize) {
 	return chunks;
 }
 
+// Random string method
 function getRandomString(length, chars) {
     var mask = '';
 
@@ -52,6 +56,7 @@ function getRandomString(length, chars) {
 	return result;
 }
 
+// Format bytes method
 function formatBytes(bytesInt) {
 	var scales = [ {val:1000000000000000, name:"PB"}, {val:1000000000000, name:"TB"}, {val:1000000000, name:"GB"}, {val:1000000, name:"MB"}, {val:1000, name:"KB"} ];
 	for (var i = 0; i < scales.length; i++) {
@@ -66,6 +71,7 @@ function formatBytes(bytesInt) {
 	return bytesInt + " B";
 }
 
+// Dummy asset method used for demo purposes on testnet
 function getDummyAsset(hex) {
 	// dummy assets - will be replaced by actual asset - asset hash pairs in main net release
 	if (!hex) {

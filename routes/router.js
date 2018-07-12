@@ -1,15 +1,17 @@
 /*
- * @router.js Main express router routing requests to controller
+ * @router.js Main router of application
+ * Uses express js router to route http requests to the view controller
  *
  */
+
 var express = require('express')
   , router = express.Router()
-  , dbApi = require("../controllers/database")
   , view = require("../controllers/view");
 
-const LIMIT_DEFAULT = 20;
-const OFFSET_DEFAULT = 0;
+const LIMIT_DEFAULT = 20;   // default limit for the number of blocks/transactions shown per page
+const OFFSET_DEFAULT = 0;   // default offest limit for the first blockheight to show per page
 
+// Index page
 router.get("/", function(req, res, next) {
 	if (client == null) {
 		res.locals.userMessage = "Unable to connect to Ocean Node";
@@ -18,14 +20,19 @@ router.get("/", function(req, res, next) {
     return next();
 }, view.loadIndex);
 
+// Node Details page
 router.get("/node-details", function(req, res, next) {
+
     return next();
 }, view.loadInfo);
 
+// Mempool Summary page
 router.get("/mempool-summary", function(req, res, next) {
+
 	return next();
 }, view.loadMempool);
 
+// Blocks page
 router.get("/blocks", function(req, res, next) {
 	var sort = "desc";
 	if (req.query.sort) {
@@ -36,17 +43,21 @@ router.get("/blocks", function(req, res, next) {
 	res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
 	res.locals.sort = sort;
 	res.locals.paginationBaseUrl = "/blocks";
+
     return next();
 }, view.loadBlocks);
 
+// Search redirect routing
 router.post("/search", function(req, res, next) {
 	if (!req.body.query) {
         res.locals.userMessage = "Enter a block height, block hash, or transaction id.";
 		return next();
 	}
+
     return next();
 }, view.loadSearch, view.loadIndex);
 
+// Block by blockheight routing
 router.get("/block-height/:blockHeight", function(req, res, next) {
 	var blockHeight = parseInt(req.params.blockHeight);
 
@@ -60,6 +71,7 @@ router.get("/block-height/:blockHeight", function(req, res, next) {
     return next();
 }, view.loadBlockHeight, view.loadIndex);
 
+// Block by blockhash routing
 router.get("/block/:blockHash", function(req, res, next) {
 	var blockHash = req.params.blockHash;
 
@@ -73,6 +85,7 @@ router.get("/block/:blockHash", function(req, res, next) {
 	return next();
 }, view.loadBlockHash, view.loadIndex);
 
+// Transaction page
 router.get("/tx/:transactionId", function(req, res, next) {
 	var txid = req.params.transactionId;
 

@@ -118,19 +118,6 @@ block content
                                 br
                                 span ~#{new DecimalRounded(fee).dividedBy(result.getrawtransaction.size).times(100000000)} mcbt/B
 
-                if (result.getrawtransaction.vin[0].coinbase)
-                    div(class="card mb-3")
-                        div(class="card-header")
-                            h2(class="h5 mb-0") Coinbase
-                        div(class="card-body")
-                            h6 Hex
-                            div(style="background-color: #f0f0f0; padding: 5px 10px;", class="mb-3")
-                                span(class="monospace word-wrap") #{result.getrawtransaction.vin[0].coinbase}
-
-                            h6 Decoded
-                            div(style="background-color: #f0f0f0; padding: 5px 10px;", class="mb-3")
-                                span(class="monospace word-wrap") #{utils.hex2ascii(result.getrawtransaction.vin[0].coinbase)}
-
                 div(class="card mb-3")
                     div(class="card-header")
                         div(class="row")

@@ -1,7 +1,13 @@
 /*
  * @dbbuilder.js Build blockchain database script
+ * Script used to build/update the database that stores
+ * all the blockchain data on blocks and transactions
+ * Can be run using different modes: init, check, update
+ *
  * @author Nikolaos Kostoulas 2018
+ *
  */
+
 var mongoose = require('mongoose')
   , env = require("../helpers/env.js")
   , bitcoin = require("bitcoin-core")
@@ -23,6 +29,7 @@ function usage() {
     process.exit(0);
 }
 
+// dbbuilder.js mode options
 var mode = 'check'
 if (process.argv.length < 2) {
     usage();
@@ -52,20 +59,13 @@ dbConnect = dbConnect + '@' + env.dbsettings.address;
 dbConnect = dbConnect + ':' + env.dbsettings.port;
 dbConnect = dbConnect + '/' + env.dbsettings.database;
 
+// connect to db and start db builder main method
 mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
     if (err) {
       console.log('Unable to connect to database: %s', dbConnect);
       exit();
     }
-
-    client = new bitcoin({
-        host: env.ocean.host,
-        port: env.ocean.port,
-        username: env.ocean.rpc.username,
-        password: env.ocean.rpc.password,
-    });
-
-    doWork(client);
+    doWork();
 });
 
 mongoose.Promise = Promise
@@ -76,7 +76,8 @@ db.once("open", function(callback) {
     console.log("Connection succeeded.");
 });
 
-function doWork(client) {
+// Main db builder method that updates db accordingly based on the script mode
+function doWork() {
     dbApi.get_blockchain_info().then(function(prevInfo) {
         dbApi.update_blockchain_info(function(info, error) {
             if (error) {
@@ -107,6 +108,7 @@ function doWork(client) {
                     }
                 });
             } else if (mode == 'update') {
+                // get previous height from info before update
                 var prevHeight = 0
                 if (prevInfo) {
                     prevHeight = prevInfo.blockchaininfo.blocks

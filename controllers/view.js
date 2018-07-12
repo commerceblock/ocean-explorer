@@ -1,9 +1,14 @@
 /*
- * @view.js View controller handling page rendering of routed requests
+ * @view.js Main view controller
+ * Functionality to handle http requests via the router
+ * Communicate with database api to get the data that
+ * are required to be displayed in the rendered /views pages
+ *
  * @author Nikolaos Kostoulas 2018
+ *
  */
-var dbApi = require("../controllers/database")
-  , rpcApi = require("../controllers/rpc");
+
+var dbApi = require("../controllers/database");
 
 // Helper function that returns vin txes for a specific tx
 function getTxInputs(tx) {
@@ -245,7 +250,7 @@ module.exports = {
             return next();
         });
     },
-    // Load latest blocks
+    // Load blocks based on offset/limit/current block height
     loadBlocks: function(req, res, next) {
         dbApi.get_blockchain_info().then(function(info) {
             if (!info) {
@@ -281,7 +286,7 @@ module.exports = {
             res.render("blocks");
         });
     },
-    // Load index page
+    // Load index page - Display the 10 latest blocks
     loadIndex: function(req, res) {
         dbApi.get_blockchain_info().then(function(info) {
             if (!info) {

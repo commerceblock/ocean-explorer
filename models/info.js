@@ -1,10 +1,15 @@
 /*
  * @info.js Info Model for Mongo database based on mongoose
+ *
  * @author Nikolaos Kostoulas 2018
+ *
  */
+
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
+// Info schema
+// Indices used: chain
 var InfoSchema = new Schema({
     chain:          { type: String, index: { unique: true } },
     blockchaininfo: Object,
@@ -14,4 +19,5 @@ var InfoSchema = new Schema({
     mempoolstats:   Object
 });
 
+// Info model used for saving and/or lookups
 module.exports = mongoose.model('Info', InfoSchema);

@@ -41,19 +41,6 @@ block content
                     td(class="monospace") #{getblockchaininfo.mediantime}
 
                 tr
-                    - var scales = [ {val:1000000000000000, name:"quadrillion"}, {val:1000000000000, name:"trillion"}, {val:1000000000, name:"billion"}, {val:1000000, name:"million"} ];
-                    - var scaleDone = false;
-                    th(class="table-active properties-header") Difficulty
-                    td(class="monospace")
-                        span #{getblockchaininfo.difficulty.toLocaleString()}
-                        each item in scales
-                            if (!scaleDone)
-                                - var fraction = Math.floor(getblockchaininfo.difficulty / item.val);
-                                if (fraction >= 1)
-                                    - scaleDone = true;
-                                    span(class="text-muted")  (#{fraction} #{item.name})
-
-                tr
                     th(class="table-active properties-header") Status
                     td(class="monospace")
                         if (getblockchaininfo.initialblockdownload)

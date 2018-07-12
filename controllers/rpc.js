@@ -1,7 +1,9 @@
 /*
- * @rpc.js Controller API for requests to RPC client chain
+ * @rpc.js Main rpc controller
+ * Functionality to wrap RPC calls into async Promises
  *
  */
+
 var utils = require("../helpers/utils.js");
 
 // 'getblockchaininfo' RPC call

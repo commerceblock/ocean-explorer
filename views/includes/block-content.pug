@@ -79,27 +79,9 @@ div(class="tab-content")
                         strong(class="text-success") #{result.getblock.confirmations.toLocaleString()}
 
             tr
-                - var scales = [ {val:1000000000000000, name:"quadrillion"}, {val:1000000000000, name:"trillion"}, {val:1000000000, name:"billion"}, {val:1000000, name:"million"} ];
-                - var scaleDone = false;
-                th(class="table-active properties-header") Difficulty
-                td(class="monospace")
-                    span #{result.getblock.difficulty.toLocaleString()}
-                    each item in scales
-                        if (!scaleDone)
-                            - var fraction = Math.floor(result.getblock.difficulty / item.val);
-                            if (fraction >= 1)
-                                - scaleDone = true;
-                                span(class="text-muted")  (#{fraction} #{item.name})
-
-
-            tr
                 th(class="table-active text-right") Version
                 td(class="monospace") 0x#{result.getblock.versionHex}
                     span(class="text-muted")  (decimal: #{result.getblock.version})
-
-            tr
-                th(class="table-active text-right") Nonce
-                td(class="monospace") #{result.getblock.nonce}
 
             tr
                 th(class="table-active text-right") Bits
@@ -128,125 +110,124 @@ div(class="tab-content")
                     if (tx && tx.txid)
                         a(href=("/tx/" + tx.txid), class="monospace") #{tx.txid}
                 div(class="card-body")
-                    if (true)
-                        div(class="row")
-                            div(class="col-md-6")
-                                h6 Input (#{tx.vin.length.toLocaleString()})
-                                if (result.txInputsByTransaction[tx.txid])
-                                    - var totalInputValue = new Decimal(0);
-                                    table(class="table mb-0")
-                                        thead
-                                            tr
-                                                th
-                                                th Input
-                                                th Asset
-                                                th Amount
-                                        tbody
-
-                                        if (tx.vin[0].coinbase)
-                                            - totalInputValue = totalInputValue.plus(new Decimal(0));
-                                            tr
-                                                th 1
-                                                td
-                                                    span(class="tag monospace") coinbase
-                                                td(class="monospace") #{genesisAsset}
-                                                td(class="monospace") #{new Decimal(0)}
-                                        if (tx.vin[0].issuance)
-                                            - totalInputValue = totalInputValue.plus(new Decimal(tx.vin[0].issuance.assetamount));
-                                            - asset = (tx.vin[0].issuance['asset'] in assets) ? (assets[tx.vin[0].issuance['asset']]) : (utils.getDummyAsset(tx.vin[0].issuance['asset']));
-                                            tr
-                                                th 1
-                                                td
-                                                    span(class="tag tag-issuance monospace") issuance
-                                                td(class="monospace") #{asset}
-                                                td(class="monospace") #{new Decimal(tx.vin[0].issuance.assetamount)}
-                                        each txInput, txInputIndex in result.txInputsByTransaction[tx.txid]
-                                            if (txInput)
-                                                - var vout = txInput.vout[tx.vin[txInputIndex].vout];
-                                                - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
-                                                tr
-                                                    th #{(txInputIndex + 1)}
-                                                    td
-                                                        if (vout.scriptPubKey && vout.scriptPubKey.addresses)
-                                                            div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
-                                                            span(class="monospace text-muted") via tx
-                                                            a(href=("/tx/" + txInput.txid + "#output-" + tx.vin[txInputIndex].vout), class="monospace") #{txInput.txid.substring(0, 14)}..., Output ##{tx.vin[txInputIndex].vout + 1}
-                                                    td(class="monospace") #{asset}
-                                                    td
-                                                        if (vout.value)
-                                                            - totalInputValue = totalInputValue.plus(new Decimal(vout.value));
-                                                            span(class="monospace") #{vout.value}
-                                                        else
-                                                            if (!tx.vin[0].coinbase)
-                                                                include unblind-modal.pug
-                                                            else
-                                                                span(class="monospace") #{new Decimal(0)}
-                                        - var coinbaseCount = tx.vin[0].coinbase || tx.vin[0].issuance  ? 1 : 0;
-                                        if ((tx.vin.length - coinbaseCount) > result.txInputsByTransaction[tx.txid].length)
-                                            tr
-                                                td
-                                                td
-                                                    span(class="monospace text-muted") #{(tx.vin.length - result.txInputsByTransaction[tx.txid].length).toLocaleString()} more...
-                                                td
-                                                td
-                                        else
-                                            tr
-                                                td
-                                                td
-                                                td
-                                                td
-                                                    strong(class="monospace") #{totalInputValue}
-                            div(class="col-md-6")
-                                h6 Output (#{tx.vout.length.toLocaleString()})
-                                - var totalOutputValue = new Decimal(0);
+                    div(class="row")
+                        div(class="col-md-6")
+                            h6 Input (#{tx.vin.length.toLocaleString()})
+                            if (result.txInputsByTransaction[tx.txid])
+                                - var totalInputValue = new Decimal(0);
                                 table(class="table mb-0")
                                     thead
                                         tr
                                             th
-                                            th Output
+                                            th Input
                                             th Asset
                                             th Amount
                                     tbody
-                                        each vout, voutIndex in tx.vout
+
+                                    if (tx.vin[0].coinbase)
+                                        - totalInputValue = totalInputValue.plus(new Decimal(0));
+                                        tr
+                                            th 1
+                                            td
+                                                span(class="tag monospace") coinbase
+                                            td(class="monospace") #{genesisAsset}
+                                            td(class="monospace") #{new Decimal(0)}
+                                    if (tx.vin[0].issuance)
+                                        - totalInputValue = totalInputValue.plus(new Decimal(tx.vin[0].issuance.assetamount));
+                                        - asset = (tx.vin[0].issuance['asset'] in assets) ? (assets[tx.vin[0].issuance['asset']]) : (utils.getDummyAsset(tx.vin[0].issuance['asset']));
+                                        tr
+                                            th 1
+                                            td
+                                                span(class="tag tag-issuance monospace") issuance
+                                            td(class="monospace") #{asset}
+                                            td(class="monospace") #{new Decimal(tx.vin[0].issuance.assetamount)}
+                                    each txInput, txInputIndex in result.txInputsByTransaction[tx.txid]
+                                        if (txInput)
+                                            - var vout = txInput.vout[tx.vin[txInputIndex].vout];
+                                            - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
                                             tr
-                                                th #{(voutIndex + 1)}
+                                                th #{(txInputIndex + 1)}
                                                 td
-                                                    if (vout.scriptPubKey)
-                                                        if (vout.scriptPubKey.addresses)
-                                                            a(id="output-" + voutIndex)
-                                                                div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
-                                                        else if (vout.scriptPubKey.type == 'fee')
-                                                            span(class="tag tag-fee monospace") fees
-                                                        else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
-                                                            div(class="monospace", style="word-break: break-word;")
-                                                                span(class="monospace") OP_RETURN:
-                                                                span(class="monospace text-muted") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
-                                                        else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
-                                                            if (vout.value > 0)
-                                                                span(class="tag tag-destruction monospace") destruction
-                                                            else
-                                                                span()
-                                                td
-                                                    if (tx.vin[0].coinbase)
-                                                        span(class="monospace") #{genesisAsset}
-                                                    else
-                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
-                                                        span(class="monospace") #{asset}
+                                                    if (vout.scriptPubKey && vout.scriptPubKey.addresses)
+                                                        div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
+                                                        span(class="monospace text-muted") via tx
+                                                        a(href=("/tx/" + txInput.txid + "#output-" + tx.vin[txInputIndex].vout), class="monospace") #{txInput.txid.substring(0, 14)}..., Output ##{tx.vin[txInputIndex].vout + 1}
+                                                td(class="monospace") #{asset}
                                                 td
                                                     if (vout.value)
+                                                        - totalInputValue = totalInputValue.plus(new Decimal(vout.value));
                                                         span(class="monospace") #{vout.value}
-                                                        - totalOutputValue = totalOutputValue.plus(vout.value);
                                                     else
                                                         if (!tx.vin[0].coinbase)
                                                             include unblind-modal.pug
                                                         else
                                                             span(class="monospace") #{new Decimal(0)}
+                                    - var coinbaseCount = tx.vin[0].coinbase || tx.vin[0].issuance  ? 1 : 0;
+                                    if ((tx.vin.length - coinbaseCount) > result.txInputsByTransaction[tx.txid].length)
+                                        tr
+                                            td
+                                            td
+                                                span(class="monospace text-muted") #{(tx.vin.length - result.txInputsByTransaction[tx.txid].length).toLocaleString()} more...
+                                            td
+                                            td
+                                    else
                                         tr
                                             td
                                             td
                                             td
                                             td
-                                                strong(class="monospace") #{totalOutputValue}
+                                                strong(class="monospace") #{totalInputValue}
+                        div(class="col-md-6")
+                            h6 Output (#{tx.vout.length.toLocaleString()})
+                            - var totalOutputValue = new Decimal(0);
+                            table(class="table mb-0")
+                                thead
+                                    tr
+                                        th
+                                        th Output
+                                        th Asset
+                                        th Amount
+                                tbody
+                                    each vout, voutIndex in tx.vout
+                                        tr
+                                            th #{(voutIndex + 1)}
+                                            td
+                                                if (vout.scriptPubKey)
+                                                    if (vout.scriptPubKey.addresses)
+                                                        a(id="output-" + voutIndex)
+                                                            div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
+                                                    else if (vout.scriptPubKey.type == 'fee')
+                                                        span(class="tag tag-fee monospace") fees
+                                                    else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
+                                                        div(class="monospace", style="word-break: break-word;")
+                                                            span(class="monospace") OP_RETURN:
+                                                            span(class="monospace text-muted") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
+                                                    else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
+                                                        if (vout.value > 0)
+                                                            span(class="tag tag-destruction monospace") destruction
+                                                        else
+                                                            span()
+                                            td
+                                                if (tx.vin[0].coinbase)
+                                                    span(class="monospace") #{genesisAsset}
+                                                else
+                                                    - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
+                                                    span(class="monospace") #{asset}
+                                            td
+                                                if (vout.value)
+                                                    span(class="monospace") #{vout.value}
+                                                    - totalOutputValue = totalOutputValue.plus(vout.value);
+                                                else
+                                                    if (!tx.vin[0].coinbase)
+                                                        include unblind-modal.pug
+                                                    else
+                                                        span(class="monospace") #{new Decimal(0)}
+                                    tr
+                                        td
+                                        td
+                                        td
+                                        td
+                                            strong(class="monospace") #{totalOutputValue}
         if (txCount > limit)
             - var pageNumber = offset / limit + 1;
             - var pageCount = Math.floor(txCount / limit);
