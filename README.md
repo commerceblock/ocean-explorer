@@ -26,8 +26,18 @@ Install [MongoDB](https://docs.mongodb.com/manual/installation/). Start the `mon
 2. `npm install` to install all required dependencies
 3. Specify connection info for `ocean`, `mongo` and `attestation API` in [env.js](app/env.js)
 4. Sync the database with the blockchain by running the script `scripts/dbbuilder.js`
-    - If run using `scripts/dbbuilder.js init` it will load all block/tx data from genesis block to latest block height found
-    - If run using `scripts/dbbuilder.js check` it will check for any block/tx data missing genesis block to latest block height found
-    - If run using `scripts/dbbuilder.js update` it will update block/tx data from last updated block height to latest block height found
+    - Run using `scripts/dbbuilder.js init clear`
+        - Clear all collections/indices
+        - Load all blockchain data from genesis block to latest block
+    - Run using `scripts/dbbuilder.js init`
+        - Find latest block stored from the Block collection
+        - Continue loading blockchain data up to latest block
+        - To be used in case initial loading failed and need to continue from where it stopped
+    - Run using `scripts/dbbuilder.js check`
+        - Go through all data from genesis block to latest block and store anything that is missing
+    - Run using `scripts/dbbuilder.js update`
+        - Find latest block stored from the Info collection
+        - Load latest blockchain data
+        - To be used for quick periodic updates as it assumes that Info/Block are up to date
 5. `npm start` to start the local server
 6. Navigate to http://127.0.0.1:3002/

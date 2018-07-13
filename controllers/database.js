@@ -103,6 +103,18 @@ module.exports = {
             });
         });
     },
+    // Get block with the largest block height in the Block collection
+    get_latest_block: function(cb) {
+        return new Promise(function(resolve, reject) {
+            Block.findOne().sort('-height').exec(function(error, block) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(block);
+            })
+        });
+    },
     // Get block from Block collection using block height
     get_block_height: function(blockheight, cb) {
         return new Promise(function(resolve, reject) {

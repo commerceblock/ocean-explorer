@@ -22,31 +22,41 @@ function usage() {
     console.log('Usage: node scripts/dbbuilder.js [mode]');
     console.log('');
     console.log('[mode]:');
-    console.log('init      Clear indexes and rebuild database starting from genesis block');
-    console.log('update    Update database from the last build to the latest chain block');
-    console.log('check     Check database and add transactions/blocks that are missing');
+    console.log('init clear Clear indexes and rebuild database starting from genesis block' )
+    console.log('init       Continue rebuilding database from latest height in the database');
+    console.log('update     Update database from the last build to the latest chain block');
+    console.log('check      Check database and add transactions/blocks that are missing');
     console.log('');
     process.exit(0);
 }
 
 // dbbuilder.js mode options
-var mode = 'check'
-if (process.argv.length < 2) {
+var mode = 'update';
+var clear = false;
+
+if (process.argv.length < 3) {
     usage();
 } else {
-    switch(process.argv[2])
-    {
+    switch(process.argv[2]) {
         case 'update':
-          mode = 'update';
-          break;
+            mode = 'update';
+            break;
         case 'check':
-          mode = 'check';
-          break;
+            mode = 'check';
+            break;
         case 'init':
-          mode = 'init';
-          break;
+            if (process.argv.length == 4) {
+                if (process.argv[4] == 'clear') {
+                    clear = true;
+                } else {
+                    usage();
+                }
+            } else {
+                mode = 'init';
+            }
+            break;
         default:
-          usage();
+            usage();
     }
 }
 
@@ -86,9 +96,27 @@ function doWork() {
             }
 
             if (mode == 'init') {
-                Tx.remove({}, function(errTx) {
-                    Block.remove({}, function(errBlock) {
-                        dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height
+                if (clear)  { // Remove all documents and start from genesis block
+                    Tx.remove({}, function(errTx) {
+                        Block.remove({}, function(errBlock) {
+                            dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height
+                                if (error) {
+                                    process.exit(0);
+                                } else {
+                                    console.log("Finished " + mode);
+                                    process.exit(0);
+                                }
+                            });
+                        });
+                    });
+                } else { // Find latest block height stored and start from there
+                    var prevHeight = 0;
+                    dbApi.get_latest_block().then(function(latestBlock) {
+                        if (latestBlock) {
+                            prevHeight = latestBlock.getblock.height;
+                            console.log("Starting init from latest block height " + prevHeight);
+                        }
+                        dbApi.update_blockchain_data(prevHeight, info.blockchaininfo.blocks, function(error) { // from prev height to latest height
                             if (error) {
                                 process.exit(0);
                             } else {
@@ -96,8 +124,11 @@ function doWork() {
                                 process.exit(0);
                             }
                         });
-                    })
-                })
+                    }).catch(function(error) {
+                        console.error(error);
+                        process.exit(0);
+                    });
+                }
             } else if (mode == 'check') {
                 dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height
                     if (error) {
