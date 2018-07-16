@@ -10,28 +10,28 @@ module.exports = {
     // Connection details for the Ocean node
     // Any bitcoin-like RPC blockchains are supported
     ocean:{
-		host:"explorer",
-		port:18886,
+		host: process.env.OCEAN_HOST,
+		port: process.env.OCEAN_PORT,
 		rpc: {
-			username:"bitcoinrpc",
-			password:"acc1e7a299bc49449912e235b54dbce5"
+			username: process.env.RPC_USER,
+			password: process.env.RPC_PASSWORD
 		}
 	},
 
     // Connection details for the Attestation API of the Ocean node
     // Not mandatory but required to display attestation info
     attestation:{
-        host:"localhost",
-        port:8080
+        host: process.env.ATTESTATION_HOST,
+        port: process.env.ATTESTATION_PORT
     },
 
     // Connection details for the database used to store blockchain data
     // Currently only MongoDB is supported
     dbsettings: {
-        "user": "",
-        "password": "",
-        "database": "testnet1",
-        "address": "localhost",
-        "port": 27017
+        "user": process.env.DB_USER,
+        "password": process.env.DB_PASSWORD,
+        "database": process.env.DB_NAME,
+        "address": process.env.DB_HOST,
+        "port": process.env.DB_PORT
   },
 };
