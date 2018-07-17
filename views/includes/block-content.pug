@@ -33,8 +33,8 @@ div(class="tab-content")
             tr
                 th(class="table-active properties-header") Next Block Hash
                 td(class="monospace")
-                    if (result.getblock.nextblockhash)
-                        a(href=("/block/" + result.getblock.nextblockhash)) #{result.getblock.nextblockhash}
+                    if (nextblockhash)
+                        a(href=("/block/" + nextblockhash)) #{nextblockhash}
                     else
                         span None
                         span(class="text-muted")  (latest block)

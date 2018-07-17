@@ -149,9 +149,9 @@ module.exports = {
         });
     },
     // Get multiple blocks from Block collection by looking up a list of block heights
-    get_blocks_height: function(blockheights, cb) {
+    get_blocks_height: function(blockheights, sortOrder='desc', cb) {
         return new Promise(function(resolve, reject) {
-            Block.find({height: { $in: blockheights}}, function(error, blocks) {
+            Block.find({height: { $in: blockheights}}).sort({height: sortOrder}).exec(function(error, blocks) {
                 if (error) {
                     reject(error);
                     return;

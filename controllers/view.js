@@ -216,13 +216,20 @@ module.exports = {
                 res.locals.userMessage = "Failed to load block with height: " + blockHeight;
                 return next();
             }
-
             res.locals.result.getblock = block.getblock;
-            getBlockTxes(block.getblock, req, res, function(error) {
-                if (error) {
-                    return next();
+            dbApi.get_block_height(block.getblock.height + 1).then(function(blockByHeight) { // get next block hash
+                if (blockByHeight) {
+                    res.locals.nextblockhash = blockByHeight.getblock.hash;
                 }
-                res.render("block-height");
+                getBlockTxes(block.getblock, req, res, function(error) {
+                    if (error) {
+                        return next();
+                    }
+                    res.render("block-height");
+                });
+            }).catch(function(errorBlock) {
+                res.locals.userMessage = errorBlock;
+                return next();
             });
         }).catch(function(errorBlock) {
             res.locals.userMessage = errorBlock;
@@ -237,13 +244,20 @@ module.exports = {
                 res.locals.userMessage = "Failed to load block with blockhash: " + blockHash;
                 return next();
             }
-
             res.locals.result.getblock = block.getblock;
-            getBlockTxes(block.getblock, req, res, function(error) {
-                if (error) {
-                    return next();
+            dbApi.get_block_height(block.getblock.height + 1).then(function(blockByHeight) { // get next block hash
+                if (blockByHeight) {
+                    res.locals.nextblockhash = blockByHeight.getblock.hash;
                 }
-                res.render("block");
+                getBlockTxes(block.getblock, req, res, function(error) {
+                    if (error) {
+                        return next();
+                    }
+                    res.render("block");
+                });
+            }).catch(function(errorBlock) {
+                res.locals.userMessage = errorBlock;
+                return next();
             });
         }).catch(function(errorBlock) {
             res.locals.userMessage = errorBlock;
@@ -271,7 +285,7 @@ module.exports = {
                 }
             }
 
-            dbApi.get_blocks_height(blockHeights).then(function(blocks) {
+            dbApi.get_blocks_height(blockHeights, res.locals.sort).then(function(blocks) {
                 res.locals.blocks = [];
                 blocks.forEach( block => {
                     res.locals.blocks.push(block.getblock);
