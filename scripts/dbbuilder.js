@@ -46,7 +46,7 @@ if (process.argv.length < 3) {
             break;
         case 'init':
             if (process.argv.length == 4) {
-                if (process.argv[4] == 'clear') {
+                if (process.argv[3] == 'clear') {
                     clear = true;
                 } else {
                     usage();
