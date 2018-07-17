@@ -47,6 +47,7 @@ if (process.argv.length < 3) {
         case 'init':
             if (process.argv.length == 4) {
                 if (process.argv[3] == 'clear') {
+                    mode = 'init';
                     clear = true;
                 } else {
                     usage();
@@ -95,8 +96,14 @@ function doWork() {
                 process.exit(0);
             }
 
+            if (!info) {
+                console.error("Blockchain info not found in the database");
+                process.exit(0);
+            }
+
             if (mode == 'init') {
                 if (clear)  { // Remove all documents and start from genesis block
+                    console.log("Clearing database");
                     Tx.remove({}, function(errTx) {
                         Block.remove({}, function(errBlock) {
                             dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height

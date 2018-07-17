@@ -16,59 +16,68 @@ var rpcApi = require("../controllers/rpc")
 
 // Save new block using the Block model
 async function save_block(block) {
-    try {
-        newblock = await block.save();
-        console.log("Block " + block.height + " saved.");
-    } catch(err) {
-        console.error(err);
-    }
+    newblock = await block.save();
+    console.log("Block " + newblock.height + " saved.");
+    return newblock;
 }
 
 // Create new block using the Block model and call save method
 async function new_block(blockhash, height, blockdata) {
-    try {
-        block = await Block.findOne({hash: blockhash}); // check first if block exists
-        if (block) {
-            return;
-        }
-        var newblock = new Block({
-            hash: blockhash,
-            height: height,
-            getblock: blockdata
-        });
-        await save_block(newblock);
-    } catch(err) {
-        console.error(err);
+    block = await Block.findOne({hash: blockhash}); // check first if block exists
+    if (block) {
+        return block;
     }
+    var newblock = new Block({
+        hash: blockhash,
+        height: height,
+        getblock: blockdata
+    });
+    return await save_block(newblock);
 }
 
 // Save new tx using the Tx model
 async function save_tx(tx) {
-    try {
-        newtx = await tx.save();
-        console.log("Tx " + tx.txid + " saved.");
-    } catch(err) {
-        console.error(err);
-    }
+    newtx = await tx.save();
+    console.log("Tx " + newtx.txid + " saved.");
+    return newtx;
 }
 
 // Create new tx using the Tx model and call save method
 async function new_tx(txid, txdata, blockheight, blockhash) {
-    try {
-        tx = await Tx.findOne({txid: txid}); // check first if tx exists
-        if (tx) {
-            return;
-        }
-        var newtx = new Tx({
-            txid: txid,
-            getrawtransaction: txdata,
-            blockheight: blockheight,
-            blockhash: blockhash
-        });
-        await save_tx(newtx);
-    } catch(err) {
-        console.error(err);
+    tx = await Tx.findOne({txid: txid}); // check first if tx exists
+    if (tx) {
+        return tx;
     }
+    var newtx = new Tx({
+        txid: txid,
+        getrawtransaction: txdata,
+        blockheight: blockheight,
+        blockhash: blockhash
+    });
+    return await save_tx(newtx);
+}
+
+// Save new info using the Info model
+async function save_info(info) {
+    // update info - should be one entry only
+    // if info does not exist - create
+    newinfo = await Info.findOneAndUpdate({chain: info.blockchaininfo.chain}, info, {upsert : true, new: true});
+    console.log("Info for height " + newinfo.blockchaininfo.blocks + " saved.");
+    return newinfo;
+}
+
+// Create new info entry using the Info model and call save method
+async function new_info(blockchaininfo, networkinfo, nettotals, mempoolinfo, mempoolstats) {
+    var newinfo = {
+        chain: blockchaininfo.chain,
+        blockchaininfo: blockchaininfo,
+        networkinfo: networkinfo,
+        nettotals: nettotals,
+        mempoolinfo: mempoolinfo,
+        mempoolstats: mempoolstats
+    };
+
+    return await save_info(newinfo);
 }
 
 module.exports = {
@@ -164,52 +173,49 @@ module.exports = {
         });
     },
     // Update blockchain info in the Info collection by doing multiple rpc calls to client chain
-    update_blockchain_info: function(cb) {
-        // establish rpc connection to client
-        client = new bitcoin({
-            host: env.ocean.host,
-            port: env.ocean.port,
-            username: env.ocean.rpc.username,
-            password: env.ocean.rpc.password,
-        });
-        // chain multiple rpc calls to receive blockchain info required
-        rpcApi.getBlockchainInfo().then(function(getblockchaininfo) {
-            rpcApi.getNetworkInfo().then(function(getnetworkinfo) {
-                rpcApi.getNetTotals().then(function(getnettotals) {
-                    rpcApi.getMempoolInfo().then(function(getmempoolinfo) {
-                        rpcApi.getMempoolStats().then(function(getmempoolstats) {
-                            var newinfo = {
-                                chain: getblockchaininfo.chain,
-                                blockchaininfo: getblockchaininfo,
-                                networkinfo: getnetworkinfo,
-                                nettotals: getnettotals,
-                                mempoolinfo: getmempoolinfo,
-                                mempoolstats: getmempoolstats
-                            };
-                            // update info - should be one entry only
-                            // if info does not exist - create
-                            Info.findOneAndUpdate({chain: getblockchaininfo.chain}, newinfo, {upsert : true, new: true}, function(err, infoentry){
-                                if (err) {
-                                    return cb(null, err);
-                                } else {
-                                    return cb(infoentry, null);
-                                }
-                            });
-                        }).catch(function(err) {
-                            return cb(null, err);
-                        });
-                    }).catch(function(err) {
-                        return cb(null, err);
-                    });
-                }).catch(function(err) {
-                    return cb(null, err);
-                });
-            }).catch(function(err) {
-                return cb(null, err);
+    update_blockchain_info: async function(cb) {
+        try {
+            // establish rpc connection to client
+            client = new bitcoin({
+                host: env.ocean.host,
+                port: env.ocean.port,
+                username: env.ocean.rpc.username,
+                password: env.ocean.rpc.password,
             });
-        }).catch(function(err) {
-            return cb(null, err);
-        });
+
+            // await multiple rpc calls to receive blockchain info required
+            var getblockchaininfo = await rpcApi.getBlockchainInfo();
+            var getnetworkinfo = await rpcApi.getNetworkInfo();
+            var getnettotals = await rpcApi.getNetTotals();
+            var getmempoolinfo = await rpcApi.getMempoolInfo();
+            var getmempoolstats = await rpcApi.getMempoolStats();
+        } catch (rpcError) {
+            console.log("Failed to get blockchain info data");
+            return cb(null, rpcError);
+        }
+
+        try {
+            // try and find previous info entry
+            // if previous info blockcount is larger, assume syncing node is out of date and throw
+            prevInfoEntry = await Info.findOne({chain: getblockchaininfo.chain});
+            if (prevInfoEntry) {
+                if (prevInfoEntry.blockchaininfo.blocks > getblockchaininfo.blocks) {
+                    throw new Error("Node height " + getblockchaininfo.blocks +
+                        " out of date. Latest height " + prevInfoEntry.blockchaininfo.blocks)
+                }
+            }
+
+            // update or generate new info entry
+            newInfoEntry = await new_info(getblockchaininfo, getnetworkinfo, getnettotals, getmempoolinfo, getmempoolstats);
+            if (newInfoEntry) {
+                return cb(newInfoEntry, null);
+            }
+        } catch (dbError) {
+            console.log("Failed to store blockchain info data");
+            return cb(null, dbError);
+        }
+
+        return cb(null, null);
     },
     // Update blockchain data in the Tx and Block collections by doing multiple rpc calls to client chain
     update_blockchain_data: async function(firstHeight, lastHeight, cb) {
@@ -222,20 +228,27 @@ module.exports = {
                     username: env.ocean.rpc.username,
                     password: env.ocean.rpc.password,
                 });
-                // Get block and save
+
                 blockhash = await rpcApi.getBlockHash(height);
                 result = await rpcApi.getBlockData(client, blockhash);
+            } catch (rpcError) {
+                console.log("Failed to get block/transcation data");
+                return cb(rpcError);
+            }
+
+            try{
+                // Get block and save
                 await new_block(blockhash, height, result.getblock);
 
                 // Get block transactions and save
                 for (var i = 0; i < result.transactions.length; i++) {
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
                 }
-            } catch (error) {
-                console.log("Failed to store block data");
-                return cb(error)
+            } catch (dbError) {
+                console.log("Failed to store block/transaction data");
+                cb(dbError);
             }
         }
-        return cb(null)
+        return cb(null);
     },
 }
