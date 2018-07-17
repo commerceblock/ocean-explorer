@@ -67,8 +67,9 @@ async function save_info(info) {
 }
 
 // Create new info entry using the Info model and call save method
-async function new_info(blockchaininfo, networkinfo, nettotals, mempoolinfo, mempoolstats) {
+async function new_info(height, blockchaininfo, networkinfo, nettotals, mempoolinfo, mempoolstats) {
     var newinfo = {
+        latestStoredHeight: height,
         chain: blockchaininfo.chain,
         blockchaininfo: blockchaininfo,
         networkinfo: networkinfo,
@@ -173,7 +174,7 @@ module.exports = {
         });
     },
     // Update blockchain info in the Info collection by doing multiple rpc calls to client chain
-    update_blockchain_info: async function(cb) {
+    update_blockchain_info: async function(height, cb) {
         try {
             // establish rpc connection to client
             client = new bitcoin({
@@ -191,7 +192,7 @@ module.exports = {
             var getmempoolstats = await rpcApi.getMempoolStats();
         } catch (rpcError) {
             console.log("Failed to get blockchain info data");
-            return cb(null, rpcError);
+            return cb(rpcError);
         }
 
         try {
@@ -206,16 +207,12 @@ module.exports = {
             }
 
             // update or generate new info entry
-            newInfoEntry = await new_info(getblockchaininfo, getnetworkinfo, getnettotals, getmempoolinfo, getmempoolstats);
-            if (newInfoEntry) {
-                return cb(newInfoEntry, null);
-            }
+            newInfoEntry = await new_info(height, getblockchaininfo, getnetworkinfo, getnettotals, getmempoolinfo, getmempoolstats);
         } catch (dbError) {
             console.log("Failed to store blockchain info data");
-            return cb(null, dbError);
+            return cb(dbError);
         }
-
-        return cb(null, null);
+        return cb(null);
     },
     // Update blockchain data in the Tx and Block collections by doing multiple rpc calls to client chain
     update_blockchain_data: async function(firstHeight, lastHeight, cb) {
@@ -244,6 +241,14 @@ module.exports = {
                 for (var i = 0; i < result.transactions.length; i++) {
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
                 }
+
+                // Get blockchain info and save
+                await module.exports.update_blockchain_info(height, function(infoError) {
+                    if (infoError) {
+                        cb(infoError);
+                    }
+                });
+
             } catch (dbError) {
                 console.log("Failed to store block/transaction data");
                 cb(dbError);

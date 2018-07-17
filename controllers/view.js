@@ -81,10 +81,12 @@ module.exports = {
             if (!info) {
                 res.locals.userMessage = "Unable to load Mempool Summary";
                 res.render("mempool-summary");
+                return;
             }
             if (!info.mempoolinfo || !info.mempoolstats) {
                 res.locals.userMessage = "Unable to load Mempool Summary";
                 res.render("mempool-summary");
+                return;
             }
             res.locals.getmempoolinfo = info.mempoolinfo;
             res.locals.mempoolstats = info.mempoolstats;
@@ -100,16 +102,30 @@ module.exports = {
             if (!info) {
                 res.locals.userMessage = "Unable to load Node Details";
                 res.render("node-details");
+                return;
             }
             if (!info.blockchaininfo || !info.networkinfo || !info.nettotals) {
                 res.locals.userMessage = "Unable to load Node Details";
                 res.render("node-details");
+                return;
             }
-            res.locals.getblockchaininfo = info.blockchaininfo;
-            res.locals.getnetworkinfo = info.networkinfo;
-            res.locals.getnettotals = info.nettotals;
-            res.locals.uptimeSeconds = process.uptime();
-            res.render("node-details");
+            dbApi.get_block_height(info.latestStoredHeight).then(function(block) { // get blockhash for latest stored block height
+                if (!block) {
+                    res.locals.userMessage = "Unable to load Node Details";
+                    res.render("node-details");
+                    return;
+                }
+                res.locals.bestblockhash = block.getblock.hash;
+
+                res.locals.getblockchaininfo = info.blockchaininfo;
+                res.locals.getnetworkinfo = info.networkinfo;
+                res.locals.getnettotals = info.nettotals;
+                res.locals.uptimeSeconds = process.uptime();
+                res.render("node-details");
+            }).catch(function(error) {
+                res.locals.userMessage = error;
+                res.render("node-details");
+            });
         }).catch(function(error) {
             res.locals.userMessage = error;
             res.render("node-details");
@@ -270,17 +286,18 @@ module.exports = {
             if (!info) {
                 res.locals.userMessage = "Could not load blockchain info";
                 res.render("blocks");
+                return;
             }
-            res.locals.blockCount = info.blockchaininfo.blocks;
+            res.locals.blockCount = info.latestStoredHeight;
             res.locals.blockOffset = res.locals.offset;
 
             var blockHeights = [];
             if (res.locals.sort == "desc") {
-                for (var i = (info.blockchaininfo.blocks - res.locals.offset); i > (info.blockchaininfo.blocks - res.locals.offset - res.locals.limit) && i>=0; i--) {
+                for (var i = (info.latestStoredHeight - res.locals.offset); i > (info.latestStoredHeight - res.locals.offset - res.locals.limit) && i>=0; i--) {
                     blockHeights.push(i);
                 }
             } else {
-                for (var i = res.locals.offset; i < (res.locals.offset + res.locals.limit) && i<=info.blockchaininfo.blocks; i++) {
+                for (var i = res.locals.offset; i < (res.locals.offset + res.locals.limit) && i<=info.latestStoredHeight; i++) {
                     blockHeights.push(i);
                 }
             }
@@ -306,13 +323,15 @@ module.exports = {
             if (!info) {
                 res.locals.userMessage = "Could not load blockchain info";
                 res.render("index");
+                return;
             }
+            res.locals.latestheight = info.latestStoredHeight;
             res.locals.getblockchaininfo = info.blockchaininfo;
 
             var blockHeights = [];
             if (info.blockchaininfo.blocks) {
-                for (var i = 0; i <10 && i <= info.blockchaininfo.blocks; i++) {
-                    blockHeights.push(info.blockchaininfo.blocks - i);
+                for (var i = 0; i <10 && i <= info.latestStoredHeight; i++) {
+                    blockHeights.push(info.latestStoredHeight - i);
                 }
             }
 

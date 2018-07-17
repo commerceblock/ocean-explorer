@@ -89,24 +89,21 @@ db.once("open", function(callback) {
 
 // Main db builder method that updates db accordingly based on the script mode
 function doWork() {
-    dbApi.get_blockchain_info().then(function(prevInfo) {
-        dbApi.update_blockchain_info(function(info, error) {
-            if (error) {
-                console.error(error);
-                process.exit(0);
-            }
-
-            if (!info) {
-                console.error("Blockchain info not found in the database");
-                process.exit(0);
-            }
-
+    dbApi.get_blockchain_info().then(function(prevInfo) { // previous info from db
+        // establish rpc connection to client
+        client = new bitcoin({
+            host: env.ocean.host,
+            port: env.ocean.port,
+            username: env.ocean.rpc.username,
+            password: env.ocean.rpc.password,
+        });
+        rpcApi.getBlockchainInfo().then(function(latestInfo) { // latest info from rpc
             if (mode == 'init') {
                 if (clear)  { // Remove all documents and start from genesis block
                     console.log("Clearing database");
                     Tx.remove({}, function(errTx) {
                         Block.remove({}, function(errBlock) {
-                            dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height
+                            dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
                                 if (error) {
                                     process.exit(0);
                                 } else {
@@ -123,7 +120,7 @@ function doWork() {
                             prevHeight = latestBlock.getblock.height;
                             console.log("Starting init from latest block height " + prevHeight);
                         }
-                        dbApi.update_blockchain_data(prevHeight, info.blockchaininfo.blocks, function(error) { // from prev height to latest height
+                        dbApi.update_blockchain_data(prevHeight, latestInfo.blocks, function(error) { // from prev height to latest height
                             if (error) {
                                 process.exit(0);
                             } else {
@@ -137,7 +134,7 @@ function doWork() {
                     });
                 }
             } else if (mode == 'check') {
-                dbApi.update_blockchain_data(0, info.blockchaininfo.blocks, function(error) { // from start to latest height
+                dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
                     if (error) {
                         process.exit(0);
                     } else {
@@ -148,11 +145,11 @@ function doWork() {
             } else if (mode == 'update') {
                 // get previous height from info before update
                 var prevHeight = 0
-                if (prevInfo) {
-                    prevHeight = prevInfo.blockchaininfo.blocks
+                if (prevInfo && prevInfo.latestStoredHeight) {
+                    prevHeight = prevInfo.latestStoredHeight;
                 }
                 console.log("Update starting at height " + prevHeight);
-                dbApi.update_blockchain_data(prevHeight, info.blockchaininfo.blocks, function(error) { // from prev height to latest height
+                dbApi.update_blockchain_data(prevHeight, latestInfo.blocks, function(error) { // from prev height to latest height
                     if (error) {
                         process.exit(0);
                     } else {
@@ -160,6 +157,11 @@ function doWork() {
                         process.exit(0);
                     }
                 });
+            }
+        }).catch(function(error) {
+            if (error) {
+                console.error(error)
+                process.exit(0);
             }
         });
     }).catch(function(error) {

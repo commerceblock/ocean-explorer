@@ -12,6 +12,7 @@ var mongoose = require('mongoose')
 // Indices used: chain
 var InfoSchema = new Schema({
     chain:          { type: String, index: { unique: true } },
+    latestStoredHeight: Number,
     blockchaininfo: Object,
     networkinfo:    Object,
     nettotals:      Object,

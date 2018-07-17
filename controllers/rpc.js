@@ -1,6 +1,6 @@
 /*
  * @rpc.js Main rpc controller
- * Functionality to wrap RPC calls into async Promises
+ * Functionality to wrap RPC calls into async Promise
  *
  */
 
