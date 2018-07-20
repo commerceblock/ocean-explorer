@@ -101,15 +101,17 @@ function doWork() {
             if (mode == 'init') {
                 if (clear)  { // Remove all documents and start from genesis block
                     console.log("Clearing database");
-                    Tx.remove({}, function(errTx) {
-                        Block.remove({}, function(errBlock) {
-                            dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
-                                if (error) {
-                                    process.exit(0);
-                                } else {
-                                    console.log("Finished " + mode);
-                                    process.exit(0);
-                                }
+                    Info.remove({}, function(errInfo) {
+                        Tx.remove({}, function(errTx) {
+                            Block.remove({}, function(errBlock) {
+                                dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
+                                    if (error) {
+                                        process.exit(0);
+                                    } else {
+                                        console.log("Finished " + mode);
+                                        process.exit(0);
+                                    }
+                                });
                             });
                         });
                     });
