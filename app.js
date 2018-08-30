@@ -21,9 +21,7 @@ var serveStatic = require('serve-static')
 var mongoose = require('mongoose')
 
 var app = express();
-var genesisBlockHash = "357abd41543a09f9290ff4b4ae008e317f252b80c96492bd9f346cced0943a7f";
 var genesisAssetHex = "594672d939519a7baede83035eafbf37a0536eeb6e02ca0a054913142d21f690";
-var genesisBlockTime = 1514764800;
 var genesisAsset = "CBT";
 
 // view engine setup
@@ -144,7 +142,6 @@ app.locals.Decimal = Decimal;
 app.locals.utils = utils;
 
 app.locals.genesisAsset = genesisAsset;
-app.locals.genesisBlockHash = genesisBlockHash;
 app.locals.assets = {};
 
 // Currently include testnet assets - Should be configured appropriately for any mainnet issuance

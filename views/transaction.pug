@@ -45,7 +45,7 @@ block content
 
         div(class="tab-content")
             div(id="tab-summary", class="tab-pane active", role="tabpanel")
-                if (result.getrawtransaction.vin[0].coinbase && result.getrawtransaction.blockhash == genesisBlockHash)
+                if (result.getrawtransaction.vin[0].coinbase && result.getblock.height == 0)
                     div(class="alert alert-warning", style="padding-bottom: 0;")
                         h4(class="alert-heading h5") This transaction doesn't really exist!
                         :markdown-it
