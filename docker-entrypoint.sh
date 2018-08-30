@@ -3,6 +3,7 @@
 case "$1" in
         explorer)
             echo "Running explorer"
+	    sleep 24
             npm start
             ;;
         clear)
