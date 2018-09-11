@@ -217,7 +217,11 @@ block content
                                                                 span()
                                                 td
                                                     if (result.getrawtransaction.vin[0].coinbase)
-                                                        span(class="monospace") #{genesisAsset}
+                                                        if vout.value > 0
+                                                            - asset = (vout.asset in assets) ? (assets[vout.asset]) : (utils.getDummyAsset(vout.asset));
+                                                            span(class="monospace") #{asset}
+                                                        else
+                                                            span(class="monospace") #{genesisAsset}
                                                     else
                                                         - asset = (vout.asset in assets) ? (assets[vout.asset]) : (utils.getDummyAsset(vout.asset));
                                                         span(class="monospace") #{asset}
