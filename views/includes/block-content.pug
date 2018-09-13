@@ -49,6 +49,10 @@ div(class="tab-content")
                 td(class="monospace") #{result.getblock.contracthash}
 
             tr
+                th(class="table-active properties-header") Mapping Hash
+                td(class="monospace") #{result.getblock.mappinghash}
+
+            tr
                 th(class="table-active properties-header") Attestation Status
                 td(class="monospace")
                     if (!attestedheight || result.getblock.height > attestedheight)
