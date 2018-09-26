@@ -188,7 +188,8 @@ block content
                                                     if (vout.scriptPubKey)
                                                         if (vout.scriptPubKey.addresses)
                                                             a(id="output-" + voutIndex)
-                                                                div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
+                                                                div(class="monospace", style="word-break: break-word;")
+                                                                    span #{vout.scriptPubKey.addresses[0]}
                                                         else if (vout.scriptPubKey.type == 'fee')
                                                             span(class="tag tag-fee monospace") fees
                                                         else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
@@ -208,8 +209,11 @@ block content
                                                         else
                                                             span(class="monospace") #{genesisAsset}
                                                     else
-                                                        - asset = (vout.asset in assets) ? (assets[vout.asset]) : (utils.getDummyAsset(vout.asset));
-                                                        span(class="monospace") #{asset}
+                                                        if result.transaction.tokenAsset && vout.asset == result.transaction.tokenAsset
+                                                            span(class="tag tag-reissuance monospace") token
+                                                        else
+                                                            - asset = (vout.asset in assets) ? (assets[vout.asset]) : (utils.getDummyAsset(vout.asset));
+                                                            span(class="monospace") #{asset}
                                                 td
                                                     if (vout.value)
                                                         span(class="monospace") #{vout.value}

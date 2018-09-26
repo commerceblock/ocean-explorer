@@ -219,8 +219,11 @@ div(class="tab-content")
                                                     else
                                                         span(class="monospace") #{genesisAsset}
                                                 else
-                                                    - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
-                                                    span(class="monospace") #{asset}
+                                                    if tx.tokenAsset && vout.asset == tx.tokenAsset
+                                                        span(class="tag tag-reissuance monospace") token
+                                                    else
+                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
+                                                        span(class="monospace") #{asset}
                                             td
                                                 if (vout.value)
                                                     span(class="monospace") #{vout.value}

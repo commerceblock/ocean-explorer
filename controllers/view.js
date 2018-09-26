@@ -49,23 +49,28 @@ function getTxData(tx, txInputs) {
         return 0
     });
     // Add prev output to tx vins
+    var hasIssuance = false
     raw.inputAssets = new Set()
     raw.totalInputValue = new Decimal(0)
     for (var i in raw.vin) {
         if (raw.vin[i].coinbase) {
             continue
         } else if (raw.vin[i].issuance) {
+            hasIssuance = true
             raw.inputAssets.add(raw.vin[i].issuance.asset)
             raw.totalInputValue = raw.totalInputValue.plus(new Decimal(raw.vin[i].issuance.assetamount))
-        } else {
-            if (txInputs[raw.vin[i].txid]) {
+            // also add prev out assetid
+            if (txInputs[raw.vin[i].txid] && !raw.vin[i].issuance.isreissuance) {
+                raw.inputAssets.add(txInputs[raw.vin[i].txid].vout[raw.vin[i].vout].asset)
+            }
+        } else if (txInputs[raw.vin[i].txid]) {
                 raw.vin[i].prev_out = txInputs[raw.vin[i].txid].vout[raw.vin[i].vout]
                 raw.inputAssets.add(raw.vin[i].prev_out.asset)
                 raw.totalInputValue = raw.totalInputValue.plus(new Decimal(raw.vin[i].prev_out.value))
-            }
         }
     }
     // Calculate fee and output value
+    // Find token asset id if it exists
     raw.fee = new Decimal(0)
     raw.totalOutputValue = new Decimal(0)
     for (var i in raw.vout) {
@@ -75,7 +80,13 @@ function getTxData(tx, txInputs) {
             }
             raw.totalOutputValue = raw.totalOutputValue.plus(new Decimal(raw.vout[i].value))
         }
+        if (hasIssuance) {
+            if (!raw.inputAssets.has(raw.vout[i].asset)) {
+                raw.tokenAsset = raw.vout[i].asset
+            }
+        }
     }
+
     return raw
 }
 
