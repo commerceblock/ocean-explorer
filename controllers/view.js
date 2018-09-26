@@ -11,22 +11,23 @@
 var dbApi = require("../controllers/database");
 
 // Helper function that returns vin txes for a specific tx
-function getTxInputs(tx) {
+function getTxInputs(tx, isLimited=false, limit=5) {
     return new Promise(function(resolve, reject) {
         var inputTxids = [];
         for (var i = 0; i < tx.getrawtransaction.vin.length; i++) {
-            if (i < 5 /* show up to 5 only */) {
-                if (!tx.getrawtransaction.vin[i].issuance && tx.getrawtransaction.vin[i].txid) // skip issuance transactions
+            if (!isLimited || (isLimited && i < limit)) {
+                 // skip issuance and coinbase transactions
+                if (!tx.getrawtransaction.vin[i].issuance && tx.getrawtransaction.vin[i].txid) {
                     inputTxids.push(tx.getrawtransaction.vin[i].txid);
+                }
             }
         }
-
-        dbApi.get_txes(inputTxids).then(function(inputTxes) {
-            var txInputs = []
-            for (const inputTx of inputTxes) {
-                txInputs.push(inputTx.getrawtransaction);
+        dbApi.get_txes(inputTxids).then(function(txes) {
+            var txInputs = {}
+            for (const tx of txes) {
+                txInputs[tx.txid] = tx.getrawtransaction;
             }
-            resolve({txid: tx.txid, txInputs: txInputs});
+            resolve(txInputs)
         }).catch(function(errorInputTxes) {
             console.error("gettxinputs" + errorInputTxes);
             reject(errorInputTxes);
@@ -53,15 +54,19 @@ function getBlockTxes(block, req, res, cb) {
         }
 
         // vin transactions
-        res.locals.result.txInputsByTransaction = {};
+        res.locals.result.txInputs = {};
         var promises = [];
         for (const tx of txes) {
-            promises.push(getTxInputs(tx));
+            promises.push(getTxInputs(tx, true));
         }
         Promise.all(promises).then(function() {
             var results = arguments[0];
-            for (var i = 0; i < results.length; i++) {
-                res.locals.result.txInputsByTransaction[results[i].txid] = results[i].txInputs;
+            for (var result in results) {
+                for (var key in results[result]) {
+                    if (!res.locals.result.txInputs[key]) {
+                        res.locals.result.txInputs[key] = results[result][key]
+                    }
+                }
             }
             return cb(false);
         }).catch(function(errorInput) {
@@ -198,18 +203,8 @@ module.exports = {
                     return next();
                 }
                 res.locals.result.getblock = block.getblock;
-
-                var inputTxids = [];
-                for (var i = 0; i < tx.getrawtransaction.vin.length; i++) {
-                    if (!tx.getrawtransaction.vin[i].coinbase && !tx.getrawtransaction.vin[i].issuance) {
-                        inputTxids.push(tx.getrawtransaction.vin[i].txid);
-                    }
-                }
-                dbApi.get_txes(inputTxids).then(function(txes) {
-                    res.locals.result.txInputs = [];
-                    for (const tx of txes) {
-                        res.locals.result.txInputs.push(tx.getrawtransaction);
-                    }
+                getTxInputs(tx).then(function(txInputs) {
+                    res.locals.result.txInputs = txInputs
                     res.render("transaction");
                 }).catch(function(errorTxes) {
                     res.locals.userMessage = errorTxes;

@@ -146,7 +146,7 @@ app.locals.assets = {};
 
 // Currently include testnet assets - Should be configured appropriately for any mainnet issuance
 app.locals.assets[genesisAssetHex] =  genesisAsset; // for 3-of-5 testnet
-app.locals.assets["f1c270c6ca139803d8556a2463b23be1c2170e69c5d3ae55e381b9c7e490938f"] = genesisAsset; // for 2-of-3 local
+app.locals.assets["6718fdfa571f3f3d091cf57f03ceac534ee5a4f78f80880dc97ee1b4f5c21da4"] = genesisAsset; // for 2-of-3 local
 global.dummy_assets = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'XLM', 'ADA', 'TRX',
                         'MIOTA', 'GOLD', 'SILVER', 'GAS', 'OIL', 'COPPER', 'PLATINUM'];
 

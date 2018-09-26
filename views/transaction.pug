@@ -25,15 +25,13 @@ block content
         - DecimalRounded = Decimal.clone({ precision: 4, rounding: 2 })
 
         - var totalInputValue = new Decimal(0);
-        if (result.getrawtransaction.vin[0].coinbase)
-            - totalInputValue = totalInputValue.plus(new Decimal(0));
-        if (result.getrawtransaction.vin[0].issuance)
-            - totalInputValue = totalInputValue.plus(new Decimal(result.getrawtransaction.vin[0].issuance.assetamount));
-        each txInput, txInputIndex in result.txInputs
-            if (txInput)
-                - var vout = txInput.vout[result.getrawtransaction.vin[txInputIndex].vout];
-                if (vout.value)
-                    - totalInputValue = totalInputValue.plus(new Decimal(vout.value));
+        each vin in result.getrawtransaction.vin
+            if (vin.coinbase)
+                - totalInputValue = totalInputValue.plus(new Decimal(0));
+            if (vin.issuance)
+                - totalInputValue = totalInputValue.plus(new Decimal(vin.issuance.assetamount));
+            if (result.txInputs[vin.txid])
+                - totalInputValue = totalInputValue.plus(new Decimal(result.txInputs[vin.txid].vout[vin.vout].value));
 
         - var totalOutputValue = new Decimal(0);
         - var fee = new Decimal(0);
@@ -138,46 +136,49 @@ block content
                                                 th Amount
                                         tbody
 
-                                        if (result.getrawtransaction.vin[0].coinbase)
-                                            tr
-                                                th 1
-                                                td
-                                                    span(class="tag monospace") coinbase
-                                                td(class="monospace") #{genesisAsset}
-                                                td(class="monospace") #{new Decimal(0)}
-
-                                        if (result.getrawtransaction.vin[0].issuance)
-                                            - asset = (result.getrawtransaction.vin[0].issuance['asset'] in assets) ? (assets[result.getrawtransaction.vin[0].issuance['asset']]) : (utils.getDummyAsset(result.getrawtransaction.vin[0].issuance['asset']));
-                                            tr
-                                                th 1
-                                                td
-                                                    span(class="tag tag-issuance monospace") issuance
-                                                td
-                                                    span(class="monospace") #{asset}
-                                                td(class="monospace") #{new Decimal(result.getrawtransaction.vin[0].issuance.assetamount)}
-
-                                        each txInput, txInputIndex in result.txInputs
-                                            if (txInput)
-                                                - var vout = txInput.vout[result.getrawtransaction.vin[txInputIndex].vout];
-                                                - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
+                                        - var txInputIndex = 1
+                                        each vin in result.getrawtransaction.vin
+                                            if (vin.coinbase)
                                                 tr
-                                                    th #{(txInputIndex + 1)}
-
+                                                    th #{(txInputIndex)}
                                                     td
-                                                        if (vout.scriptPubKey && vout.scriptPubKey.addresses)
-                                                            div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
-                                                            span(class="monospace text-muted") via tx
-                                                            a(href=("/tx/" + txInput.txid + "#output-" + result.getrawtransaction.vin[txInputIndex].vout), class="monospace") #{txInput.txid.substring(0, 14)}..., Output ##{result.getrawtransaction.vin[txInputIndex].vout + 1}
+                                                        span(class="tag monospace") coinbase
+                                                    td(class="monospace") #{genesisAsset}
+                                                    td(class="monospace") #{new Decimal(0)}
+                                            else if (vin.issuance)
+                                                - asset = (vin.issuance['asset'] in assets) ? (assets[vin.issuance['asset']]) : (utils.getDummyAsset(vin.issuance['asset']));
+                                                tr
+                                                    th #{(txInputIndex)}
+                                                    td
+                                                        if (vin.issuance.assetBlindingNonce == "0000000000000000000000000000000000000000000000000000000000000000")
+                                                            span(class="tag tag-issuance monospace") issuance
+                                                        else
+                                                            span(class="tag tag-reissuance monospace") reissuance
                                                     td
                                                         span(class="monospace") #{asset}
-                                                    td
-                                                        if (vout.value)
-                                                            span(class="monospace") #{vout.value}
-                                                        else
-                                                            if (!result.getrawtransaction.vin[0].coinbase)
-                                                                include includes/unblind-modal.pug
+                                                    td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
+                                            else
+                                                if (result.txInputs[vin.txid])
+                                                    - var vout = result.txInputs[vin.txid].vout[vin.vout]
+                                                    - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
+                                                    tr
+                                                        th #{(txInputIndex)}
+                                                        td
+                                                            if (vout.scriptPubKey && vout.scriptPubKey.addresses)
+                                                                div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
+                                                                span(class="monospace text-muted") via tx
+                                                                a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
+                                                        td
+                                                            span(class="monospace") #{asset}
+                                                        td
+                                                            if (vout.value)
+                                                                span(class="monospace") #{vout.value}
                                                             else
-                                                                span(class="monospace") #{new Decimal(0)}
+                                                                if (vin.coinbase)
+                                                                    include includes/unblind-modal.pug
+                                                                else
+                                                                    span(class="monospace") #{new Decimal(0)}
+                                            - txInputIndex += 1
 
                                         tr
                                             td

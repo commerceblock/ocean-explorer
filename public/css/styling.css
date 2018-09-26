@@ -233,6 +233,11 @@
  .tag-issuance {
      background-color: #008000;
 }
+
+ .tag-reissuance {
+     background-color: #008080;
+}
+
  .tag-fee {
      background-color: #FF0000;
 }

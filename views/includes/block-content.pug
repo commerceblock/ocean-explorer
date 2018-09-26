@@ -117,70 +117,75 @@ div(class="tab-content")
                     div(class="row")
                         div(class="col-md-6")
                             h6 Input (#{tx.vin.length.toLocaleString()})
-                            if (result.txInputsByTransaction[tx.txid])
-                                - var totalInputValue = new Decimal(0);
-                                table(class="table mb-0")
-                                    thead
-                                        tr
-                                            th
-                                            th Input
-                                            th Asset
-                                            th Amount
-                                    tbody
+                            - var totalInputValue = new Decimal(0);
+                            table(class="table mb-0")
+                                thead
+                                    tr
+                                        th
+                                        th Input
+                                        th Asset
+                                        th Amount
+                                tbody
 
-                                    if (tx.vin[0].coinbase)
+                                - var txInputIndex = 1
+                                each vin in tx.vin
+                                    if (vin.coinbase)
                                         - totalInputValue = totalInputValue.plus(new Decimal(0));
                                         tr
-                                            th 1
+                                            th #{(txInputIndex)}
                                             td
                                                 span(class="tag monospace") coinbase
                                             td(class="monospace") #{genesisAsset}
                                             td(class="monospace") #{new Decimal(0)}
-                                    if (tx.vin[0].issuance)
-                                        - totalInputValue = totalInputValue.plus(new Decimal(tx.vin[0].issuance.assetamount));
-                                        - asset = (tx.vin[0].issuance['asset'] in assets) ? (assets[tx.vin[0].issuance['asset']]) : (utils.getDummyAsset(tx.vin[0].issuance['asset']));
+                                    else if (vin.issuance)
+                                        - totalInputValue = totalInputValue.plus(new Decimal(vin.issuance.assetamount));
+                                        - asset = (vin.issuance['asset'] in assets) ? (assets[vin.issuance['asset']]) : (utils.getDummyAsset(vin.issuance['asset']));
                                         tr
-                                            th 1
+                                            th #{(txInputIndex)}
                                             td
-                                                span(class="tag tag-issuance monospace") issuance
+                                                if (vin.issuance.assetBlindingNonce == "0000000000000000000000000000000000000000000000000000000000000000")
+                                                    span(class="tag tag-issuance monospace") issuance
+                                                else
+                                                    span(class="tag tag-reissuance monospace") reissuance
                                             td(class="monospace") #{asset}
-                                            td(class="monospace") #{new Decimal(tx.vin[0].issuance.assetamount)}
-                                    each txInput, txInputIndex in result.txInputsByTransaction[tx.txid]
-                                        if (txInput)
-                                            - var vout = txInput.vout[tx.vin[txInputIndex].vout];
+                                            td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
+
+                                    else
+                                        if (result.txInputs[vin.txid])
+                                            - var vout = result.txInputs[vin.txid].vout[vin.vout]
                                             - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
                                             tr
-                                                th #{(txInputIndex + 1)}
+                                                th #{(txInputIndex)}
                                                 td
                                                     if (vout.scriptPubKey && vout.scriptPubKey.addresses)
                                                         div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
                                                         span(class="monospace text-muted") via tx
-                                                        a(href=("/tx/" + txInput.txid + "#output-" + tx.vin[txInputIndex].vout), class="monospace") #{txInput.txid.substring(0, 14)}..., Output ##{tx.vin[txInputIndex].vout + 1}
+                                                        a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
                                                 td(class="monospace") #{asset}
                                                 td
                                                     if (vout.value)
                                                         - totalInputValue = totalInputValue.plus(new Decimal(vout.value));
                                                         span(class="monospace") #{vout.value}
                                                     else
-                                                        if (!tx.vin[0].coinbase)
+                                                        if (!vin.coinbase)
                                                             include unblind-modal.pug
                                                         else
                                                             span(class="monospace") #{new Decimal(0)}
-                                    - var coinbaseCount = tx.vin[0].coinbase || tx.vin[0].issuance  ? 1 : 0;
-                                    if ((tx.vin.length - coinbaseCount) > result.txInputsByTransaction[tx.txid].length)
-                                        tr
-                                            td
-                                            td
-                                                span(class="monospace text-muted") #{(tx.vin.length - result.txInputsByTransaction[tx.txid].length).toLocaleString()} more...
-                                            td
-                                            td
-                                    else
-                                        tr
-                                            td
-                                            td
-                                            td
-                                            td
-                                                strong(class="monospace") #{totalInputValue}
+                                    - txInputIndex += 1
+                                if (tx.vin.length > txInputIndex - 1)
+                                    tr
+                                        td
+                                        td
+                                            span(class="monospace text-muted") #{(tx.vin.length - txInputIndex - 1).toLocaleString()} more...
+                                        td
+                                        td
+                                else
+                                    tr
+                                        td
+                                        td
+                                        td
+                                        td
+                                            strong(class="monospace") #{totalInputValue}
                         div(class="col-md-6")
                             h6 Output (#{tx.vout.length.toLocaleString()})
                             - var totalOutputValue = new Decimal(0);
