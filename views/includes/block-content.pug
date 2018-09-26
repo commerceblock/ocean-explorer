@@ -117,7 +117,7 @@ div(class="tab-content")
                     div(class="row")
                         div(class="col-md-6")
                             h6 Input (#{tx.vin.length.toLocaleString()})
-                            - var totalInputValue = new Decimal(0);
+                            - var totalInputValue = tx.totalInputValue
                             table(class="table mb-0")
                                 thead
                                     tr
@@ -130,7 +130,6 @@ div(class="tab-content")
                                 - var txInputIndex = 1
                                 each vin in tx.vin
                                     if (vin.coinbase)
-                                        - totalInputValue = totalInputValue.plus(new Decimal(0));
                                         tr
                                             th #{(txInputIndex)}
                                             td
@@ -138,39 +137,35 @@ div(class="tab-content")
                                             td(class="monospace") #{genesisAsset}
                                             td(class="monospace") #{new Decimal(0)}
                                     else if (vin.issuance)
-                                        - totalInputValue = totalInputValue.plus(new Decimal(vin.issuance.assetamount));
                                         - asset = (vin.issuance['asset'] in assets) ? (assets[vin.issuance['asset']]) : (utils.getDummyAsset(vin.issuance['asset']));
                                         tr
                                             th #{(txInputIndex)}
                                             td
-                                                if (vin.issuance.assetBlindingNonce == "0000000000000000000000000000000000000000000000000000000000000000")
+                                                if (!vin.issuance.isreissuance)
                                                     span(class="tag tag-issuance monospace") issuance
                                                 else
                                                     span(class="tag tag-reissuance monospace") reissuance
                                             td(class="monospace") #{asset}
                                             td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
 
-                                    else
-                                        if (result.txInputs[vin.txid])
-                                            - var vout = result.txInputs[vin.txid].vout[vin.vout]
-                                            - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
-                                            tr
-                                                th #{(txInputIndex)}
-                                                td
-                                                    if (vout.scriptPubKey && vout.scriptPubKey.addresses)
-                                                        div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
-                                                        span(class="monospace text-muted") via tx
-                                                        a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
-                                                td(class="monospace") #{asset}
-                                                td
-                                                    if (vout.value)
-                                                        - totalInputValue = totalInputValue.plus(new Decimal(vout.value));
-                                                        span(class="monospace") #{vout.value}
+                                    else if (vin.prev_out)
+                                        - asset = (vin.prev_out['asset'] in assets) ? (assets[vin.prev_out['asset']]) : (utils.getDummyAsset(vin.prev_out['asset']));
+                                        tr
+                                            th #{(txInputIndex)}
+                                            td
+                                                if (vin.prev_out.scriptPubKey && vin.prev_out.scriptPubKey.addresses)
+                                                    div(class="monospace", style="word-break: break-word;") #{vin.prev_out.scriptPubKey.addresses[0]}
+                                                    span(class="monospace text-muted") via tx
+                                                    a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
+                                            td(class="monospace") #{asset}
+                                            td
+                                                if (vin.prev_out.value)
+                                                    span(class="monospace") #{vin.prev_out.value}
+                                                else
+                                                    if (!vin.coinbase)
+                                                        include unblind-modal.pug
                                                     else
-                                                        if (!vin.coinbase)
-                                                            include unblind-modal.pug
-                                                        else
-                                                            span(class="monospace") #{new Decimal(0)}
+                                                        span(class="monospace") #{new Decimal(0)}
                                     - txInputIndex += 1
                                 if (tx.vin.length > txInputIndex - 1)
                                     tr
@@ -188,7 +183,7 @@ div(class="tab-content")
                                             strong(class="monospace") #{totalInputValue}
                         div(class="col-md-6")
                             h6 Output (#{tx.vout.length.toLocaleString()})
-                            - var totalOutputValue = new Decimal(0);
+                            - var totalOutputValue = tx.totalOutputValue
                             table(class="table mb-0")
                                 thead
                                     tr
@@ -229,7 +224,6 @@ div(class="tab-content")
                                             td
                                                 if (vout.value)
                                                     span(class="monospace") #{vout.value}
-                                                    - totalOutputValue = totalOutputValue.plus(vout.value);
                                                 else
                                                     if (!tx.vin[0].coinbase)
                                                         include unblind-modal.pug

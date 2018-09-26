@@ -9,6 +9,7 @@
  */
 
 var dbApi = require("../controllers/database");
+var Decimal = require('decimal.js');
 
 // Helper function that returns vin txes for a specific tx
 function getTxInputs(tx, isLimited=false, limit=5) {
@@ -16,8 +17,8 @@ function getTxInputs(tx, isLimited=false, limit=5) {
         var inputTxids = [];
         for (var i = 0; i < tx.getrawtransaction.vin.length; i++) {
             if (!isLimited || (isLimited && i < limit)) {
-                 // skip issuance and coinbase transactions
-                if (!tx.getrawtransaction.vin[i].issuance && tx.getrawtransaction.vin[i].txid) {
+                 // skip coinbase transactions
+                if (tx.getrawtransaction.vin[i].txid) {
                     inputTxids.push(tx.getrawtransaction.vin[i].txid);
                 }
             }
@@ -25,7 +26,8 @@ function getTxInputs(tx, isLimited=false, limit=5) {
         dbApi.get_txes(inputTxids).then(function(txes) {
             var txInputs = {}
             for (const tx of txes) {
-                txInputs[tx.txid] = tx.getrawtransaction;
+                if (tx && tx.txid)
+                    txInputs[tx.txid] = tx.getrawtransaction;
             }
             resolve(txInputs)
         }).catch(function(errorInputTxes) {
@@ -33,6 +35,48 @@ function getTxInputs(tx, isLimited=false, limit=5) {
             reject(errorInputTxes);
         });
     });
+}
+
+// Helper function that formats the raw transaction data for display
+function getTxData(tx, txInputs) {
+    raw = tx.getrawtransaction
+    // Sort vins so that issuances appear first
+    raw.vin.sort(function(a,b) {
+        if (b.issuance)
+            return 1
+        if (a.issuance)
+            return -1
+        return 0
+    });
+    // Add prev output to tx vins
+    raw.inputAssets = new Set()
+    raw.totalInputValue = new Decimal(0)
+    for (var i in raw.vin) {
+        if (raw.vin[i].coinbase) {
+            continue
+        } else if (raw.vin[i].issuance) {
+            raw.inputAssets.add(raw.vin[i].issuance.asset)
+            raw.totalInputValue = raw.totalInputValue.plus(new Decimal(raw.vin[i].issuance.assetamount))
+        } else {
+            if (txInputs[raw.vin[i].txid]) {
+                raw.vin[i].prev_out = txInputs[raw.vin[i].txid].vout[raw.vin[i].vout]
+                raw.inputAssets.add(raw.vin[i].prev_out.asset)
+                raw.totalInputValue = raw.totalInputValue.plus(new Decimal(raw.vin[i].prev_out.value))
+            }
+        }
+    }
+    // Calculate fee and output value
+    raw.fee = new Decimal(0)
+    raw.totalOutputValue = new Decimal(0)
+    for (var i in raw.vout) {
+        if (raw.vout[i].value) {
+            if (raw.vout[i].scriptPubKey.type == "fee") {
+                raw.fee = raw.fee.plus(new Decimal(raw.vout[i].value))
+            }
+            raw.totalOutputValue = raw.totalOutputValue.plus(new Decimal(raw.vout[i].value))
+        }
+    }
+    return raw
 }
 
 // Helper function that gets all the transactions for a particular block
@@ -46,27 +90,25 @@ function getBlockTxes(block, req, res, cb) {
             res.locals.userMessage = "Failed to get txes of block";
             return cb(true);
         }
-
-        // transactions
-        res.locals.result.transactions = [];
-        for (const tx of txes) {
-            res.locals.result.transactions.push(tx.getrawtransaction);
-        }
-
         // vin transactions
-        res.locals.result.txInputs = {};
         var promises = [];
         for (const tx of txes) {
             promises.push(getTxInputs(tx, true));
         }
         Promise.all(promises).then(function() {
             var results = arguments[0];
+            var txInputs = {}
             for (var result in results) {
                 for (var key in results[result]) {
-                    if (!res.locals.result.txInputs[key]) {
-                        res.locals.result.txInputs[key] = results[result][key]
+                    if (!txInputs[key]) {
+                        txInputs[key] = results[result][key]
                     }
                 }
+            }
+            // transactions
+            res.locals.result.transactions = [];
+            for (const tx of txes) {
+                res.locals.result.transactions.push(getTxData(tx, txInputs));
             }
             return cb(false);
         }).catch(function(errorInput) {
@@ -194,9 +236,6 @@ module.exports = {
                 res.locals.userMessage = "Failed to load transaction with txid = " + txid;
                 return next();
             }
-
-            res.locals.result.getrawtransaction = tx.getrawtransaction;
-
             dbApi.get_block_hash(tx.getrawtransaction.blockhash).then(function(block) {
                 if (!block) {
                     res.locals.userMessage = "Failed to load transaction with txid = " + txid;
@@ -204,7 +243,7 @@ module.exports = {
                 }
                 res.locals.result.getblock = block.getblock;
                 getTxInputs(tx).then(function(txInputs) {
-                    res.locals.result.txInputs = txInputs
+                    res.locals.result.transaction = getTxData(tx, txInputs);
                     res.render("transaction");
                 }).catch(function(errorTxes) {
                     res.locals.userMessage = errorTxes;
