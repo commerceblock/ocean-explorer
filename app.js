@@ -21,7 +21,7 @@ var serveStatic = require('serve-static')
 var mongoose = require('mongoose')
 
 var app = express();
-var genesisAssetHex = "f1c270c6ca139803d8556a2463b23be1c2170e69c5d3ae55e381b9c7e490938f";
+var genesisAssetHex = "cad5765e6f54ceb51c0366e4e349e5fbbfabcefadecf8fc3b614514784c0c2f2";
 var genesisAsset = "CBT";
 
 // view engine setup
