@@ -55,7 +55,7 @@ div(class="tab-content")
             tr
                 th(class="table-active properties-header") Attestation Status
                 td(class="monospace")
-                    if (!attestedheight || result.getblock.height > attestedheight)
+                    if (attestedheight == undefined || result.getblock.height > attestedheight)
                         strong(class="text-danger") Not Attested
                     else
                         strong(class="text-primary") Attested

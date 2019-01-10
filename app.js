@@ -14,7 +14,7 @@ var moment = require("moment");
 var Decimal = require('decimal.js');
 var bitcoin = require("bitcoin-core");
 var pug = require("pug");
-var rpcApi = require("./controllers/rpc.js");
+var dbApi = require("./controllers/database");
 var momentDurationFormat = require("moment-duration-format");
 var baseActionsRouter = require('./routes/router');
 var serveStatic = require('serve-static')
@@ -85,20 +85,27 @@ app.use(function(req, res, next) {
     // get latest block height by sending a GET request to the attestation API
     http.request({host: env.attestation.host,
                   port: env.attestation.port,
-                  path: '/bestblockheight/',
+                  path: '/api/v1/latestcommitment?position=' + env.attestation.position,
                   method: 'GET'}, function(res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
             var parsedResponse
             try {
                 parsedResponse = JSON.parse(chunk)
-                global.attestedheight = parsedResponse["blockheight"]
+                global.attestedhash = parsedResponse["response"]["commitment"]
+                dbApi.get_block_hash(attestedhash).then(function(blockByHash) {
+                    if (blockByHash) {
+                        global.attestedheight = blockByHash.height
+                    }
+                }).catch(function(err) {
+                    console.log("ERROR ATTESTATION_API: Failed getting block for commitment")
+                });
             } catch(err) {
                 console.log("ERROR ATTESTATION_API: Failed parsing http response")
             }
         });
     }).on('error', function(err) {
-        console.log("Error ATTESTATION_API: Request Failed")
+        console.log("Error ATTESTATION_API: Request Failed: " + err)
     }).end();
 
 	next();
