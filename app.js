@@ -21,8 +21,20 @@ var serveStatic = require('serve-static')
 var mongoose = require('mongoose')
 
 var app = express();
-var genesisAssetHex = "cad5765e6f54ceb51c0366e4e349e5fbbfabcefadecf8fc3b614514784c0c2f2";
+
+// set app locals
+app.locals.moment = moment;
+app.locals.Decimal = Decimal;
+app.locals.utils = utils;
+
 var genesisAsset = "CBT";
+app.locals.genesisAsset = genesisAsset;
+app.locals.assets = {};
+
+// Currently include testnet assets - Should be configured appropriately for any mainnet issuance
+app.locals.assets["cad5765e6f54ceb51c0366e4e349e5fbbfabcefadecf8fc3b614514784c0c2f2"] =  genesisAsset; // for 3-of-5 testnet
+global.dummy_assets = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'XLM', 'ADA', 'TRX',
+                        'MIOTA', 'GOLD', 'SILVER', 'GAS', 'OIL', 'COPPER', 'PLATINUM'];
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -64,6 +76,21 @@ var db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error"));
 db.once("open", function(callback) {
     console.log("Connection succeeded.");
+
+    // get genesis asset hash
+    dbApi.get_block_height(0).then(function(blockByHeight) {
+        if (blockByHeight && blockByHeight.getblock.tx.length > 1) {
+            dbApi.get_tx(blockByHeight.getblock.tx[1]).then(function(tx) {
+                if (tx && tx.getrawtransaction.vin[0].issuance) {
+                    app.locals.assets[tx.getrawtransaction.vin[0].issuance.asset] = genesisAsset; // add asset hex as genesis asset
+                }
+            }).catch(function(err) {
+                console.log("genesis issuance tx missing")
+            });
+        }
+    }).catch(function(err) {
+        console.log("genesis block missing")
+    });
 });
 
 app.use(function(req, res, next) {
@@ -143,18 +170,5 @@ app.use(function(err, req, res, next) {
 		error: {}
 	});
 });
-
-app.locals.moment = moment;
-app.locals.Decimal = Decimal;
-app.locals.utils = utils;
-
-app.locals.genesisAsset = genesisAsset;
-app.locals.assets = {};
-
-// Currently include testnet assets - Should be configured appropriately for any mainnet issuance
-app.locals.assets[genesisAssetHex] =  genesisAsset; // for 3-of-5 testnet
-app.locals.assets["6718fdfa571f3f3d091cf57f03ceac534ee5a4f78f80880dc97ee1b4f5c21da4"] = genesisAsset; // for 2-of-3 local
-global.dummy_assets = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'XLM', 'ADA', 'TRX',
-                        'MIOTA', 'GOLD', 'SILVER', 'GAS', 'OIL', 'COPPER', 'PLATINUM'];
 
 module.exports = app;
