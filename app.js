@@ -89,7 +89,11 @@ db.once("open", function(callback) {
 });
 
 // connect to MongDB - should automatically try to reconnect if connection fails
-mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
+mongoose.connect(dbConnect, {
+        reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
+        reconnectInterval: 1000 ,
+        useNewUrlParser: true
+    }, function(err) {
     if (err) {
         console.log('Unable to connect to database: %s', dbConnect);
         process.exit(0);
