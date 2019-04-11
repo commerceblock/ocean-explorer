@@ -1,5 +1,21 @@
 #!/bin/bash
 
+if [ -f /run/secrets/ocean_user ]; then
+    export RPC_USER="$(cat /run/secrets/ocean_user)"
+fi
+
+if [ -f /run/secrets/ocean_pass ]; then
+    export RPC_PASSWORD="$(cat /run/secrets/ocean_pass)"
+fi
+
+if [ -f /run/secrets/mongo_pass ]; then
+    export DB_PASSWORD="$(cat /run/secrets/mongo_pass)"
+fi
+
+if [ -f /run/secrets/mongo_user ]; then
+    export DB_USER="$(cat /run/secrets/mongo_user)"
+fi
+
 case "$1" in
         explorer)
             echo "Running explorer"
