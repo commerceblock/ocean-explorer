@@ -62,18 +62,13 @@ dbConnect = dbConnect + '@' + env.dbsettings.address;
 dbConnect = dbConnect + ':' + env.dbsettings.port;
 dbConnect = dbConnect + '/' + env.dbsettings.database;
 
-// connect to MongDB - should automatically try to reconnect if connection fails
-mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
-    if (err) {
-      console.log('Unable to connect to database: %s', dbConnect);
-      exit();
-    }
-});
-
 mongoose.Promise = Promise
 
 var db = mongoose.connection;
-db.on("error", console.error.bind(console, "connection error"));
+db.on("error", function(err) {
+    console.error(err);
+    process.exit(0);
+});
 db.once("open", function(callback) {
     console.log("Connection succeeded.");
 
@@ -91,6 +86,14 @@ db.once("open", function(callback) {
     }).catch(function(err) {
         console.log("genesis block missing")
     });
+});
+
+// connect to MongDB - should automatically try to reconnect if connection fails
+mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
+    if (err) {
+        console.log('Unable to connect to database: %s', dbConnect);
+        process.exit(0);
+    }
 });
 
 app.use(function(req, res, next) {
