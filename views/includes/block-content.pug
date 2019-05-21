@@ -162,7 +162,7 @@ div(class="tab-content")
                                                 if (vin.prev_out.value)
                                                     span(class="monospace") #{vin.prev_out.value}
                                                 else
-                                                    if (!vin.coinbase)
+                                                    if (!vin.asset)
                                                         include unblind-modal.pug
                                                     else
                                                         span(class="monospace") #{new Decimal(0)}
@@ -232,7 +232,7 @@ div(class="tab-content")
                                                 if (vout.value)
                                                     span(class="monospace") #{vout.value}
                                                 else
-                                                    if (!tx.vin[0].coinbase)
+                                                    if (!vout.asset)
                                                         include unblind-modal.pug
                                                     else
                                                         span(class="monospace") #{new Decimal(0)}

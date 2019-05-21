@@ -158,7 +158,7 @@ block content
                                                     if (vin.prev_out.value)
                                                         span(class="monospace") #{vin.prev_out.value}
                                                     else
-                                                        if (vin.coinbase)
+                                                        if (!vin.asset)
                                                             include includes/unblind-modal.pug
                                                         else
                                                             span(class="monospace") #{new Decimal(0)}
@@ -192,10 +192,10 @@ block content
                                                                     span #{vout.scriptPubKey.addresses[0]}
                                                         else if (vout.scriptPubKey.type == 'fee')
                                                             span(class="tag tag-fee monospace") fees
-														else if (vout.scriptPubKey.type == 'registeraddress')
-															span(class="tag tag-policy monospace") registeraddress
-														else if (vout.scriptPubKey.type == 'lockedmultisig')
-															span(class="tag tag-lockedmulti monospace") lockedmultisig
+                                                        else if (vout.scriptPubKey.type == 'registeraddress')
+                                                            span(class="tag tag-policy monospace") registeraddress
+                                                        else if (vout.scriptPubKey.type == 'lockedmultisig')
+                                                            span(class="tag tag-lockedmulti monospace") lockedmultisig
                                                         else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
                                                             div(class="monospace", style="word-break: break-word;")
                                                                 span(class="monospace") OP_RETURN:
@@ -222,7 +222,7 @@ block content
                                                     if (vout.value)
                                                         span(class="monospace") #{vout.value}
                                                     else
-                                                        if (!result.transaction.vin[0].coinbase)
+                                                        if (!vout.asset)
                                                             include includes/unblind-modal.pug
                                                         else
                                                             span(class="monospace") #{new Decimal(0)}
