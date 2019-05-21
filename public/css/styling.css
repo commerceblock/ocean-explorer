@@ -241,6 +241,12 @@
  .tag-fee {
      background-color: #FF0000;
 }
+ .tag-policy {
+     background-color: #00FFFF;
+}
+ .tag-lockedmulti {
+     background-color: #778899;
+}
  .tag-null {
      background-color: #C0C0C0;
 }
