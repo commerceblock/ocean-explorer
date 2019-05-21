@@ -192,10 +192,10 @@ block content
                                                                     span #{vout.scriptPubKey.addresses[0]}
                                                         else if (vout.scriptPubKey.type == 'fee')
                                                             span(class="tag tag-fee monospace") fees
-							else if (vout.scriptPubKey.type == 'registeraddress')
-							    span(class="tag tag-policy monospace") registeraddress
-							else if (vout.scriptPubKey.type == 'lockedmultisig')
-							    span(class="tag tag-lockedmulti monospace") lockedmultisig
+														else if (vout.scriptPubKey.type == 'registeraddress')
+															span(class="tag tag-policy monospace") registeraddress
+														else if (vout.scriptPubKey.type == 'lockedmultisig')
+															span(class="tag tag-lockedmulti monospace") lockedmultisig
                                                         else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
                                                             div(class="monospace", style="word-break: break-word;")
                                                                 span(class="monospace") OP_RETURN:
