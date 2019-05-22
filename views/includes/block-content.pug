@@ -137,7 +137,7 @@ div(class="tab-content")
                                             td(class="monospace") #{genesisAsset}
                                             td(class="monospace") #{new Decimal(0)}
                                     else if (vin.issuance)
-                                        - asset = (vin.issuance['asset'] in assets) ? (assets[vin.issuance['asset']]) : (utils.getDummyAsset(vin.issuance['asset']));
+                                        - asset = (vin.issuance['asset'] in assets) ? (assets[vin.issuance['asset']]) : "ASSET";
                                         tr
                                             th #{(txInputIndex)}
                                             td
@@ -149,7 +149,7 @@ div(class="tab-content")
                                             td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
 
                                     else if (vin.prev_out)
-                                        - asset = (vin.prev_out['asset'] in assets) ? (assets[vin.prev_out['asset']]) : (utils.getDummyAsset(vin.prev_out['asset']));
+                                        - asset = (vin.prev_out['asset'] in assets) ? (assets[vin.prev_out['asset']]) : "ASSET";
                                         tr
                                             th #{(txInputIndex)}
                                             td
@@ -218,7 +218,7 @@ div(class="tab-content")
                                             td
                                                 if (tx.vin[0].coinbase)
                                                     if vout.value > 0
-                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
+                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : "ASSET";
                                                         span(class="monospace") #{asset}
                                                     else
                                                         span(class="monospace") #{genesisAsset}
@@ -226,7 +226,7 @@ div(class="tab-content")
                                                     if tx.tokenAsset && vout.asset == tx.tokenAsset
                                                         span(class="tag tag-reissuance monospace") token
                                                     else
-                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
+                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : "ASSET";
                                                         span(class="monospace") #{asset}
                                             td
                                                 if (vout.value)

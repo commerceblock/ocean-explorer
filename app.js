@@ -33,8 +33,6 @@ app.locals.assets = {};
 
 // Currently include testnet assets - Should be configured appropriately for any mainnet issuance
 app.locals.assets["cad5765e6f54ceb51c0366e4e349e5fbbfabcefadecf8fc3b614514784c0c2f2"] =  genesisAsset; // for 3-of-5 testnet
-global.dummy_assets = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'XLM', 'ADA', 'TRX',
-                        'MIOTA', 'GOLD', 'SILVER', 'GAS', 'OIL', 'COPPER', 'PLATINUM'];
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
