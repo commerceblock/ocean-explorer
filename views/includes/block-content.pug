@@ -140,8 +140,6 @@ div(class="tab-content")
                                         - var asset = genesisAsset
                                         if (vin.issuance.assetlabel)
                                             - asset = vin.issuance.assetlabel;
-                                        else if (vin.issuance['asset'] in assets)
-                                            - asset = (assets[vin.issuance['asset']]);
                                         tr
                                             th #{(txInputIndex)}
                                             td
@@ -156,8 +154,6 @@ div(class="tab-content")
                                         - var asset = genesisAsset
                                         if (vin.prev_out.assetlabel)
                                             - asset = vin.prev_out.assetlabel;
-                                        else if (vin.prev_out['asset'] in assets)
-                                            - asset = (assets[vin.prev_out['asset']]);
                                         tr
                                             th #{(txInputIndex)}
                                             td
@@ -236,8 +232,6 @@ div(class="tab-content")
                                                         - var asset = genesisAsset
                                                         if (vout.assetlabel)
                                                             - asset = vout.assetlabel;
-                                                        else if (vout['asset'] in assets)
-                                                            - asset = (assets[vout['asset']]);
                                                         span(class="monospace") #{asset}
                                             td
                                                 if (vout.value)
