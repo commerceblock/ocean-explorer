@@ -27,7 +27,7 @@ app.locals.moment = moment;
 app.locals.Decimal = Decimal;
 app.locals.utils = utils;
 
-var genesisAsset = "CBT";
+var genesisAsset = env.genesisAsset;
 app.locals.genesisAsset = genesisAsset;
 app.locals.assets = {};
 

@@ -132,7 +132,11 @@ block content
                                                 td(class="monospace") #{genesisAsset}
                                                 td(class="monospace") #{new Decimal(0)}
                                         else if (vin.issuance)
-                                            - asset = (vin.issuance['asset'] in assets) ? (assets[vin.issuance['asset']]) : "ASSET";
+                                            - var asset = genesisAsset
+                                            if (vin.issuance.assetlabel)
+                                                - asset = vin.issuance.assetlabel;
+                                            else if (vin.issuance['asset'] in assets)
+                                                - asset = (assets[vin.issuance['asset']]);
                                             tr
                                                 th #{(txInputIndex)}
                                                 td
@@ -144,7 +148,11 @@ block content
                                                     span(class="monospace") #{asset}
                                                 td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
                                         else if (vin.prev_out)
-                                            - asset = (vin.prev_out['asset'] in assets) ? (assets[vin.prev_out['asset']]) : "ASSET";
+                                            - var asset = genesisAsset
+                                            if (vin.prev_out.assetlabel)
+                                                - asset = vin.prev_out.assetlabel;
+                                            else if (vin.prev_out['asset'] in assets)
+                                                - asset = (assets[vin.prev_out['asset']]);
                                             tr
                                                 th #{(txInputIndex)}
                                                 td
@@ -207,16 +215,19 @@ block content
                                                                 span()
                                                 td
                                                     if (result.transaction.vin[0].coinbase)
-                                                        if vout.value > 0
-                                                            - asset = (vout.asset in assets) ? (assets[vout.asset]) : "ASSET";
-                                                            span(class="monospace") #{asset}
-                                                        else
-                                                            span(class="monospace") #{genesisAsset}
+                                                        - var asset = genesisAsset
+                                                        if (vout.assetlabel)
+                                                            - asset = vout.assetlabel;
+                                                        span(class="monospace") #{asset}
                                                     else
                                                         if result.transaction.tokenAsset && vout.asset == result.transaction.tokenAsset
-                                                            span(class="tag tag-reissuance monospace") token
+                                                            span(class="tag tag-reissuance monospace") #{genesisAsset}
                                                         else
-                                                            - asset = (vout.asset in assets) ? (assets[vout.asset]) : "ASSET";
+                                                            - var asset = genesisAsset
+                                                            if (vout.assetlabel)
+                                                                - asset = vout.assetlabel;
+                                                            else if (voutv.asset in assets)
+                                                                - asset = (assets[vout.asset]);
                                                             span(class="monospace") #{asset}
                                                 td
                                                     if (vout.value)
