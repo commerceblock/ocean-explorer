@@ -137,7 +137,9 @@ div(class="tab-content")
                                             td(class="monospace") #{genesisAsset}
                                             td(class="monospace") #{new Decimal(0)}
                                     else if (vin.issuance)
-                                        - asset = (vin.issuance['asset'] in assets) ? (assets[vin.issuance['asset']]) : (utils.getDummyAsset(vin.issuance['asset']));
+                                        - var asset = genesisAsset
+                                        if (vin.issuance.assetlabel)
+                                            - asset = vin.issuance.assetlabel;
                                         tr
                                             th #{(txInputIndex)}
                                             td
@@ -149,7 +151,9 @@ div(class="tab-content")
                                             td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
 
                                     else if (vin.prev_out)
-                                        - asset = (vin.prev_out['asset'] in assets) ? (assets[vin.prev_out['asset']]) : (utils.getDummyAsset(vin.prev_out['asset']));
+                                        - var asset = genesisAsset
+                                        if (vin.prev_out.assetlabel)
+                                            - asset = vin.prev_out.assetlabel;
                                         tr
                                             th #{(txInputIndex)}
                                             td
@@ -162,7 +166,7 @@ div(class="tab-content")
                                                 if (vin.prev_out.value)
                                                     span(class="monospace") #{vin.prev_out.value}
                                                 else
-                                                    if (!vin.coinbase)
+                                                    if (!vin.asset)
                                                         include unblind-modal.pug
                                                     else
                                                         span(class="monospace") #{new Decimal(0)}
@@ -202,6 +206,15 @@ div(class="tab-content")
                                                             div(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
                                                     else if (vout.scriptPubKey.type == 'fee')
                                                         span(class="tag tag-fee monospace") fees
+                                                    else if (vout.scriptPubKey.type == 'registeraddress')
+                                                        span(class="tag tag-policy monospace") registeraddress
+                                                    else if (vout.scriptPubKey.type == 'lockedmultisig')
+                                                        if (vout.request)
+                                                            span(class="tag tag-lockedmulti monospace") Request
+                                                        else if (vout.bid)
+                                                            span(class="tag tag-lockedmulti monospace") Bid
+                                                        else
+                                                            span(class="tag tag-lockedmulti monospace") lockedmultisig
                                                     else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
                                                         div(class="monospace", style="word-break: break-word;")
                                                             span(class="monospace") OP_RETURN:
@@ -213,22 +226,23 @@ div(class="tab-content")
                                                             span()
                                             td
                                                 if (tx.vin[0].coinbase)
-                                                    if vout.value > 0
-                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
-                                                        span(class="monospace") #{asset}
-                                                    else
-                                                        span(class="monospace") #{genesisAsset}
+                                                    - var asset = genesisAsset
+                                                    if (vout.assetlabel)
+                                                        - asset = vout.assetlabel;
+                                                    span(class="monospace") #{asset}
                                                 else
                                                     if tx.tokenAsset && vout.asset == tx.tokenAsset
-                                                        span(class="tag tag-reissuance monospace") token
+                                                        span(class="tag tag-reissuance monospace") #{genesisAsset}
                                                     else
-                                                        - asset = (vout['asset'] in assets) ? (assets[vout['asset']]) : (utils.getDummyAsset(vout['asset']));
+                                                        - var asset = genesisAsset
+                                                        if (vout.assetlabel)
+                                                            - asset = vout.assetlabel;
                                                         span(class="monospace") #{asset}
                                             td
                                                 if (vout.value)
                                                     span(class="monospace") #{vout.value}
                                                 else
-                                                    if (!tx.vin[0].coinbase)
+                                                    if (!vout.asset)
                                                         include unblind-modal.pug
                                                     else
                                                         span(class="monospace") #{new Decimal(0)}

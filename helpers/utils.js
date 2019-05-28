@@ -71,27 +71,9 @@ function formatBytes(bytesInt) {
 	return bytesInt + " B";
 }
 
-// Dummy asset method used for demo purposes on testnet
-function getDummyAsset(hex) {
-	// dummy assets - will be replaced by actual asset - asset hash pairs in main net release
-	if (!hex) {
-		return "";
-	}
-
-	var sum = 0;
-	for (var i = 0; i < hex.length; i++) {
-		c = hex[i];
-		if ('0123456789'.indexOf(c) !== -1) {
-			sum += parseInt(c);
-		}
-	}
-	return dummy_assets[sum % dummy_assets.length]
-}
-
 module.exports = {
 	hex2ascii: hex2ascii,
 	splitArrayIntoChunks: splitArrayIntoChunks,
 	getRandomString: getRandomString,
 	formatBytes: formatBytes,
-	getDummyAsset: getDummyAsset
 };
