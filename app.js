@@ -28,11 +28,10 @@ app.locals.Decimal = Decimal;
 app.locals.utils = utils;
 
 var genesisAsset = env.genesisAsset;
+if (typeof genesisAsset == 'undefined') {
+    genesisAsset = "ASSET";
+}
 app.locals.genesisAsset = genesisAsset;
-app.locals.assets = {};
-
-// Currently include testnet assets - Should be configured appropriately for any mainnet issuance
-app.locals.assets["cad5765e6f54ceb51c0366e4e349e5fbbfabcefadecf8fc3b614514784c0c2f2"] =  genesisAsset; // for 3-of-5 testnet
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -66,24 +65,6 @@ var db = mongoose.connection;
 db.on("error", function(err) {
     console.error(err);
     process.exit(0);
-});
-db.once("open", function(callback) {
-    console.log("Connection succeeded.");
-
-    // get genesis asset hash
-    dbApi.get_block_height(0).then(function(blockByHeight) {
-        if (blockByHeight && blockByHeight.getblock.tx.length > 1) {
-            dbApi.get_tx(blockByHeight.getblock.tx[1]).then(function(tx) {
-                if (tx && tx.getrawtransaction.vin[0].issuance) {
-                    app.locals.assets[tx.getrawtransaction.vin[0].issuance.asset] = genesisAsset; // add asset hex as genesis asset
-                }
-            }).catch(function(err) {
-                console.log("genesis issuance tx missing")
-            });
-        }
-    }).catch(function(err) {
-        console.log("genesis block missing")
-    });
 });
 
 // connect to MongDB - should automatically try to reconnect if connection fails
