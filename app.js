@@ -28,7 +28,7 @@ app.locals.Decimal = Decimal;
 app.locals.utils = utils;
 
 var genesisAsset = env.genesisAsset;
-if (typeof genesisAsset == 'undefined') {
+if (!(env.genesisAsset)) {
     genesisAsset = "ASSET";
 }
 app.locals.genesisAsset = genesisAsset;
