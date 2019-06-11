@@ -22,7 +22,6 @@ module.exports = {
     // Not mandatory but required to display attestation info
     attestation:{
         host: process.env.ATTESTATION_HOST,
-        port: process.env.ATTESTATION_PORT,
         position: process.env.ATTESTATION_POSITION
     },
 

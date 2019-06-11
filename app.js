@@ -3,7 +3,7 @@
 'use strict';
 
 var express = require('express');
-var http = require('http')
+var https = require('https')
 var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -79,6 +79,9 @@ mongoose.connect(dbConnect, {
     }
 });
 
+var mainstayConnect = 'https://' + env.attestation.host +
+    '/api/v1/latestcommitment?position=' + env.attestation.position;
+
 app.use(function(req, res, next) {
 	if (env.ocean && env.ocean.rpc) {
 		res.locals.host = env.ocean.host;
@@ -95,11 +98,7 @@ app.use(function(req, res, next) {
 	}
 	res.locals.env = env;
 
-    // get latest block height by sending a GET request to the attestation API
-    http.request({host: env.attestation.host,
-                  port: env.attestation.port,
-                  path: '/api/v1/latestcommitment?position=' + env.attestation.position,
-                  method: 'GET'}, function(res) {
+    https.get(mainstayConnect, function(res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
             var parsedResponse
