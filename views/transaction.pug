@@ -219,6 +219,8 @@ block content
                                                         - var asset = genesisAsset
                                                         if (vout.assetlabel)
                                                             - asset = vout.assetlabel;
+                                                        if (vout.value == 0)
+                                                            - asset = '';
                                                         span(class="monospace") #{asset}
                                                     else
                                                         if result.transaction.tokenAsset && vout.asset == result.transaction.tokenAsset
