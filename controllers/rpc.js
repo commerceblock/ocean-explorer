@@ -361,7 +361,7 @@ function executeBatchesSequentiallyInternal(batchId, batches, currentIndex, accu
 }
 
 // Method to get block data (txes, txVins, block) using 'getblock' and 'getrawtransaction' RPC calls
-function getBlockData(rpcClient, blockHash) {
+function getBlockData(rpcClient, blockHash, withInputs=false) {
 	console.log("getBlockData: " + blockHash);
 
 	return new Promise(function(resolve, reject) {
@@ -378,25 +378,29 @@ function getBlockData(rpcClient, blockHash) {
 			}
 
 			getRawTransactions(txids).then(function(transactions) {
-				var txInputsByTransaction = {};
-				var promises = [];
-				for (var i = 0; i < transactions.length; i++) {
-					var transaction = transactions[i];
-					if (transaction) {
-						promises.push(getTransactionInputs(client, transaction, 5));
-					}
-				}
-				Promise.all(promises).then(function() {
-					var results = arguments[0];
-					for (var i = 0; i < results.length; i++) {
-						var resultX = results[i];
-						txInputsByTransaction[resultX.txid] = resultX.inputTransactions;
-					}
+                if (withInputs) {
+                    var txInputsByTransaction = {};
+                    var promises = [];
+                    for (var i = 0; i < transactions.length; i++) {
+                        var transaction = transactions[i];
+                        if (transaction) {
+                            promises.push(getTransactionInputs(client, transaction, 5));
+                        }
+                    }
+                    Promise.all(promises).then(function() {
+                        var results = arguments[0];
+                        for (var i = 0; i < results.length; i++) {
+                            var resultX = results[i];
+                            txInputsByTransaction[resultX.txid] = resultX.inputTransactions;
+                        }
 
-					resolve({ getblock:result2, transactions:transactions, txInputsByTransaction:txInputsByTransaction });
-				}).catch(function(err) {
-                    reject(err);
-                });
+                        resolve({ getblock:result2, transactions:transactions, txInputsByTransaction:txInputsByTransaction });
+                    }).catch(function(err) {
+                        reject(err);
+                    });
+                } else {
+                    resolve({ getblock:result2, transactions:transactions});
+                }
 			}).catch(function(err) {
                 reject(err);
             });
