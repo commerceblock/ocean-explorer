@@ -81,16 +81,6 @@ block content
                                 else
                                     span Spendable after #{moment.utc(new Date(result.transaction.locktime * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
 
-                    tr
-                        th(class="table-active properties-header") Confirmations
-                        td(class="monospace")
-                            if (!result.transaction.confirmations || result.transaction.confirmations == 0)
-                                strong(class="text-danger") 0 (unconfirmed)
-                            else if (result.transaction.confirmations < 6)
-                                strong(class="text-warning") #{result.transaction.confirmations}
-                            else
-                                strong(class="text-success") #{result.transaction.confirmations.toLocaleString()}
-
                     if (result.transaction.vin[0].coinbase)
                         tr
                             th(class="table-active properties-header") Total Network Fees

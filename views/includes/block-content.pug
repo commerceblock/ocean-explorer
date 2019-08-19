@@ -75,14 +75,6 @@ div(class="tab-content")
                     span(class="text-muted")  (weight: #{result.getblock.weight.toLocaleString()})
 
             tr
-                th(class="table-active properties-header") Confirmations
-                td(class="monospace")
-                    if (result.getblock.confirmations < 6)
-                        strong(class="text-warning") #{result.getblock.confirmations}
-                    else
-                        strong(class="text-success") #{result.getblock.confirmations.toLocaleString()}
-
-            tr
                 th(class="table-active text-right") Version
                 td(class="monospace") 0x#{result.getblock.versionHex}
                     span(class="text-muted")  (decimal: #{result.getblock.version})
