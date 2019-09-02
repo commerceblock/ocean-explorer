@@ -1,0 +1,86 @@
+/* purgecss start ignore */
+.main-content {
+  @apply my-1-25r;
+  @screen c {
+    @apply mb-2r mt-1-25r;
+  }
+  @screen e {
+    @apply mb-3r mt-2r;
+  }
+
+  & h1,
+  & h2,
+  & h3,
+  & h4,
+  & h5,
+  & h6 {
+    @apply text-primary border-0;
+    margin-bottom: 0.25em;
+    &:not( :nth-child( 1 ) ) {
+      margin-top: 1.25em;
+    }
+    @include media( c ) {
+      margin-bottom: 0.6em;
+      &:not( :nth-child( 1 ) ) {
+        margin-top: 1.7em;
+      }
+    }
+  }
+  & h1 {
+    @extend %heading-style-1;
+    margin-bottom: 0.4em;
+  }
+  & h2 {
+    @extend %heading-style-2-content;
+  }
+  & h3 {
+    @extend %heading-style-3-content;
+  }
+  & h4 {
+    @extend %heading-style-4-content;
+  }
+  & h5 {
+    @extend %heading-style-5-content;
+  }
+  & h6 {
+    @extend %heading-style-6-content;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  a {
+    @extend %link-style-primary;
+  }
+
+  & .disabled {
+    @apply pointer-events-none;
+  }
+
+  & .hljs {
+    @apply text-xi bg-grey-100;
+  }
+  & .hljs-string,
+  & .hljs-number {
+    @apply text-green-tinted;
+  }
+
+  & .tag {
+    border-radius: 4px;
+    background-color: #000080;
+    color: white;
+    padding: 2px 5px;
+    margin-right: 4px;
+  }
+
+  & .tab-content {
+    & .tab-pane {
+      display: none;
+    }
+    & .active {
+      display: block;
+    }
+  }
+}
+/* purgecss end ignore */

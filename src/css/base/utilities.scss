@@ -1,0 +1,39 @@
+// ----- useful extends -----
+%element-fill {
+  left: 0;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+// ----- classes -----
+.container {
+  @apply px-1r mx-auto max-w-alpha;
+  @screen c {
+    @apply px-3r;
+  }
+  @screen i {
+    @apply px-6-25r;
+  }
+}
+
+.layered {
+  @apply relative z-2;
+}
+
+.monospace {
+  font-family: Cousine, monospace;
+}
+
+.overflow-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-danger {
+  @apply text-orange font-bold;
+}
+.text-muted {
+  @apply text-grey-600;
+}

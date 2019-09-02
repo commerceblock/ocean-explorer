@@ -1,0 +1,16 @@
+.icon {
+  display: block;
+  height: 1em;
+  fill: currentColor;
+  width: 1em;
+  &--fill {
+    height: 100%;
+    width: 100%;
+  }
+  &--chev {
+    width: 0.6em;
+  }
+  // &--reverse {
+  //   transform: scaleX( -1 );
+  // }
+}

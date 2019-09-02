@@ -1,0 +1,95 @@
+extends layout
+
+block headContent
+	title Mempool Summary
+
+block content
+	h1 Mempool Summary
+
+	if (getmempoolinfo)
+		div(class="table-container")
+			table(class="table table--primary mb-2r")
+				tr
+					th(class="table-active properties-header") Transaction Count
+					td #{getmempoolinfo.size.toLocaleString()}
+				tr
+					th(class="table-active properties-header") Memory Usage
+					td(class="monospace")
+						span #{utils.formatBytes(getmempoolinfo.usage)}
+						span(class="text-muted")  (virtual size: #{utils.formatBytes(getmempoolinfo.bytes)})
+				tr
+					th(class="table-active properties-header") Max Size
+					td(class="monospace") #{utils.formatBytes(getmempoolinfo.maxmempool)}
+				tr
+					th(class="table-active properties-header") Min Fee
+					td(class="monospace") #{getmempoolinfo.mempoolminfee.toLocaleString()}
+				tr
+					th(class="table-active properties-header") Total Fees
+					td(class="monospace") #{mempoolstats.totalFee.toLocaleString()}
+
+		h4 Transaction count by fee level
+
+		if (false)
+			#{JSON.stringify(mempoolstats)}
+
+		- var feeBucketLabels = [ "0 - 5 sat/B", "6 - 10 sat/B", "11 - 25 sat/B", "26 - 50 sat/B", "51 - 75 sat/B", "76 - 100 sat/B", "101 - 150 sat/B", "151+ sat/B" ];
+		- var feeBucketTxCounts = [ mempoolstats.fee_0_5, mempoolstats.fee_6_10, mempoolstats.fee_11_25, mempoolstats.fee_26_50, mempoolstats.fee_51_75, mempoolstats.fee_76_100, mempoolstats.fee_101_150, mempoolstats.fee_151_max ];
+		- var totalfeeBuckets = [ mempoolstats.totalfee_0_5, mempoolstats.totalfee_6_10, mempoolstats.totalfee_11_25, mempoolstats.totalfee_26_50, mempoolstats.totalfee_51_75, mempoolstats.totalfee_76_100, mempoolstats.totalfee_101_150, mempoolstats.totalfee_151_max ];
+		- var bgColors = [ "bg-primary", "bg-success", "bg-info", "bg-warning", "bg-danger", "bg-primary progress-bar-striped", "bg-success progress-bar-striped", "bg-info progress-bar-striped" ];
+
+		canvas(id="mempoolBarChart", height="150")
+
+		script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js")
+
+		script var feeBucketLabels = [];
+		each feeBucketLabel, index in feeBucketLabels
+			- var percentTx = Math.round(100 * feeBucketTxCounts[index] / getmempoolinfo.size).toLocaleString();
+
+			script feeBucketLabels.push(["#{feeBucketLabel}","#{feeBucketTxCounts[index]} tx (#{percentTx}%)","#{new Number(totalfeeBuckets[index]).toFixed(4)} CBT"]);
+
+		script var feeBucketTxCounts = [#{feeBucketTxCounts}];
+
+		script.
+			var ctx = document.getElementById("mempoolBarChart").getContext('2d');
+			var mempoolBarChart = new Chart(ctx, {
+			    type: 'bar',
+			    data: {
+			        labels: feeBucketLabels,
+			        datasets: [{
+			            data: feeBucketTxCounts,
+			            backgroundColor: [
+			                'rgba(255, 99,  132, 0.3)',
+			                'rgba(255, 159, 64,  0.3)',
+			                'rgba(255, 206, 86,  0.3)',
+			                'rgba(55,  212, 140, 0.3)',
+			                'rgba(75,  192, 192, 0.3)',
+			                'rgba(54,  162, 235, 0.3)',
+			                'rgba(153, 102, 255, 0.3)',
+			                'rgba(0,   0,   0,   0.3)',
+			            ],
+			            borderColor: [
+			                'rgba(255, 99,  132, 1)',
+			                'rgba(255, 159, 64,  1)',
+			                'rgba(255, 206, 86,  1)',
+			                'rgba(55,  212, 140, 1)',
+			                'rgba(75,  192, 192, 1)',
+			                'rgba(54,  162, 235, 1)',
+			                'rgba(153, 102, 255, 1)',
+			                'rgba(0,   0,   0,   1)',
+			            ],
+			            borderWidth: 2
+			        }]
+			    },
+			    options: {
+			    	legend: {
+			    		display: false
+			    	},
+			        scales: {
+			            yAxes: [{
+			                ticks: {
+			                    beginAtZero:true
+			                }
+			            }]
+			        }
+			    }
+			});

@@ -1,0 +1,77 @@
+@mixin breakpoint-content( $bp, $value ) {
+  @if $bp == 'a' {
+    @content;
+  } @else {
+    @include media( $bp ) {
+      @content;
+    }
+  }
+}
+
+@mixin font-face( $filename, $legacy: false ) {
+  @font-face {
+    @content;
+    @if $legacy {
+      src: url('../fonts/#{$filename}.eot');
+      src: url('../fonts/#{$filename}.eot?#iefix') format('embedded-opentype'),
+      url('../fonts/#{$filename}.woff') format('woff'),
+      url('../fonts/#{$filename}.ttf') format('truetype'),
+      url('../fonts/#{$filename}.svg') format('svg');
+    } @else {
+      src: url('../fonts/#{$filename}.woff2') format('woff2'),
+      url('../fonts/#{$filename}.woff') format('woff');
+    }
+  }
+}
+
+@mixin flex-container( $width, $height ) {
+  height: 0;
+  overflow: hidden;
+  padding-bottom: $height / $width * 100;
+  position: relative;
+  z-index: 1;
+}
+
+@mixin generate-grid-gap( $obj ) {
+  @each $bp, $value in $obj {
+    @include breakpoint-content( $bp, $value ) {
+      @apply -mb-#{$value};
+      & > .grid__item {
+        @apply pb-#{$value};
+      }
+    }
+  }
+}
+
+@mixin generate-grid-gutter( $obj ) {
+  @each $bp, $value in $obj {
+    @include breakpoint-content( $bp, $value ) {
+      @apply -ml-#{$value};
+      & > .grid__item {
+        @apply pl-#{$value};
+      }
+    }
+  }
+}
+
+@mixin hi-dpi( $ratio: 1.3 ) {
+  @media only screen and ( -webkit-min-device-pixel-ratio: $ratio ),
+  only screen and ( min--moz-device-pixel-ratio: $ratio ),
+  only screen and ( -o-min-device-pixel-ratio: #{$ratio} / 1 ),
+  only screen and ( min-resolution: round( $ratio * 96dpi ) ),
+  only screen and ( min-resolution: $ratio * 1dppx ) {
+    @content;
+  }
+}
+
+@mixin media( $breakpoint ) {
+  @media only screen and ( min-width: theme('screens.#{$breakpoint}') ) {
+    @content;
+  }
+}
+
+@mixin media-max( $breakpoint ) {
+  @media only screen and ( max-width: theme('screens.#{$breakpoint}-max.max') ) {
+    @content;
+  }
+}

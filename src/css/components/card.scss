@@ -1,0 +1,24 @@
+.card {
+  @apply border border-tertiary;
+  & a {
+    @extend %link-style-secondary;
+  }
+}
+.card-header {
+  @apply border-b border-tertiary bg-grey-100;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  & .monospace {
+    @apply text-xi;
+    @screen c {
+      @apply text-mu;
+    }
+  }
+}
+.card-header,
+.card-body {
+  padding: 0.75em 0.75em 0.625em;
+  @include media( e ) {
+    padding: 1em 1em 0.875em;
+  }
+}

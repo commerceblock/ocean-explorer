@@ -1,0 +1,107 @@
+// ----- headings -----
+.h {
+  @apply font-bold;
+}
+
+%heading-style-1 {
+  @apply h text-epsilon leading-snug;
+  @include media( c ) {
+    @apply text-delta;
+  }
+  @include media( e ) {
+    @apply text-gamma;
+  }
+  @include media( f ) {
+    @apply text-beta leading-tight;
+  }
+  @include media( g ) {
+    @apply text-alpha;
+  }
+}
+%heading-style-2-content {
+  @apply h text-delta leading-snug;
+  @include media( e ) {
+    @apply text-gamma;
+  }
+  @include media( g ) {
+    @apply text-beta leading-tight;
+  }
+}
+%heading-style-3-content {
+  @apply h text-zeta leading-snug;
+  @include media( c ) {
+    @apply text-epsilon;
+  }
+  @include media( e ) {
+    @apply text-delta;
+  }
+  @include media( g ) {
+    @apply text-gamma;
+  }
+}
+%heading-style-4-content {
+  @apply h text-eta leading-snug;
+  @include media( c ) {
+    @apply text-zeta;
+  }
+  @include media( e ) {
+    @apply text-epsilon;
+  }
+  @include media( g ) {
+    @apply text-delta;
+  }
+}
+%heading-style-5-content {
+  @apply h text-iota;
+  @include media( c ) {
+    @apply text-eta;
+  }
+}
+%heading-style-6-content {
+  @apply h;
+  @screen c {
+    @apply text-iota;
+  }
+}
+
+// ----- divider -----
+.divider {
+  display: inline-block;
+  margin: 0 0.75em;
+}
+
+// ----- links -----
+%link-style-primary {
+  @apply font-bold text-primary;
+  border-bottom: 3px solid theme('borderColor.secondary');
+  position: relative;
+  &::after {
+    bottom: -3px;
+    content: '';
+    border-bottom: 3px solid theme('borderColor.emph');
+    position: absolute;
+    left: auto;
+    right: 0;
+    transition: left 0s 0.2s, right 0s 0.2s, width 0.2s ease-out;
+    width: 0;
+  }
+  &:hover {
+    &::after {
+      left: 0;
+      right: auto;
+      transition-delay: 0s, 0s, 0s;
+      width: 100%;
+    }
+  }
+}
+%link-style-secondary {
+  @apply text-green;
+  border-bottom: 0;
+  transition: 0.1s;
+  &::after {
+    display: none;
+  }
+  &:hover {
+    @apply text-green-tinted;
+  }
+}

@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	h1 Error
+
+	if (message)
+		p !{message}
+	else
+		p Unknown error
+
+	if (error)
+		h2 #{error.status}
+		pre #{error.stack}

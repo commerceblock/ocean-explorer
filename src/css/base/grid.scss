@@ -1,0 +1,87 @@
+$grid-gutter-widths: (
+  default: (
+    a: 'grid-default'
+  ),
+  xxs: (
+    a: 'grid-xxs'
+  ),
+  xs: (
+    a: 'grid-xs'
+  ),
+  sm: (
+    a: 'grid-sm'
+  ),
+  md: (
+    a: 'grid-md'
+  ),
+  lg: (
+    a: 'grid-lg'
+  ),
+  xl: (
+    a: 'grid-xs',
+    c: 'grid-md',
+    e: 'grid-xl'
+  ),
+  2xl: (
+    a: 'grid-2xl'
+  ),
+  3xl: (
+    a: 'grid-md',
+    c: 'grid-lg',
+    e: 'grid-xl',
+    g: 'grid-3xl'
+  ),
+  // 4xl: (
+  //   a: 'grid-4xl'
+  // ),
+  5xl: (
+    a: 'grid-xl',
+    i: 'grid-5xl'
+  )
+);
+$grid-gap-widths: (
+  xs: (
+    a: 'grid-xs'
+  ),
+  sm: (
+    a: 'grid-sm'
+  ),
+  md: (
+    a: 'grid-md'
+  ),
+  lg: (
+    a: 'grid-sm',
+    c: 'grid-lg'
+  ),
+  xl: (
+    a: 'grid-sm',
+    c: 'grid-xl'
+  ),
+  'xl-md': (
+    a: 'grid-md',
+    c: 'grid-xl'
+  )
+);
+
+.grid {
+  @each $key, $values in $grid-gutter-widths {
+    @if ($key == 'default') {
+      @include generate-grid-gutter( $values );
+    }
+    @else {
+      &--#{$key} {
+        @include generate-grid-gutter( $values );
+      }
+    }
+  }
+  @each $key, $values in $grid-gap-widths {
+    @if ($key == 'default') {
+      @include generate-grid-gap( $values );
+    }
+    @else {
+      &--gap-#{$key} {
+        @include generate-grid-gap( $values );
+      }
+    }
+  }
+}

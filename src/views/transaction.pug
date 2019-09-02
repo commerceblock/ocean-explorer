@@ -1,0 +1,275 @@
+extends layout
+
+block headContent
+    title Transaction #{txid}
+
+block content
+    if (result && result.transaction)
+        h1(class="h2")
+          span Transaction
+          p(class="monospace text-mu overflow-ellipsis") #{txid}
+
+        ul(class='nav nav-tabs')
+            li(class="nav-item")
+                a(data-toggle="tab", href="#tab-summary", class="nav-link active", role="tab") Summary
+            li(class="nav-item")
+                a(data-toggle="tab", href="#tab-scripts", class="nav-link", role="tab") Scripts
+            li(class="nav-item")
+                a(data-toggle="tab", href="#tab-raw", class="nav-link", role="tab") Raw
+
+        - DecimalRounded = Decimal.clone({ precision: 4, rounding: 2 })
+
+        - var totalInputValue = result.transaction.totalInputValue
+        - var totalOutputValue = result.transaction.totalOutputValue
+        - var fee = result.transaction.fee
+
+        div(class="tab-content")
+            div(id="tab-summary", class="tab-pane active", role="tabpanel")
+                if (result.transaction.vin[0].coinbase && result.getblock.height == 0)
+                    div(class="alert alert-warning", style="padding-bottom: 0;")
+                        h4(class="alert-heading h5") This transaction doesn't really exist!
+                        :markdown-it
+                            This is the coinbase transaction of the [Ocean Genesis Block](/block/f2b80b27fdcd3b9047de882c4ad0c72a9d875919aedccba7f6cdc6c994fcdf02). For more background about this special-case transaction, you can join the [discussion](https://t.me/joinchat/Ge36IURXhKAS_6HTznUXUg) with the [CommerceBlock](https://www.commerceblock.com) community and the [Ocean Core](https://github.com/commerceblock/ocean) developers.
+
+                div(class="table-container mb-2r")
+                    table(class="table table--primary")
+                        tr
+                            th(class="table-active properties-header") Included in Block
+                            td(class="monospace")
+                                if (result.getblock)
+                                    a(href=("/block/" + result.transaction.blockhash)) #{result.transaction.blockhash}
+                                    if (result.getblock.height)
+                                        span(class="text-muted")  (#{result.getblock.height.toLocaleString()})
+                                else
+                                    span N/A
+                                    span(class="text-muted")  (unconfirmed)
+
+                        tr
+                            th(class="table-active properties-header") Timestamp
+                            if (result.transaction.time)
+                                td(class="monospace") #{moment.utc(new Date(result.transaction["time"] * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
+                            else
+                                td(class="monospace") N/A
+                                    span(class="text-muted")  (unconfirmed)
+
+                        tr
+                            th(class="table-active properties-header") Version
+                            td(class="monospace") #{result.transaction.version}
+
+                        tr
+                            th(class="table-active properties-header") Size
+                            td(class="monospace")
+                                span #{result.transaction.size.toLocaleString()} bytes
+                                if (result.transaction.vsize != result.transaction.size)
+                                    span  (
+                                    a(href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#Transaction_size_calculations") virtual size
+                                    span : #{result.transaction.vsize.toLocaleString()} bytes)
+
+                        if (result.transaction.locktime > 0)
+                            tr
+                                th(class="table-active properties-header")
+                                    span Locktime
+                                td(class="monospace")
+                                    if (result.transaction.locktime < 500000000)
+                                        span Spendable in block
+                                        a(href=("/block-height/" + result.transaction.locktime))  #{result.transaction.locktime}
+                                        span  or later
+                                    else
+                                        span Spendable after #{moment.utc(new Date(result.transaction.locktime * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
+
+                        if (result.transaction.vin[0].coinbase)
+                            tr
+                                th(class="table-active properties-header") Total Network Fees
+                                td(class="monospace") #{new Decimal(totalOutputValue).minus(totalInputValue)}
+                        else
+                            tr
+                                th(class="table-active properties-header") Network Fee Paid
+                                td(class="monospace")
+                                    strong #{fee}
+                                    br
+                                    span ~#{new DecimalRounded(fee).dividedBy(result.transaction.size).times(100000000)} sat/B
+
+                div(class="row")
+                    div(class="col-md-6")
+                        h6 Input (#{result.transaction.vin.length.toLocaleString()})
+                        div(class="table-container mb-1r")
+                            table(class="table table--secondary")
+                                thead
+                                    tr
+                                        th(style="width: 40px;")
+                                        th Input
+                                        th Asset
+                                        th Amount
+                                tbody
+                                  - var txInputIndex = 1
+                                  each vin in result.transaction.vin
+                                      if (vin.coinbase)
+                                          tr
+                                              th #{(txInputIndex)}
+                                              td
+                                                  span(class="tag monospace") coinbase
+                                              td(class="monospace") #{genesisAsset}
+                                              td(class="monospace") #{new Decimal(0)}
+                                      else if (vin.issuance)
+                                          - var asset = genesisAsset
+                                          if (vin.issuance.assetlabel)
+                                              - asset = vin.issuance.assetlabel;
+                                          tr
+                                              th #{(txInputIndex)}
+                                              td
+                                                  if (!vin.issuance.isreissuance)
+                                                      span(class="tag tag-issuance monospace") issuance
+                                                  else
+                                                      span(class="tag tag-reissuance monospace") reissuance
+                                              td
+                                                  span(class="monospace") #{asset}
+                                              td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
+                                      else if (vin.prev_out)
+                                          - var asset = genesisAsset
+                                          if (vin.prev_out.assetlabel)
+                                              - asset = vin.prev_out.assetlabel;
+                                          tr
+                                              th #{(txInputIndex)}
+                                              td
+                                                  if (vin.prev_out.scriptPubKey && vin.prev_out.scriptPubKey.addresses)
+                                                      div(class="monospace", style="word-break: break-word;") #{vin.prev_out.scriptPubKey.addresses[0]}
+                                                      span(class="monospace text-muted") via tx
+                                                      a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
+                                              td
+                                                  span(class="monospace") #{asset}
+                                              td
+                                                  if (vin.prev_out.value)
+                                                      span(class="monospace") #{vin.prev_out.value}
+                                                  else
+                                                      if (!vin.asset)
+                                                          include includes/unblind-modal.pug
+                                                      else
+                                                          span(class="monospace") #{new Decimal(0)}
+                                      - txInputIndex += 1
+
+                                  tr
+                                      td
+                                      td
+                                      td
+                                      td
+                                          strong(class="monospace") #{totalInputValue}
+
+                    div(class="col-md-6")
+                        h6 Output (#{result.transaction.vout.length.toLocaleString()})
+                        div(class="table-container mb-1r")
+                            table(class="table table--secondary")
+                                thead
+                                    tr
+                                        th
+                                        th Output
+                                        th Asset
+                                        th Amount
+
+                                tbody
+                                    each vout, voutIndex in result.transaction.vout
+                                        tr
+                                            th #{(voutIndex + 1)}
+                                            td
+                                                if (vout.scriptPubKey)
+                                                    if (vout.scriptPubKey.addresses)
+                                                        a(id="output-" + voutIndex)
+                                                            div(class="monospace", style="word-break: break-word;")
+                                                                span #{vout.scriptPubKey.addresses[0]}
+                                                    else if (vout.scriptPubKey.type == 'fee')
+                                                        span(class="tag tag-fee monospace") fees
+                                                    else if (vout.scriptPubKey.type == 'registeraddress')
+                                                        span(class="tag tag-policy monospace") registeraddress
+                                                    else if (vout.scriptPubKey.type == 'lockedmultisig')
+                                                        if (vout.request)
+                                                            span(class="tag tag-lockedmulti monospace") Request
+                                                        else if (vout.bid)
+                                                            span(class="tag tag-lockedmulti monospace") Bid
+                                                        else
+                                                            span(class="tag tag-lockedmulti monospace") lockedmultisig
+                                                    else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
+                                                        div(class="monospace", style="word-break: break-word;")
+                                                            span(class="monospace") OP_RETURN:
+                                                            span(class="monospace text-muted") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
+                                                    else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
+                                                        if (vout.value > 0)
+                                                            span(class="tag tag-destruction monospace") destruction
+                                                        else
+                                                            span()
+                                            td
+                                                if (result.transaction.vin[0].coinbase)
+                                                    - var asset = genesisAsset
+                                                    if (vout.assetlabel)
+                                                        - asset = vout.assetlabel;
+                                                    if (vout.value == 0)
+                                                        - asset = '';
+                                                    span(class="monospace") #{asset}
+                                                else
+                                                    if result.transaction.tokenAsset && vout.asset == result.transaction.tokenAsset
+                                                        span(class="tag tag-reissuance monospace") #{genesisAsset}
+                                                    else
+                                                        - var asset = genesisAsset
+                                                        if (vout.assetlabel)
+                                                            - asset = vout.assetlabel;
+                                                        span(class="monospace") #{asset}
+                                            td
+                                                if (vout.value)
+                                                    span(class="monospace") #{vout.value}
+                                                else
+                                                    if (!vout.asset)
+                                                        include includes/unblind-modal.pug
+                                                    else
+                                                        span(class="monospace") #{new Decimal(0)}
+
+                                    tr
+                                        td
+                                        td
+                                        td
+                                        td
+                                            strong(class="monospace") #{totalOutputValue}
+
+            div(id="tab-scripts", class="tab-pane", role="tabpanel")
+                h6 Input Scripts
+                div(class="table-container mb-1r")
+                    table(class="table table--secondary")
+                        thead
+                            tr
+                                th(style="width: 50px;")
+                                th Script Sig (asm)
+                        tbody
+                            each vin, vinIndex in result.transaction.vin
+                                tr
+                                    th #{vinIndex + 1}
+                                    td
+                                        if (vin.scriptSig && vin.scriptSig.asm)
+                                            span(class="word-wrap monospace") #{vin.scriptSig.asm}
+
+                                        else if (vin.coinbase)
+                                            div(style="line-height: 1.75em;")
+                                                span(class="tag") coinbase
+                                                br
+                                                span(class="word-wrap monospace") #{vin.coinbase}
+                                                br
+                                                span(class="word-wrap monospace text-muted") (decoded) #{utils.hex2ascii(vin.coinbase)}
+
+                h6 Output Scripts
+                div(class="table-container mb-1r")
+                    table(class="table table--secondary")
+                        thead
+                            tr
+                                th(style="width: 50px;")
+                                th Script Pub Key (asm)
+                        tbody
+                            each vout, voutIndex in result.transaction.vout
+                                tr
+                                    th #{voutIndex + 1}
+                                    td
+                                        if (vout.scriptPubKey && vout.scriptPubKey.asm)
+                                            span(class="word-wrap monospace") #{vout.scriptPubKey.asm}
+                                            if (vout.scriptPubKey.asm.startsWith("OP_RETURN"))
+                                                br
+                                                span(class="word-wrap monospace text-muted") (decoded) #{utils.hex2ascii(vout.scriptPubKey.asm)}
+
+            div(id="tab-raw", class="tab-pane", role="tabpanel")
+                div(class="highlight")
+                    pre
+                        code(class="language-json", data-lang="json") #{JSON.stringify(result.transaction, null, 4)}

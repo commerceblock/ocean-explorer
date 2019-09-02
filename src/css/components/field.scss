@@ -1,0 +1,40 @@
+.field__icon {
+  position: absolute;
+  right: 1.5em;
+  top: 50%;
+  transform: translateY( -50% );
+}
+.field__input {
+  border: 1px solid theme('borderColor.tertiary');
+  display: block;
+  padding: 1em 3em 1em 1.5em;
+
+  &:focus {
+    border-color: theme('borderColor.field-active');
+    & + .field__icon {
+      color: theme('borderColor.field-active');
+    }
+  }
+  &::placeholder {
+    @apply text-default;
+  }
+  // &::-webkit-file-upload-button {
+  //   @apply btn btn--quart text-nu uppercase bg-primary;
+  //   cursor: pointer;
+  //   display: block;
+  //   padding: 0.85em 1.2em 0.8em;
+  //   &:focus {
+  //     outline: 0;
+  //   }
+  //   &:hover {
+  //     @apply bg-quarternary;
+  //   }
+  // }
+  // &--box {
+  //   min-height: 6rem;
+  // }
+  // &--select {
+  //   height: 47px;
+  //   padding-right: 2.5em;
+  // }
+}
