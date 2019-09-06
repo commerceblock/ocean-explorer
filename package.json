@@ -9,10 +9,10 @@
     "prod": "NODE_ENV=production webpack --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
   },
   "browserslist": [
-  "last 4 version",
-  "> 1%",
-  "not dead"
-],
+    "last 4 version",
+    "> 1%",
+    "not dead"
+  ],
   "dependencies": {
     "bitcoin-core": "2.0.0",
     "body-parser": "^1.18.3",
