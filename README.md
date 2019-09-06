@@ -1,4 +1,4 @@
-# ![Ocean Explorer](public/img/logo/favicon-256.png) Ocean Explorer Reskin
+# Ocean Explorer Reskin
 
 Ocean blockchain explorer using MongoDB. Built with Node.js, express, Tailwind, Laravel Mix.
 
