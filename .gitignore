@@ -57,3 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
+# Don't commit compiled assets & views
+public/*
+!public/.gitignore
