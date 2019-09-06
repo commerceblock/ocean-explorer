@@ -20,7 +20,7 @@ case "$1" in
         explorer)
             echo "Running explorer"
 	    sleep 24
-            npm run prod
+            npm start
             ;;
         clear)
             echo "Clear all collections/indices"
