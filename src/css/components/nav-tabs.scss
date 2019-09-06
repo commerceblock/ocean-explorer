@@ -1,0 +1,21 @@
+.nav-tabs {
+  @apply bg-quinary flex mb-1-25r;
+  & .nav-item {
+    @apply pl-grid-md;
+  }
+  & .nav-link {
+    @apply block border-b-2 font-normal text-default;
+    border-color: transparent;
+    padding: 0.625em 0;
+    &::after {
+      display: none;
+    }
+    &:hover,
+    &.active {
+      @apply text-primary border-emph;
+    }
+    &.active {
+      @apply pointer-events-none;
+    }
+  }
+}

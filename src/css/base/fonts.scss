@@ -1,0 +1,31 @@
+$font-primary: 'SofiaPro';
+
+@include font-face( '395E88_1_0' ) {
+  font-family: $font-primary;
+  font-style: normal;
+  font-weight: 300;
+}
+
+@include font-face( '395E88_3_0' ) {
+  font-family: $font-primary;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@include font-face( '395E88_4_0' ) {
+  font-family: $font-primary;
+  font-style: italic;
+  font-weight: 400;
+}
+
+@include font-face( '395E88_2_0' ) {
+  font-family: $font-primary;
+  font-style: normal;
+  font-weight: 500;
+}
+
+@include font-face( '395E88_0_0' ) {
+  font-family: $font-primary;
+  font-style: normal;
+  font-weight: 700;
+}

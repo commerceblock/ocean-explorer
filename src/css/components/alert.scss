@@ -1,0 +1,7 @@
+.alert {
+  @apply mb-2r;
+  & > span {
+    @apply border border-orange inline-block text-orange;
+    padding: 0.5rem 1rem;
+  }
+}

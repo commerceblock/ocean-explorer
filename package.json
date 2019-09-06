@@ -3,8 +3,16 @@
   "version": "1.0.0",
   "private": false,
   "scripts": {
-    "start": "NODE_ENV=production node ./bin/www"
+    "start": "NODE_ENV=production node ./bin/www",
+    "dev": "NODE_ENV=development webpack --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "watch": "NODE_ENV=development webpack --watch --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "prod": "NODE_ENV=production webpack --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
   },
+  "browserslist": [
+  "last 4 version",
+  "> 1%",
+  "not dead"
+],
   "dependencies": {
     "bitcoin-core": "2.0.0",
     "body-parser": "^1.18.3",
@@ -18,6 +26,22 @@
     "mongoose": "^5.5.11",
     "morgan": "~1.9.0",
     "pug": "2.0.1",
-    "serve-static": "^1.13.2"
+    "serve-static": "^1.13.2",
+    "svgxuse": "^1.2.6"
+  },
+  "devDependencies": {
+    "@ayctor/laravel-mix-svg-sprite": "^1.0.0",
+    "copy-webpack-plugin": "^5.0.3",
+    "imagemin-webpack-plugin": "^2.4.2",
+    "laravel-mix": "^4.0.15",
+    "laravel-mix-imagemin": "^1.0.0",
+    "laravel-mix-purgecss": "^4.1.0",
+    "laravel-mix-tailwind": "^0.1.0",
+    "resolve-url-loader": "2.3.1",
+    "sass": "^1.20.1",
+    "sass-loader": "7.*",
+    "svg-spritemap-webpack-plugin": "^3.3.1",
+    "tailwindcss": "^1.0.0-beta.8",
+    "vue-template-compiler": "^2.6.10"
   }
 }

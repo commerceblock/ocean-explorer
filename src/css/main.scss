@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'base/mixins';
+@import 'base/fonts';
+@import 'base/icon';
+@import 'base/site';
+@import 'base/grid';
+@import 'base/utilities';
+@import 'base/typography';
+
+@import 'components/alert';
+@import 'components/card';
+@import 'components/field';
+@import 'components/footer';
+@import 'components/header';
+@import 'components/main-content';
+@import 'components/nav-tabs';
+@import 'components/pagination';
+@import 'components/table';
+@import 'components/test-bar';

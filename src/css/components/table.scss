@@ -1,0 +1,64 @@
+.table-container {
+  overflow-x: scroll;
+  width: 100%;
+}
+.table {
+  @apply border-2 border-tertiary text-left;
+  border-bottom-width: 0;
+  width: 100%;
+  & th {
+    @apply text-primary text-nu;
+    @screen c {
+      @apply text-base;
+    }
+  }
+  & tr {
+    @apply border-b-2 border-tertiary;
+  }
+  & td {
+    @apply text-xi;
+    @screen c {
+      @apply text-mu;
+    }
+  }
+  & a {
+    @apply font-bold;
+    @extend %link-style-secondary;
+  }
+  & .properties-header {
+    @apply bg-grey-100 border-r-2 border-tertiary;
+  }
+
+  &--primary {
+    & th,
+    & td {
+      padding: 0.75em 0.75em 0.625em;
+      @include media( e ) {
+        padding: 1em 1em 0.875em;
+      }
+    }
+  }
+
+  &--secondary {
+    @apply border bg-grey-100;
+    & tr {
+      @apply border-b;
+    }
+    & td,
+    & th {
+      @apply text-nu;
+      padding: 0.75em 0.75em 0.625em;
+    }
+    & td {
+      @apply text-xi;
+    }
+  }
+}
+
+.table-striped {
+  & tbody {
+    & tr:nth-of-type( 2n+1 ) {
+      @apply bg-grey-100;
+    }
+  }
+}

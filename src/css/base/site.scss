@@ -1,0 +1,66 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+body {
+  @apply bg-primary leading-normal font-primary text-base text-default font-normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  @apply bg-tertiary text-primary;
+}
+
+// resets
+
+input,
+input:focus,
+button,
+button:focus {
+  outline: 0;
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+}
+
+input[type='text'],
+input[type='date'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='color'],
+input[type='submit'],
+input[type='button'],
+input[type='tel'],
+button,
+textarea,
+select {
+  appearance: none;
+  line-height: 1;
+}
+
+input[type='radio'],
+input[type='checkbox'],
+input[type='color'],
+input[type='submit'],
+input[type='button'],
+button,
+select {
+  cursor: pointer;
+}
+
+label {
+  display: block;
+}
+
+textarea {
+  resize: none;
+}
+
+// ---- end resets
