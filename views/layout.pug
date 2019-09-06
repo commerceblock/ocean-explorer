@@ -4,49 +4,49 @@ html
 		meta(charset="utf-8")
 		meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no")
 
-		link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css", integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm", crossorigin="anonymous")
-		link(rel="stylesheet", href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
-		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato|Open+Sans|Cousine")
+		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Cousine")
 		link(rel="stylesheet", href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css")
 
 		link(rel='stylesheet', href='/css/styling.css')
-		link(rel="icon", type="image/png", sizes="32x32", href="/img/favicons/favicon-256.png")
-		link(rel="icon", type="image/png", sizes="96x96", href="/img/favicons/favicon-256.png")
-		link(rel="icon", type="image/png", sizes="16x16", href="/img/favicons/favicon-256.png")
+		link(rel='stylesheet', href='/css/font-license.css')
+		link(rel="icon", type="image/png", sizes="32x32", href="/img/favicon-256.png")
+		link(rel="icon", type="image/png", sizes="96x96", href="/img/favicon-256.png")
+		link(rel="icon", type="image/png", sizes="16x16", href="/img/favicon-256.png")
 
 		block headContent
-			title Ocean Explorer
+			title GTSA Explorer
 
 	body
-		nav(class="navbar navbar-expand-lg navbar-custom mb-5")
-			div(class="container")
-				if (env.testnet)
-					div(class="corner-ribbon top-left sticky red shadow")
-						span testnet
+		nav(class="header")
+			if (env.testnet)
+				div(class="test-bar")
+					span testnet
+			div(class="header__inner container flex items-center justify-between")
+				a(class="header__logo text-primary", href="/")
+					svg(class="icon icon--fill")
+						use(xlink:href="/sprite.svg#dgld-logo", href="/sprite.svg#dgld-logo")
 
-				a(class="navbar-brand", color=yellow, href="/")
-					span
-						img(src="/img/logo/logo-small.png", class="header-image")
-						span Ocean Explorer
-
-				button(type="button", class="navbar-toggler navbar-toggler-right", data-toggle="collapse", data-target="#navbarNav")
-					span(class="navbar-toggler-icon")
-						i(class="fa fa-navicon")
-
-				div(class="collapse navbar-collapse", id="navbarNav")
+				button(type="button", class="header__toggle layered text-zeta text-primary", data-toggle="collapse", data-target="#navbarNav")
+					svg(class="icon")
+						use(xlink:href="/sprite.svg#menu", href="/sprite.svg#menu")
+				
+				div(class="collapse navbar-collapse header__overlay", id="navbarNav")
 					if (client)
-						ul(class="navbar-nav mr-auto")
-							li(class="nav-item")
-								a(href="/blocks", class="nav-link") Blocks
-							li(class="nav-item")
-								a(href="/mempool-summary", class="nav-link") Mempool
-							li(class="nav-item")
-								a(href="/node-details", class="nav-link") Status
+						ul(class="header__nav mb-2r flex flex-wrap items-center grid grid--md font-medium")
+							li(class="grid__item header__item")
+								a(href="/blocks", class="header__link") Blocks
+							li(class="grid__item header__item")
+								a(href="/mempool-summary", class="header__link") Mempool
+							li(class="grid__item header__item")
+								a(href="/node-details", class="header__link") Status
 						form(method="post", action="/search", class="form-inline")
-							div(class="input-group")
-								input(type="text", class="form-control form-control-sm", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
-								span(class="input-group-btn")
-									input(type="submit", class="btn btn-primary", value="Search")
+							div(class="field layered w-12/12 max-w-lambda text-mu")
+								input(type="text", class="field__input w-12/12", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
+								div(class="icon field__icon text-quinary")
+									button(type="submit")
+										svg(class="icon")
+											use(xlink:href="/sprite.svg#search", href="/sprite.svg#search")
+
 		div(class="main-content")
 
 			div(class="container")
@@ -57,15 +57,16 @@ html
 			div(class="container")
 				block content
 
-		footer(class="footer")
-			div(class="container")
-				span
-					a(href="https://www.commerceblock.com") CommerceBlock
-				span &nbsp;&copy;2018
-				span &nbsp;&ndash;&nbsp;
-				span Source code available on github
-					a(href="https://github.com/commerceblock/ocean-explorer") commerceblock/ocean-explorer
+		//- footer(class="footer")
+		//- 	div(class="container")
+		//- 		span
+		//- 			a(href="https://www.commerceblock.com") CommerceBlock
+		//- 		span &nbsp;&copy;2018
+		//- 		span &nbsp;&ndash;&nbsp;
+		//- 		span Source code available on github
+		//- 			a(href="https://github.com/commerceblock/ocean-explorer") commerceblock/ocean-explorer
 
+		script(src='/js/app.js')
 		script(src="https://code.jquery.com/jquery-3.2.1.min.js", integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=", crossorigin="anonymous")
 		script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q", crossorigin="anonymous")
 		script(src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js", integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb", crossorigin="anonymous")

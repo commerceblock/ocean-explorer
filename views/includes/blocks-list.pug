@@ -1,20 +1,21 @@
-table(class="table table-striped table-responsive-sm")
-	thead
-		tr
-			th(class="data-header") Height
-			th(class="data-header") Timestamp
-			th(class="data-header text-right") Age
-			th(class="data-header text-right") Transactions
-			th(class="data-header text-right") Size (bytes)
-	tbody
-		each block, blockIndex in blocks
-			if (block)
-				tr
-					td(class="data-cell monospace")
-						a(href=("/block-height/" + block.height)) #{block.height.toLocaleString()}
-					td(class="data-cell monospace") #{moment.utc(new Date(parseInt(block.time) * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
+div(class="table-container")
+	table(class="table table--primary min-w-700 table-striped")
+		thead
+			tr
+				th(class="data-header") Height
+				th(class="data-header") Timestamp
+				th(class="data-header text-right") Age
+				th(class="data-header text-right") Transactions
+				th(class="data-header text-right") Size (bytes)
+		tbody
+			each block, blockIndex in blocks
+				if (block)
+					tr
+						td(class="data-cell monospace")
+							a(href=("/block-height/" + block.height)) #{block.height.toLocaleString()}
+						td(class="data-cell monospace") #{moment.utc(new Date(parseInt(block.time) * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
 
-					- var timeAgo = moment.duration(moment.utc(new Date()).diff(moment.utc(new Date(parseInt(block.time) * 1000))));
-					td(class="data-cell monospace text-right") #{timeAgo.format()}
-					td(class="data-cell monospace text-right") #{block.tx.length.toLocaleString()}
-					td(class="data-cell monospace text-right") #{block.size.toLocaleString()}
+						- var timeAgo = moment.duration(moment.utc(new Date()).diff(moment.utc(new Date(parseInt(block.time) * 1000))));
+						td(class="data-cell monospace text-right") #{timeAgo.format()}
+						td(class="data-cell monospace text-right") #{block.tx.length.toLocaleString()}
+						td(class="data-cell monospace text-right") #{block.size.toLocaleString()}

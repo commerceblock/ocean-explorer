@@ -1,4 +1,4 @@
-ul(class='nav nav-tabs mb-3')
+ul(class='nav nav-tabs')
     li(class="nav-item")
         a(data-toggle="tab", href="#tab-summary", class="nav-link active", role="tab") Summary
     li(class="nav-item")
@@ -14,84 +14,84 @@ div(class="tab-content")
                 :markdown-it
                     This is the first block in the Ocean blockchain. This block was mined by anonymous/pseudonymous creator Satoshi Swagamoto.
 
-        table(class="table")
-            tr
-                th(class="table-active properties-header") Block Hash
-                td(class="monospace")
-                    a(href=("/block/" + result.getblock.hash)) #{result.getblock.hash}
+        div(class="table-container")
+            table(class="table table--primary")
+                tr
+                    th(class="table-active properties-header") Block Hash
+                    td(class="monospace")
+                        a(href=("/block/" + result.getblock.hash)) #{result.getblock.hash}
 
-            tr
-                th(class="table-active properties-header") Previous Block Hash
-                td(class="monospace")
-                    if (result.getblock.previousblockhash)
-                        a(href=("/block/" + result.getblock.previousblockhash)) #{result.getblock.previousblockhash}
+                tr
+                    th(class="table-active properties-header") Previous Block Hash
+                    td(class="monospace")
+                        if (result.getblock.previousblockhash)
+                            a(href=("/block/" + result.getblock.previousblockhash)) #{result.getblock.previousblockhash}
 
-                    else if (result.getblock.height == 0)
-                        span This is the
-                        a(href="https://www.commerceblock.com") Ocean Genesis Block
+                        else if (result.getblock.height == 0)
+                            span This is the 
+                              a(href="https://www.commerceblock.com") Ocean Genesis Block
 
-            tr
-                th(class="table-active properties-header") Next Block Hash
-                td(class="monospace")
-                    if (nextblockhash)
-                        a(href=("/block/" + nextblockhash)) #{nextblockhash}
-                    else
-                        span None
-                        span(class="text-muted")  (latest block)
+                tr
+                    th(class="table-active properties-header") Next Block Hash
+                    td(class="monospace")
+                        if (nextblockhash)
+                            a(href=("/block/" + nextblockhash)) #{nextblockhash}
+                        else
+                            span None
+                            span(class="text-muted")  (latest block)
 
-            tr
-                th(class="table-active properties-header") Block Height
-                td(class="monospace")
-                    a(href=("/block-height/" + result.getblock.height)) #{result.getblock.height.toLocaleString()}
+                tr
+                    th(class="table-active properties-header") Block Height
+                    td(class="monospace")
+                        a(href=("/block-height/" + result.getblock.height)) #{result.getblock.height.toLocaleString()}
 
-            tr
-                th(class="table-active properties-header") Contract Hash
-                td(class="monospace") #{result.getblock.contracthash}
+                tr
+                    th(class="table-active properties-header") Contract Hash
+                    td(class="monospace") #{result.getblock.contracthash}
 
-            tr
-                th(class="table-active properties-header") Mapping Hash
-                td(class="monospace") #{result.getblock.mappinghash}
+                tr
+                    th(class="table-active properties-header") Mapping Hash
+                    td(class="monospace") #{result.getblock.mappinghash}
 
-            tr
-                th(class="table-active properties-header") Attestation Status
-                td(class="monospace")
-                    if (attestedheight == undefined || result.getblock.height > attestedheight)
-                        strong(class="text-danger") Not Attested
-                    else
-                        strong(class="text-primary") Attested
+                tr
+                    th(class="table-active properties-header") Attestation Status
+                    td(class="monospace")
+                        if (attestedheight == undefined || result.getblock.height > attestedheight)
+                            strong(class="text-danger") Not Attested
+                        else
+                            strong(class="text-primary") Attested
 
-            tr
-                th(class="table-active properties-header") Timestamp
-                td(class="monospace") #{moment.utc(new Date(result.getblock.time * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
+                tr
+                    th(class="table-active properties-header") Timestamp
+                    td(class="monospace") #{moment.utc(new Date(result.getblock.time * 1000)).format("DD-MM-YYYY HH:mm:ss")} UTC
 
-            tr
-                th(class="table-active properties-header") Transaction Count
-                td(class="monospace") #{result.getblock.tx.length.toLocaleString()}
+                tr
+                    th(class="table-active properties-header") Transaction Count
+                    td(class="monospace") #{result.getblock.tx.length.toLocaleString()}
 
-            tr
-                th(class="table-active properties-header") Size
-                td(class="monospace")
-                    span #{result.getblock.size.toLocaleString()} bytes
-                    span(class="text-muted")  (weight: #{result.getblock.weight.toLocaleString()})
+                tr
+                    th(class="table-active properties-header") Size
+                    td(class="monospace")
+                        span #{result.getblock.size.toLocaleString()} bytes
+                        span(class="text-muted")  (weight: #{result.getblock.weight.toLocaleString()})
 
-            tr
-                th(class="table-active text-right") Version
-                td(class="monospace") 0x#{result.getblock.versionHex}
-                    span(class="text-muted")  (decimal: #{result.getblock.version})
+                tr
+                    th(class="table-active properties-header") Version
+                    td(class="monospace") 0x#{result.getblock.versionHex}
+                        span(class="text-muted")  (decimal: #{result.getblock.version})
 
-            tr
-                th(class="table-active text-right") Bits
-                td(class="monospace") #{result.getblock.bits}
+                tr
+                    th(class="table-active properties-header") Bits
+                    td(class="monospace") #{result.getblock.bits}
 
-            tr
-                th(class="table-active text-right") Merkle Root
-                td(class="monospace") #{result.getblock.merkleroot}
+                tr
+                    th(class="table-active properties-header") Merkle Root
+                    td(class="monospace") #{result.getblock.merkleroot}
 
-            tr
-                th(class="table-active text-right") Chainwork
-                td(class="monospace") #{result.getblock.chainwork}
+                tr
+                    th(class="table-active properties-header") Chainwork
+                    td(class="monospace") #{result.getblock.chainwork}
 
-        hr
         h2(class="h4") Transactions (#{txCount.toLocaleString()})
             small  - Showing
             small
@@ -101,7 +101,7 @@ div(class="tab-content")
                     span #{(offset + 1)} - #{Math.min(offset + limit, txCount)}
 
         each tx, txIndex in result.transactions
-            div(class="card mb-3")
+            div(class="card mb-2r")
                 div(class="card-header")
                     if (tx && tx.txid)
                         a(href=("/tx/" + tx.txid), class="monospace") #{tx.txid}
@@ -110,7 +110,7 @@ div(class="tab-content")
                         div(class="col-md-6")
                             h6 Input (#{tx.vin.length.toLocaleString()})
                             - var totalInputValue = tx.totalInputValue
-                            table(class="table mb-0")
+                            table(class="table table--secondary mb-1-5r")
                                 thead
                                     tr
                                         th
@@ -118,69 +118,68 @@ div(class="tab-content")
                                         th Asset
                                         th Amount
                                 tbody
+                                  - var txInputIndex = 1
+                                  each vin in tx.vin
+                                      if (vin.coinbase)
+                                          tr
+                                              th #{(txInputIndex)}
+                                              td
+                                                  span(class="tag monospace") coinbase
+                                              td(class="monospace") #{genesisAsset}
+                                              td(class="monospace") #{new Decimal(0)}
+                                      else if (vin.issuance)
+                                          - var asset = genesisAsset
+                                          if (vin.issuance.assetlabel)
+                                              - asset = vin.issuance.assetlabel;
+                                          tr
+                                              th #{(txInputIndex)}
+                                              td
+                                                  if (!vin.issuance.isreissuance)
+                                                      span(class="tag tag-issuance monospace") issuance
+                                                  else
+                                                      span(class="tag tag-reissuance monospace") reissuance
+                                              td(class="monospace") #{asset}
+                                              td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
 
-                                - var txInputIndex = 1
-                                each vin in tx.vin
-                                    if (vin.coinbase)
-                                        tr
-                                            th #{(txInputIndex)}
-                                            td
-                                                span(class="tag monospace") coinbase
-                                            td(class="monospace") #{genesisAsset}
-                                            td(class="monospace") #{new Decimal(0)}
-                                    else if (vin.issuance)
-                                        - var asset = genesisAsset
-                                        if (vin.issuance.assetlabel)
-                                            - asset = vin.issuance.assetlabel;
-                                        tr
-                                            th #{(txInputIndex)}
-                                            td
-                                                if (!vin.issuance.isreissuance)
-                                                    span(class="tag tag-issuance monospace") issuance
-                                                else
-                                                    span(class="tag tag-reissuance monospace") reissuance
-                                            td(class="monospace") #{asset}
-                                            td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
-
-                                    else if (vin.prev_out)
-                                        - var asset = genesisAsset
-                                        if (vin.prev_out.assetlabel)
-                                            - asset = vin.prev_out.assetlabel;
-                                        tr
-                                            th #{(txInputIndex)}
-                                            td
-                                                if (vin.prev_out.scriptPubKey && vin.prev_out.scriptPubKey.addresses)
-                                                    div(class="monospace", style="word-break: break-word;") #{vin.prev_out.scriptPubKey.addresses[0]}
-                                                    span(class="monospace text-muted") via tx
-                                                    a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
-                                            td(class="monospace") #{asset}
-                                            td
-                                                if (vin.prev_out.value)
-                                                    span(class="monospace") #{vin.prev_out.value}
-                                                else
-                                                    if (!vin.asset)
-                                                        include unblind-modal.pug
-                                                    else
-                                                        span(class="monospace") #{new Decimal(0)}
-                                    - txInputIndex += 1
-                                if (tx.vin.length > txInputIndex - 1)
-                                    tr
-                                        td
-                                        td
-                                            span(class="monospace text-muted") #{(tx.vin.length - txInputIndex - 1).toLocaleString()} more...
-                                        td
-                                        td
-                                else
-                                    tr
-                                        td
-                                        td
-                                        td
-                                        td
-                                            strong(class="monospace") #{totalInputValue}
+                                      else if (vin.prev_out)
+                                          - var asset = genesisAsset
+                                          if (vin.prev_out.assetlabel)
+                                              - asset = vin.prev_out.assetlabel;
+                                          tr
+                                              th #{(txInputIndex)}
+                                              td
+                                                  if (vin.prev_out.scriptPubKey && vin.prev_out.scriptPubKey.addresses)
+                                                      div(class="monospace", style="word-break: break-word;") #{vin.prev_out.scriptPubKey.addresses[0]}
+                                                      span(class="monospace text-muted") via tx
+                                                      a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
+                                              td(class="monospace") #{asset}
+                                              td
+                                                  if (vin.prev_out.value)
+                                                      span(class="monospace") #{vin.prev_out.value}
+                                                  else
+                                                      if (!vin.asset)
+                                                          include unblind-modal.pug
+                                                      else
+                                                          span(class="monospace") #{new Decimal(0)}
+                                      - txInputIndex += 1
+                                  if (tx.vin.length > txInputIndex - 1)
+                                      tr
+                                          td
+                                          td
+                                              span(class="monospace text-muted") #{(tx.vin.length - txInputIndex - 1).toLocaleString()} more...
+                                          td
+                                          td
+                                  else
+                                      tr
+                                          td
+                                          td
+                                          td
+                                          td
+                                              strong(class="monospace") #{totalInputValue}
                         div(class="col-md-6")
                             h6 Output (#{tx.vout.length.toLocaleString()})
                             - var totalOutputValue = tx.totalOutputValue
-                            table(class="table mb-0")
+                            table(class="table table--secondary")
                                 thead
                                     tr
                                         th
@@ -262,4 +261,4 @@ div(class="tab-content")
 
     div(id="tab-raw", class="tab-pane", role="tabpanel")
         pre
-            code #{JSON.stringify(result.getblock, null, 4)}
+          code #{JSON.stringify(result.getblock, null, 4)}
