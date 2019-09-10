@@ -15,7 +15,7 @@ mix.js(`${src}/js/main.js`, `${dist}/js/app.js`)
   .tailwind('./tailwind.config.js')
   .purgeCss({
     globs: [
-      path.join(__dirname, `${src}/views/**/*.pug`),
+      path.join(__dirname, `views/**/*.pug`),
       path.join(__dirname, `${src}/js/**/*.{js,vue}`),
     ],
     extractorPattern: /[a-zA-Z0-9-:%_/]+/g,
