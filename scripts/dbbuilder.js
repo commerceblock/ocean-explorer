@@ -73,8 +73,10 @@ dbConnect = dbConnect + '/' + env.dbsettings.database;
 // connect to db and start db builder main method
 mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
     if (err) {
-      console.log('Unable to connect to database: %s', dbConnect);
-      exit();
+        console.error('Unable to connect to database: %s @ %s',
+            env.dbsettings.user, dbConnect.split('@')[1]);
+        console.error(err);
+        process.exit(1);
     }
     doWork();
 });
@@ -106,7 +108,8 @@ function doWork() {
                             Block.remove({}, function(errBlock) {
                                 dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
                                     if (error) {
-                                        process.exit(0);
+                                        console.error(error);
+                                        process.exit(1);
                                     } else {
                                         console.log("Finished " + mode);
                                         process.exit(0);
@@ -124,7 +127,8 @@ function doWork() {
                         }
                         dbApi.update_blockchain_data(prevHeight, latestInfo.blocks, function(error) { // from prev height to latest height
                             if (error) {
-                                process.exit(0);
+                                console.error(error);
+                                process.exit(1);
                             } else {
                                 console.log("Finished " + mode);
                                 process.exit(0);
@@ -132,13 +136,14 @@ function doWork() {
                         });
                     }).catch(function(error) {
                         console.error(error);
-                        process.exit(0);
+                        process.exit(1);
                     });
                 }
             } else if (mode == 'check') {
                 dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
                     if (error) {
-                        process.exit(0);
+                        console.error(error);
+                        process.exit(1);
                     } else {
                         console.log("Finished " + mode);
                         process.exit(0);
@@ -153,7 +158,8 @@ function doWork() {
                 console.log("Update starting at height " + prevHeight);
                 dbApi.update_blockchain_data(prevHeight, latestInfo.blocks, function(error) { // from prev height to latest height
                     if (error) {
-                        process.exit(0);
+                        console.error(error);
+                        process.exit(1);
                     } else {
                         console.log("Finished " + mode);
                         process.exit(0);
@@ -162,14 +168,14 @@ function doWork() {
             }
         }).catch(function(error) {
             if (error) {
-                console.error(error)
-                process.exit(0);
+                console.error(error);
+                process.exit(1);
             }
         });
     }).catch(function(error) {
         if (error) {
-            console.error(error)
-            process.exit(0);
+            console.error(error);
+            process.exit(1);
         }
     });
 }
