@@ -64,7 +64,7 @@ mongoose.Promise = Promise
 var db = mongoose.connection;
 db.on("error", function(err) {
     console.error(err);
-    process.exit(0);
+    process.exit(1);
 });
 
 // connect to MongDB - should automatically try to reconnect if connection fails
@@ -74,8 +74,10 @@ mongoose.connect(dbConnect, {
         useNewUrlParser: true
     }, function(err) {
     if (err) {
-        console.log('Unable to connect to database: %s', dbConnect);
-        process.exit(0);
+        console.error('Unable to connect to database: %s @ %s',
+            env.dbsettings.user, dbConnect.split('@')[1]);
+        console.error(err);
+        process.exit(1);
     }
 });
 
