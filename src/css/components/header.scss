@@ -1,5 +1,5 @@
 .header {
-  @apply bg-white;
+  @apply bg-yellow;
   border-bottom: 1px solid transparent;
   left: 0;
   position: sticky;
@@ -7,9 +7,9 @@
   top: 0;
   transition: 0.2s;
   z-index: 2;
-  &--scrolling {
-    @apply bg-primary text-default border-tertiary;
-  }
+  // &--scrolling {
+  //   @apply bg-primary text-default border-tertiary;
+  // }
 }
 .header__inner {
   padding-bottom: 1.25rem;
