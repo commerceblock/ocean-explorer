@@ -13,11 +13,21 @@ const OFFSET_DEFAULT = 0;   // default offest limit for the first blockheight to
 
 // Index page
 router.get("/", function(req, res, next) {
-	if (client == null) {
+  if (client == null) {
 		res.locals.userMessage = "Unable to connect to Ocean Node";
 		res.render("index");
 	}
-    return next();
+	var sort = "desc";
+	if (req.query.sort) {
+		sort = req.query.sort;
+	}
+
+	res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
+	res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
+	res.locals.sort = sort;
+	res.locals.paginationBaseUrl = "/";
+
+  return next();
 }, view.loadIndex);
 
 // Node Details page

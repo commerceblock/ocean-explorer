@@ -370,26 +370,52 @@ module.exports = {
                 res.render("index");
                 return;
             }
-            res.locals.latestheight = info.latestStoredHeight;
-            res.locals.getblockchaininfo = info.blockchaininfo;
+
+            res.locals.blockCount = info.latestStoredHeight;
+            res.locals.blockOffset = res.locals.offset;
 
             var blockHeights = [];
-            if (info.blockchaininfo.blocks) {
-                for (var i = 0; i <10 && i <= info.latestStoredHeight; i++) {
-                    blockHeights.push(info.latestStoredHeight - i);
+            if (res.locals.sort == "desc") {
+                for (var i = (info.latestStoredHeight - res.locals.offset); i > (info.latestStoredHeight - res.locals.offset - res.locals.limit) && i>=0; i--) {
+                    blockHeights.push(i);
+                }
+            } else {
+                for (var i = res.locals.offset; i < (res.locals.offset + res.locals.limit) && i<=info.latestStoredHeight; i++) {
+                    blockHeights.push(i);
                 }
             }
 
-            dbApi.get_blocks_height(blockHeights).then(function(latestBlocks) {
-                res.locals.latestBlocks = [];
-                latestBlocks.forEach( block => {
-                    res.locals.latestBlocks.push(block.getblock);
+            dbApi.get_blocks_height(blockHeights, res.locals.sort).then(function(blocks) {
+                res.locals.blocks = [];
+                blocks.forEach( block => {
+                    res.locals.blocks.push(block.getblock);
                 });
                 res.render("index");
-            }).catch(function(err) {
-                res.locals.userMessage = err;
+            }).catch(function(errorBlocks){
+                res.locals.userMessage = errorBlocks;
                 res.render("index");
             });
+
+            // res.locals.latestheight = info.latestStoredHeight;
+            // res.locals.getblockchaininfo = info.blockchaininfo;
+            //
+            // var blockHeights = [];
+            // if (info.blockchaininfo.blocks) {
+            //     for (var i = 0; i <10 && i <= info.latestStoredHeight; i++) {
+            //         blockHeights.push(info.latestStoredHeight - i);
+            //     }
+            // }
+            //
+            // dbApi.get_blocks_height(blockHeights).then(function(latestBlocks) {
+            //     res.locals.latestBlocks = [];
+            //     latestBlocks.forEach( block => {
+            //         res.locals.latestBlocks.push(block.getblock);
+            //     });
+            //     res.render("index");
+            // }).catch(function(err) {
+            //     res.locals.userMessage = err;
+            //     res.render("index");
+            // });
         }).catch(function(err) {
             res.locals.userMessage = err;
             res.render("index");

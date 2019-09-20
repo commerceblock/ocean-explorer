@@ -9,16 +9,17 @@ block content
 	:markdown-it
 		Investment Grade Gold, Allocated in Swiss Vaults &amp; Secured Using Bitcoin.
 
-	if (latestBlocks)
-		div(class="flex justify-between mt-2r c:mt-3r")
-			h3 Latest Blocks
-					if (getblockchaininfo.initialblockdownload)
-						small  (#{(getblockchaininfo.headers - latestheight).toLocaleString()} behind)
+	div(class="mt-2r c:mt-3r")
+		h3 Latest Blocks
+	include includes/blocks-list.pug
+	if (blockCount > limit)
+		- var pageNumber = offset / limit + 1;
+		- var pageCount = Math.floor(blockCount / limit);
+		- if (pageCount * limit < blockCount) {
+			- pageCount++;
+		- }
+		- var paginationUrlFunction = function(x) {
+			- return paginationBaseUrl + "?limit=" + limit + "&offset=" + ((x - 1) * limit + "&sort=" + sort);
+		- }
 
-			div(class="c:mt-0-25r e:mt-0-5r")
-				a(href="/blocks") Browse Blocks &raquo;
-
-		- var blocks = latestBlocks;
-		- var blockOffset = 0;
-
-		include includes/blocks-list.pug
+		include includes/pagination.pug
