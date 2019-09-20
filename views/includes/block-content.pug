@@ -10,9 +10,9 @@ div(class="tab-content")
     div(id="tab-summary", class="tab-pane active", role="tabpanel")
         if (result.getblock.height == 0)
             div(class="alert alert-success", style="padding-bottom: 0;")
-                h4(class="alert-heading h5") This is the Ocean Genesis Block!
+                h4(class="alert-heading h5") This is the Genesis Block!
                 :markdown-it
-                    This is the first block in the Ocean blockchain. This block was mined by anonymous/pseudonymous creator Satoshi Swagamoto.
+                    This is the first block in the blockchain.
 
         div(class="table-container")
             table(class="table table--primary")
@@ -29,7 +29,7 @@ div(class="tab-content")
 
                         else if (result.getblock.height == 0)
                             span This is the 
-                              a(href="https://www.commerceblock.com") Ocean Genesis Block
+                              a(href="https://www.commerceblock.com") Genesis Block
 
                 tr
                     th(class="table-active properties-header") Next Block Hash
