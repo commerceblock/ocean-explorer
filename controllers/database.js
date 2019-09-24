@@ -10,6 +10,7 @@
 var rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
+  , Asset = require("../models/asset")
   , Info = require("../models/info")
   , env = require("../helpers/env")
   , bitcoin = require("bitcoin-core");
@@ -19,7 +20,7 @@ async function save_block(block) {
     newblock = await block.save();
     console.log("Block " + newblock.height + " saved.");
     return newblock;
-}
+  }
 
 // Create new block using the Block model and call save method
 async function new_block(blockhash, height, blockdata) {
@@ -55,6 +56,40 @@ async function new_tx(txid, txdata, blockheight, blockhash) {
         blockhash: blockhash
     });
     return await save_tx(newtx);
+}
+
+// Save new asset using the Asset model
+async function save_asset(asset) {
+    newasset = await asset.save();
+    console.log("Asset " + newasset.asset + " saved.");
+    return newasset;
+}
+
+// Create new asset using the Asset model and call save method,
+// or add reissuance amount to existing asset
+async function new_asset(asset, assetamount, assetlabel, token, tokenamount, issuancetxid, isreissuance) {
+    if (!isreissuance) {
+      existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
+        if (existing_asset) {
+            return existing_asset;
+        }
+        var newasset = new Asset({
+            asset: asset,
+            assetamount: assetamount,
+            assetlabel: assetlabel,
+            token: token,
+            tokenamount: tokenamount,
+            issuancetx: issuancetxid
+        });
+        return await save_asset(newasset);
+    }
+    // Update existing asset's assetamount
+    existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount}});
+    if (!existing_asset) {
+        throw("Failed to find asset "+asset+" for reissuance.");
+    }
+    console.log("Asset " + asset + " reissuance recorded.")
+    return existing_asset
 }
 
 // Save new info using the Info model
@@ -236,9 +271,21 @@ module.exports = {
             try{
                 // Get block and save
                 await new_block(blockhash, height, result.getblock);
-
-                // Get block transactions and save
+                // Get block transactions
                 for (var i = 0; i < result.transactions.length; i++) {
+                    // Check for issuance/reissuance
+                    if (result.transactions[i]["vin"][0]["issuance"] != undefined) {
+                        await new_asset(
+                          result.transactions[i]["vin"][0]["issuance"]["asset"],
+                          result.transactions[i]["vin"][0]["issuance"]["assetamount"],
+                          result.transactions[i]["vin"][0]["issuance"]["assetlabel"],
+                          result.transactions[i]["vin"][0]["issuance"]["token"],
+                          result.transactions[i]["vin"][0]["issuance"]["tokenamount"],
+                          result.transactions[i]["txid"],
+                          result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
+                        )
+                    }
+                    // save Txs
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
                 }
 

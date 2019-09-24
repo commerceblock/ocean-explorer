@@ -14,6 +14,7 @@ var mongoose = require('mongoose')
   , rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
+  , Asset = require("../models/asset")
   , Info = require("../models/info")
   , dbApi = require("../controllers/database");
 
@@ -106,14 +107,16 @@ function doWork() {
                     Info.remove({}, function(errInfo) {
                         Tx.remove({}, function(errTx) {
                             Block.remove({}, function(errBlock) {
-                                dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
-                                    if (error) {
-                                        console.error(error);
-                                        process.exit(1);
-                                    } else {
-                                        console.log("Finished " + mode);
-                                        process.exit(0);
-                                    }
+                                Asset.remove({}, function(errAsset) {
+                                    dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
+                                        if (error) {
+                                            console.error(error);
+                                            process.exit(1);
+                                        } else {
+                                            console.log("Finished " + mode);
+                                            process.exit(0);
+                                        }
+                                    });
                                 });
                             });
                         });
