@@ -11,12 +11,14 @@ var mongoose = require('mongoose')
 // Asset schema
 // Indices used:
 var AssetSchema = new Schema({
-    asset:        { type: String, index: { unique: true } },
-    assetamount:  Number,
-    assetlabel:   {type: String, default: ""},
-    token:        String,
-    tokenamount:  Number,
-    issuancetx:   String
+    asset:            { type: String, index: { unique: true } },
+    assetamount:      Number,
+    assetlabel:       {type: String, default: ""},
+    token:            String,
+    tokenamount:      Number,
+    issuancetx:       String,
+    reissuedamount:   { type: Number, default: 0},
+    destroyedamount:  { type: Number, default: 0}
 });
 
 // Asset model used for saving and/or lookups

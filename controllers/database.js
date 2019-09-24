@@ -67,9 +67,9 @@ async function save_asset(asset) {
 
 // Create new asset using the Asset model and call save method,
 // or add reissuance amount to existing asset
-async function new_asset(asset, assetamount, assetlabel, token, tokenamount, issuancetxid, isreissuance) {
-    if (!isreissuance) {
-      existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
+async function new_asset(asset, assetamount, assetlabel, token, tokenamount, issuancetxid, isreissuance, destroy=false) {
+    if (!isreissuance && !destroy) {
+        existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
         if (existing_asset) {
             return existing_asset;
         }
@@ -83,12 +83,17 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
         });
         return await save_asset(newasset);
     }
-    // Update existing asset's assetamount
-    existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount}});
-    if (!existing_asset) {
-        throw("Failed to find asset "+asset+" for reissuance.");
+    if (destroy) {
+        existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":-assetamount,"destroyedamount":assetamount}});
+        console.log("Asset " + asset + " destroy recorded.")
+    } else {
+        // Must be reissuance -> Update existing asset's assetamount
+        existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount,"reissuedamount":assetamount}});
+        console.log("Asset " + asset + " reissuance recorded.")
     }
-    console.log("Asset " + asset + " reissuance recorded.")
+    if (!existing_asset) {
+        throw("Failed to find asset "+asset+" for reissuance/destruction.");
+    }
     return existing_asset
 }
 
@@ -273,7 +278,7 @@ module.exports = {
                 await new_block(blockhash, height, result.getblock);
                 // Get block transactions
                 for (var i = 0; i < result.transactions.length; i++) {
-                    // Check for issuance/reissuance
+                    // Check for asset issuance/reissuance
                     if (result.transactions[i]["vin"][0]["issuance"] != undefined) {
                         await new_asset(
                           result.transactions[i]["vin"][0]["issuance"]["asset"],
@@ -284,6 +289,11 @@ module.exports = {
                           result.transactions[i]["txid"],
                           result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
                         )
+                    }
+                    // Check for asset destroy transaction -> if OP_RETURN vout exists && not coinbase tx
+                    vout = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
+                    if (vout != null && result.transactions[i]["vin"][0]["coinbase"] == undefined) {
+                        await new_asset(vout["asset"],vout["value"],"","","","","",true)
                     }
                     // save Txs
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
