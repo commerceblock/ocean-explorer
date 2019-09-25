@@ -15,7 +15,7 @@ var AssetSchema = new Schema({
     assetamount:      { type: Number, default: 0},
     assetlabel:       { type: String, default: ""},
     token:            String,
-    tokenamount:      {type: Number, default: 0},
+    tokenamount:      { type: Number, default: 0},
     issuancetx:       String,
     reissuedamount:   { type: Number, default: 0},
     destroyedamount:  { type: Number, default: 0}
