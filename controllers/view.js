@@ -193,28 +193,28 @@ module.exports = {
     loadSearch: function(req, res, next) {
         var query = req.body.query.toLowerCase();
         if (query.length == 64) {
-          // Try find tx, block or asset
-          dbApi.get_tx(query).then(function(tx) {
-              if (tx) {
-                  res.redirect("/tx/" + query);
-                  return;
-              }
-          }).catch(function(err) {});
-          dbApi.get_block_hash(query).then(function(blockByHash) {
-              if (blockByHash) {
-                  res.redirect("/block/" + query);
-                  return;
-              }
-          }).catch(function(err) {});
-          dbApi.get_asset(query).then(function(asset) {
-              if (asset) {
-                // res.redirect("/asset/"+query);
-                res.locals.userMessage = "Asset page coming soon!";
-                return;
-              }
-          }).catch(function(err) {});
-          res.locals.userMessage = "No results found for query: " + query;
-          return next();
+            // Try find tx, block or asset
+            dbApi.get_tx(query).then(function(tx) {
+                if (tx) {
+                    res.redirect("/tx/" + query);
+                    return;
+                }
+            }).catch(function(err) {});
+            dbApi.get_block_hash(query).then(function(blockByHash) {
+                if (blockByHash) {
+                    res.redirect("/block/" + query);
+                    return;
+                }
+            }).catch(function(err) {});
+            dbApi.get_asset(query).then(function(asset) {
+                if (asset) {
+                    // res.redirect("/asset/"+query);
+                    res.locals.userMessage = "Asset page coming soon!";
+                    return;
+                }
+            }).catch(function(err) {});
+            res.locals.userMessage = "No results found for query: " + query;
+            return next();
         } else if (!isNaN(query)) {
             dbApi.get_block_height(parseInt(query)).then(function(blockByHeight) {
                 if (blockByHeight) {

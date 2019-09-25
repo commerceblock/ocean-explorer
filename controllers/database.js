@@ -20,7 +20,7 @@ async function save_block(block) {
     newblock = await block.save();
     console.log("Block " + newblock.height + " saved.");
     return newblock;
-  }
+}
 
 // Create new block using the Block model and call save method
 async function new_block(blockhash, height, blockdata) {
@@ -314,9 +314,9 @@ module.exports = {
                           result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
                         )
                     }
-                    // Check for asset destroy transaction -> if OP_RETURN vout exists && not coinbase tx
+                    // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue 
                     vout = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
-                    if (vout != null && result.transactions[i]["vin"][0]["coinbase"] == undefined) {
+                    if (vout != null && vout["value"] > 0) {
                         await new_asset(vout["asset"],vout["value"],"","","","","",true)
                     }
                     // save Txs

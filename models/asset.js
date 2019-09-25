@@ -1,7 +1,7 @@
 /*
  * @asset.js Asset Model for Mongo database based on mongoose
  *
- * @author Nikolaos Kostoulas 2018
+ * @author Tomos Wootton 2018
  *
  */
 
@@ -9,7 +9,7 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
 // Asset schema
-// Indices used:
+// Indices used: asset
 var AssetSchema = new Schema({
     asset:            { type: String, index: { unique: true } },
     assetamount:      Number,

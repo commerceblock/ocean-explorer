@@ -2,12 +2,15 @@
  * @api.js Main Api controller
  * Functionality to handle http api requests via the router
  * Functionality to get information from database and return as JSON object
+ *
+ * @author Tomos Wootton 2019
+ *
  */
 
 var dbApi = require("../controllers/database");
 
 module.exports = {
-   // Get assets data from blockchain info and render mempool page
+   // Get assets data and dump JSON
    loadAssets: function(req, res, next) {
         dbApi.get_all_assets().then(function(assets) {
             if (!assets) {
