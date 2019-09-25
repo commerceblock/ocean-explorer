@@ -201,6 +201,18 @@ module.exports = {
             });
         });
     },
+    // Get all assets from Assets collection
+    get_all_assets: function(cb) {
+        return new Promise(function(resolve, reject) {
+            Asset.find({}, function(error, assets) {
+              if (error) {
+                  reject(error);
+                  return;
+              }
+              resolve(assets);
+            });
+          });
+    },
     // Get blockchain info from Info collection - Info collection should only have 1 entry
     get_blockchain_info: function(cb) {
         return new Promise(function(resolve, reject) {
