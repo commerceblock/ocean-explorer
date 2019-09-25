@@ -12,8 +12,8 @@ var mongoose = require('mongoose')
 // Indices used: asset
 var AssetSchema = new Schema({
     asset:            { type: String, index: { unique: true } },
-    assetamount:      Number,
-    assetlabel:       {type: String, default: ""},
+    assetamount:      { type: Number, default: 0},
+    assetlabel:       { type: String, default: ""},
     token:            String,
     tokenamount:      {type: Number, default: 0},
     issuancetx:       String,
