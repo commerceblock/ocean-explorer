@@ -51,7 +51,7 @@ router.get("/blocks", function(req, res, next) {
 // Search redirect routing
 router.post("/search", function(req, res, next) {
 	if (!req.body.query) {
-        res.locals.userMessage = "Enter a block height, block hash, or transaction id.";
+        res.locals.userMessage = "Enter a block height, block hash, asset or transaction id.";
 		return next();
 	}
 
@@ -102,7 +102,20 @@ router.get("/block/:blockHash", function(req, res, next) {
 	return next();
 }, view.loadBlockHash, view.loadIndex);
 
+// Asset by asset (id) routing
+router.get("/asset/:asset", function(req, res, next) {
+  res.locals.assetid = req.params.asset
+
+	return next();
+}, view.loadAsset);
+
 // Assets page
+router.get("/assets", function(req, res, next) {
+
+	return next();
+}, view.loadAssets);
+
+// API assets
 router.get("/api/assets", function(req, res, next) {
 
     return next();

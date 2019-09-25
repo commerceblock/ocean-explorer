@@ -193,35 +193,28 @@ module.exports = {
     loadSearch: function(req, res, next) {
         var query = req.body.query.toLowerCase();
         if (query.length == 64) {
-            dbApi.get_tx(query).then(function(tx) {
-                if (tx) {
-                    res.redirect("/tx/" + query);
-                    return;
-                }
-                dbApi.get_block_hash(query).then(function(blockByHash) {
-                    if (blockByHash) {
-                        res.redirect("/block/" + query);
-                        return;
-                    }
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                }).catch(function(err) {
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                });
-            }).catch(function(err) {
-                dbApi.get_block_hash(query).then(function(blockByHash) {
-                    if (blockByHash) {
-                        res.redirect("/block/" + query);
-                        return;
-                    }
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                }).catch(function(err) {
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                });
-            });
+          // Try find tx, block or asset
+          dbApi.get_tx(query).then(function(tx) {
+              if (tx) {
+                  res.redirect("/tx/" + query);
+                  return;
+              }
+          }).catch(function(err) {});
+          dbApi.get_block_hash(query).then(function(blockByHash) {
+              if (blockByHash) {
+                  res.redirect("/block/" + query);
+                  return;
+              }
+          }).catch(function(err) {});
+          dbApi.get_asset(query).then(function(asset) {
+              if (asset) {
+                // res.redirect("/asset/"+query);
+                res.locals.userMessage = "Asset page coming soon!";
+                return;
+              }
+          }).catch(function(err) {});
+          res.locals.userMessage = "No results found for query: " + query;
+          return next();
         } else if (!isNaN(query)) {
             dbApi.get_block_height(parseInt(query)).then(function(blockByHeight) {
                 if (blockByHeight) {
@@ -362,6 +355,35 @@ module.exports = {
             res.render("blocks");
         });
     },
+    loadAsset: function(req, res) {
+        dbApi.get_asset(res.locals.assetid).then(function(asset) {
+            if (!asset) {
+                res.locals.userMessage = "Failed to load asset "+ asset;
+                return next();
+            }
+            res.locals.asset = asset
+        }).catch(function(errorAsset) {
+            res.locals.userMessage = errorAsset;
+            return next();
+        });
+    },
+    // Load assets
+    loadAssets: function(req, res){
+        dbApi.get_all_assets().then(function(assets) {
+            if (!assets) {
+                res.locals.userMessage = "Unable to load assets";
+                return next();
+            }
+            res.locals.assets = [];
+            assets.forEach ( asset => {
+                res.locals.assets.push(asset);
+            });
+            res.render("assets")
+        }).catch(function(errorAsset) {
+           res.locals.userMessage = errorAsset;
+           return next();
+        });
+    },
     // Load index page - Display the 10 latest blocks
     loadIndex: function(req, res) {
         dbApi.get_blockchain_info().then(function(info) {
@@ -394,5 +416,6 @@ module.exports = {
             res.locals.userMessage = err;
             res.render("index");
         });
-    }
+    },
+
 }

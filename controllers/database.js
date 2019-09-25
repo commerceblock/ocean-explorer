@@ -201,6 +201,18 @@ module.exports = {
             });
         });
     },
+    // Get asset from Assets collection using assetid
+    get_asset: function(assetid, cb) {
+        return new Promise(function(resolve, reject) {
+            Asset.findOne({asset: assetid}, function(error, asset) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(asset);
+            });
+        });
+    },
     // Get all assets from Assets collection
     get_all_assets: function(cb) {
         return new Promise(function(resolve, reject) {
