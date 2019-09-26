@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": false,
   "scripts": {
-    "start": "NODE_ENV=production node ./bin/www"
+    "start": "NODE_ENV=production node ./bin/www",
+    "dev": "NODE_ENV=development node ./bin/www"
   },
   "dependencies": {
     "bitcoin-core": "2.0.0",
