@@ -355,20 +355,23 @@ module.exports = {
             res.render("blocks");
         });
     },
-    loadAsset: function(req, res) {
+    loadAsset: function(req, res, next) {
         dbApi.get_asset(res.locals.assetid).then(function(asset) {
             if (!asset) {
-                res.locals.userMessage = "Failed to load asset "+ asset;
+                res.locals.userMessage = "Failed to load asset "+ res.locals.assetid;
                 return next();
             }
             res.locals.asset = asset
+            // res.render("assets")
+            res.locals.userMessage = "Asset page coming soon!";
+            res.render("index")
         }).catch(function(errorAsset) {
             res.locals.userMessage = errorAsset;
             return next();
         });
     },
     // Load assets
-    loadAssets: function(req, res){
+    loadAssets: function(req, res, next){
         dbApi.get_all_assets().then(function(assets) {
             if (!assets) {
                 res.locals.userMessage = "Unable to load assets";
@@ -378,10 +381,27 @@ module.exports = {
             assets.forEach ( asset => {
                 res.locals.assets.push(asset);
             });
-            res.render("assets")
+            // res.render("assets")
+            res.locals.userMessage = "Assets page coming soon!";
+            res.render("index")
         }).catch(function(errorAsset) {
            res.locals.userMessage = errorAsset;
            return next();
+        });
+    },
+    loadAddress: function(req, res, next) {
+        dbApi.get_address_txs(res.locals.address).then(function(addrTxs) {
+            if (!addrTxs) {
+                res.locals.userMessage = "Failed to load address "+res.locals.address+" transactions.";
+                return next();
+            }
+            res.locals.addrTxs = addrTxs
+            // res.render("address")
+            res.locals.userMessage = "Address page coming soon!";
+            res.render("index")
+        }).catch(function(errorAddr) {
+            res.locals.userMessage = errorAddr;
+            return next();
         });
     },
     // Load index page - Display the 10 latest blocks

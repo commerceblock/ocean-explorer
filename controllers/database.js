@@ -86,14 +86,18 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
     }
     if (destroy) {
         existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":-assetamount,"destroyedamount":assetamount}});
+        if (!existing_asset) {
+            throw("Failed to find asset "+asset+" for destruction.");
+        }
         console.log("Asset " + asset + " destroy recorded.")
     } else {
         // Must be reissuance -> Update existing asset's assetamount
         existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount,"reissuedamount":assetamount}});
+        if (!existing_asset) {
+            throw("Failed to find asset "+asset+" for reissuance.");
+        }
         console.log("Asset " + asset + " reissuance recorded.")
     }
-    if (!existing_asset)
-        throw("Failed to find asset "+asset+" for reissuance/destruction.");
     return existing_asset
 }
 
@@ -113,17 +117,15 @@ async function new_addr(vin, vout) {
     // Set vin's isSpent=true
     if (vin.length) {
         for (const inp of vin) {
-            update_inp = await Addr.findOneAndUpdate({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}});
-            if (update_inp)
-                console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.")
+            await Addr.findOneAndUpdate({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
+            ? console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.") : null;
         }
     }
     // Save vout's
     if (vout.length) {
         newaddrs = []
         for (const outp of vout) {
-            // Check if addr entry exists
-            addr = await Addr.findOne({"txid":vout["txid"],"vout":vout["vout"]});
+            addr = await Addr.findOne({"txid":vout["txid"],"vout":vout["vout"]});  // Check if addr entry exists
             if (addr)
                 continue;
             var newaddr = new Addr({
@@ -265,6 +267,18 @@ module.exports = {
               resolve(assets);
             });
           });
+    },
+    // Get Txs for address from Addr collection using txid and vout
+    get_address_txs: function(address, cb) {
+        return new Promise(function(resolve, reject) {
+            Addr.find({"address":address}, function(error, addrTxs) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(addrTxs);
+            });
+        });
     },
     // Get blockchain info from Info collection - Info collection should only have 1 entry
     get_blockchain_info: function(cb) {
