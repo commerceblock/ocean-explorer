@@ -121,4 +121,10 @@ router.get("/api/assets", function(req, res, next) {
     return next();
 }, api.loadAssets);
 
+// API address
+router.get("/api/address:address", function(req, res, next) {
+
+    return next();
+}, api.loadAddress);
+
 module.exports = router;

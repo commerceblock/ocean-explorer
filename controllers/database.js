@@ -11,6 +11,7 @@ var rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
   , Asset = require("../models/asset")
+  , Addr = require("../models/addr")
   , Info = require("../models/info")
   , env = require("../helpers/env")
   , bitcoin = require("bitcoin-core");
@@ -91,10 +92,50 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
         existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount,"reissuedamount":assetamount}});
         console.log("Asset " + asset + " reissuance recorded.")
     }
-    if (!existing_asset) {
+    if (!existing_asset)
         throw("Failed to find asset "+asset+" for reissuance/destruction.");
-    }
     return existing_asset
+}
+
+
+
+// Save new addr using the Address model
+async function save_addr(addrs) {
+    for (const addr of addrs) {
+        newaddr = await addr.save();
+    }
+    console.log("Tx " + newaddr.txid + " vout adderesses saved.");
+    return newaddr;
+}
+
+// Create new address using the Addr model and call save method
+async function new_addr(vin, vout) {
+    // Set vin's isSpent=true
+    if (vin.length) {
+        for (const inp of vin) {
+            update_inp = await Addr.findOneAndUpdate({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}});
+            if (update_inp)
+                console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.")
+        }
+    }
+    // Save vout's
+    if (vout.length) {
+        newaddrs = []
+        for (const outp of vout) {
+            // Check if addr entry exists
+            addr = await Addr.findOne({"txid":vout["txid"],"vout":vout["vout"]});
+            if (addr)
+                continue;
+            var newaddr = new Addr({
+                address: outp["address"][0],
+                txid:    outp["txid"],
+                vout:    outp["vout"]
+            });
+            newaddrs.push(newaddr)
+        }
+        return await save_addr(newaddrs);
+    }
+    return
 }
 
 // Save new info using the Info model
@@ -314,13 +355,24 @@ module.exports = {
                           result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
                         )
                     }
-                    // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue 
-                    vout = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
-                    if (vout != null && vout["value"] > 0) {
-                        await new_asset(vout["asset"],vout["value"],"","","","","",true)
+                    // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
+                    vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
+                    if (vout_OP_RET != null && vout_OP_RET["value"] > 0) {
+                        await new_asset(vout_OP_RET["asset"],vout_OP_RET["value"],"","","","","",true)
                     }
-                    // save Txs
+                    // Save Txs
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
+                    // Save Address
+                    // Get txid and vout of input txs that are not coinbase
+                    vin = result.transactions[i]["vin"].filter(item => item["coinbase"] == undefined)
+                        .map(item => {return({txid:item["txid"],vout:item["vout"]})});
+                    // Get addresses, txid and vin of txs
+                    vout = result.transactions[i]["vout"].map(item => {return({
+                        address:item["scriptPubKey"]["addresses"] ? item["scriptPubKey"]["addresses"] : "",
+                        txid:result.transactions[i]["txid"],
+                        vout:item["n"]
+                    })});
+                    await new_addr(vin,vout)
                 }
 
                 // Get blockchain info and save
