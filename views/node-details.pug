@@ -29,10 +29,23 @@ block content
                         a(href="/block/" + bestblockhash) #{bestblockhash}
 
                 tr
+                    th(class="table-active properties-header") Mainstay Position
+                    td(class="monospace")
+                        a(href="http://" + env.attestation.host + "/position/" + env.attestation.position) #{env.attestation.position}
+
+                tr
                     th(class="table-active properties-header") Latest Attested Height
                     td(class="monospace")
                         if (attestedheight !== undefined)
                             a(href="/block-height/" + attestedheight) #{attestedheight}
+                        else
+                            strong(class="text-danger") Attestation Unavailable
+
+                tr
+                    th(class="table-active properties-header") Latest Attestation Txid
+                    td(class="monospace")
+                        if (attestationtxid !== undefined)
+                            a(href="http://" + env.attestation.host + "/tx/" + attestationtxid) #{attestationtxid}
                         else
                             strong(class="text-danger") Attestation Unavailable
 
