@@ -10,19 +10,32 @@
 var dbApi = require("../controllers/database");
 
 module.exports = {
-   // Get assets data and dump JSON
-   loadAssets: function(req, res, next) {
-        dbApi.get_all_assets().then(function(assets) {
-            if (!assets) {
-                res.send("Unable to load assets.");
+   // Get single asset data and dump JSON
+   loadAsset: function(req, res, next) {
+        dbApi.get_asset(req.params.asset).then(function(asset) {
+            if (!asset) {
+                res.send("Unable to load asset information.");
                 return next();
             }
-            res.send(assets)
+            res.send(asset)
         }).catch(function(errorAsset) {
             res.locals.userMessage = errorAsset;
             return next();
         });
     },
+    // Get assets data and dump JSON
+    loadAssets: function(req, res, next) {
+         dbApi.get_all_assets().then(function(assets) {
+             if (!assets) {
+                 res.send("Unable to load assets.");
+                 return next();
+             }
+             res.send(assets)
+         }).catch(function(errorAssets) {
+             res.locals.userMessage = errorAssets;
+             return next();
+         });
+     },
     // Get address data and dump JSON
     loadAddress: function(req, res, next) {
          dbApi.get_address_txs(req.params.address).then(function(addrTxs) {

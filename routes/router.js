@@ -121,6 +121,12 @@ router.get("/address/:address", function(req, res, next) {
     return next();
 }, view.loadAddress, view.loadIndex);
 
+// API single asset
+router.get("/api/asset/:asset", function(req, res, next) {
+
+    return next();
+}, api.loadAsset);
+
 // API assets
 router.get("/api/assets", function(req, res, next) {
 
