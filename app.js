@@ -100,27 +100,44 @@ app.use(function(req, res, next) {
 	}
 	res.locals.env = env;
 
-    https.get(mainstayConnect, function(res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            var parsedResponse
-            try {
-                parsedResponse = JSON.parse(chunk)
-                global.attestedhash = parsedResponse["response"]["commitment"]
-                dbApi.get_block_hash(attestedhash).then(function(blockByHash) {
-                    if (blockByHash) {
-                        global.attestedheight = blockByHash.height
+    dbApi.get_blockchain_info().then(function(info) {
+        if (info) {
+            global.attestedheight = info.latestAttestedHeight;
+            global.attestationtxid = info.latestAttestationTxid;
+
+            https.get(mainstayConnect, function(res) {
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    var parsedResponse
+                    try {
+                        parsedResponse = JSON.parse(chunk)
+                        attestedhash = parsedResponse["response"]["commitment"]
+                        dbApi.get_block_hash(attestedhash).then(function(blockByHash) {
+                            if (blockByHash) {
+                                global.attestedheight = blockByHash.height
+                                global.attestationtxid = parsedResponse["response"]["txid"]
+                            }
+                        }).catch(function(err) {
+                            console.log("ERROR ATTESTATION_API: Failed getting block for commitment")
+                        });
+                    } catch(err) {
+                        console.log("ERROR ATTESTATION_API: Failed parsing http response")
                     }
-                }).catch(function(err) {
-                    console.log("ERROR ATTESTATION_API: Failed getting block for commitment")
                 });
-            } catch(err) {
-                console.log("ERROR ATTESTATION_API: Failed parsing http response")
-            }
-        });
-    }).on('error', function(err) {
-        console.log("Error ATTESTATION_API: Request Failed: " + err)
-    }).end();
+            }).on('error', function(err) {
+                console.log("ERROR ATTESTATION_API: Request Failed: " + err)
+            }).end();
+
+            info.latestAttestedHeight = global.attestedheight;
+            info.latestAttestationTxid = global.attestationtxid;
+            dbApi.update_blockchain_info(info).then(function(updated) {
+            }).catch(function(err) {
+                console.log("ERROR: Could not save blockchain info for attestation update " + err);
+            });
+        }
+    }).catch(function(err) {
+        console.log("ERROR: Could not get blockchain info to update attestation " + err);
+    });
 
 	next();
 });

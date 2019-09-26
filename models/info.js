@@ -13,6 +13,8 @@ var mongoose = require('mongoose')
 var InfoSchema = new Schema({
     chain:          { type: String, index: { unique: true } },
     latestStoredHeight: Number,
+    latestAttestedHeight: Number,
+    latestAttestationTxid: String,
     blockchaininfo: Object,
     networkinfo:    Object,
     nettotals:      Object,

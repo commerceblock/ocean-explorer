@@ -307,8 +307,20 @@ module.exports = {
             });
         });
     },
+    // Update blockchain info attestation information
+    update_blockchain_info: function(info, cb) {
+        return new Promise(function(resolve, reject) {
+            save_info(info, function(error) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(true);
+            });
+        });
+    },
     // Update blockchain info in the Info collection by doing multiple rpc calls to client chain
-    update_blockchain_info: async function(height, cb) {
+    update_blockchain_info_rpc: async function(height, cb) {
         try {
             // establish rpc connection to client
             client = new bitcoin({
@@ -406,7 +418,7 @@ module.exports = {
                 }
 
                 // Get blockchain info and save
-                await module.exports.update_blockchain_info(height, function(infoError) {
+                await module.exports.update_blockchain_info_rpc(height, function(infoError) {
                     if (infoError) {
                         cb(infoError);
                     }
