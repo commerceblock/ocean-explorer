@@ -91,7 +91,6 @@ cron.schedule("* * * * *",()=> {
         if (info) {
             global.attestedheight = info.latestAttestedHeight;
             global.attestationtxid = info.latestAttestationTxid;
-
             https.get(mainstayConnect, function(res) {
                 res.setEncoding('utf8');
                 res.on('data', function (chunk) {
@@ -103,6 +102,12 @@ cron.schedule("* * * * *",()=> {
                             if (blockByHash) {
                                 global.attestedheight = blockByHash.height
                                 global.attestationtxid = parsedResponse["response"]["txid"]
+                                info.latestAttestedHeight = global.attestedheight;
+                                info.latestAttestationTxid = global.attestationtxid;
+                                dbApi.update_blockchain_info(info).then(function(updated) {
+                                }).catch(function(err) {
+                                    console.log("ERROR: Could not save blockchain info for attestation update " + err);
+                                });
                             }
                         }).catch(function(err) {
                             console.log("ERROR ATTESTATION_API: Failed getting block for commitment")
@@ -114,13 +119,6 @@ cron.schedule("* * * * *",()=> {
             }).on('error', function(err) {
                 console.log("ERROR ATTESTATION_API: Request Failed: " + err)
             }).end();
-
-            info.latestAttestedHeight = global.attestedheight;
-            info.latestAttestationTxid = global.attestationtxid;
-            dbApi.update_blockchain_info(info).then(function(updated) {
-            }).catch(function(err) {
-                console.log("ERROR: Could not save blockchain info for attestation update " + err);
-            });
         }
     }).catch(function(err) {
         console.log("ERROR: Could not get blockchain info to update attestation " + err);
