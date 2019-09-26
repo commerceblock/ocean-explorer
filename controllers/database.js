@@ -268,7 +268,7 @@ module.exports = {
             });
           });
     },
-    // Get Txs for address from Addr collection using txid and vout
+    // Get Txs for address from Addr collection
     get_address_txs: function(address, cb) {
         return new Promise(function(resolve, reject) {
             Addr.find({"address":address}, function(error, addrTxs) {
@@ -280,7 +280,7 @@ module.exports = {
             });
         });
     },
-    // Get Utxos for address from Addr collection using txid and vout
+    // Get Utxos for address from Addr collection
     get_address_utxos: function(address, cb) {
         return new Promise(function(resolve, reject) {
             Addr.find({"address":address,"isSpent":true}, function(error, addrUtxos) {

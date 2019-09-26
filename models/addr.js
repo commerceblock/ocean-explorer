@@ -8,12 +8,12 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
-// Asset schema
-// Indices used: asset
+// Address schema
+// Indices used: address, vout
 var AddrSchema = new Schema({
     address:    { type: String, index: true },
     txid:       String,
-    vout:       { type: Number, index: true}, 
+    vout:       { type: Number, index: true},
     isSpent:    { type: Boolean, default: false }
 });
 
