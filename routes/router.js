@@ -14,10 +14,6 @@ const OFFSET_DEFAULT = 0;   // default offest limit for the first blockheight to
 
 // Index page
 router.get("/", function(req, res, next) {
-	if (client == null) {
-		res.locals.userMessage = "Unable to connect to Ocean Node";
-		res.render("index");
-	}
     return next();
 }, view.loadIndex);
 

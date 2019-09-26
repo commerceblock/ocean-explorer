@@ -34,19 +34,18 @@ html
 						i(class="fa fa-navicon")
 
 				div(class="collapse navbar-collapse", id="navbarNav")
-					if (client)
-						ul(class="navbar-nav mr-auto")
-							li(class="nav-item")
-								a(href="/blocks", class="nav-link") Blocks
-							li(class="nav-item")
-								a(href="/mempool-summary", class="nav-link") Mempool
-							li(class="nav-item")
-								a(href="/node-details", class="nav-link") Status
-						form(method="post", action="/search", class="form-inline")
-							div(class="input-group")
-								input(type="text", class="form-control form-control-sm", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
-								span(class="input-group-btn")
-									input(type="submit", class="btn btn-primary", value="Search")
+					ul(class="navbar-nav mr-auto")
+						li(class="nav-item")
+							a(href="/blocks", class="nav-link") Blocks
+						li(class="nav-item")
+							a(href="/mempool-summary", class="nav-link") Mempool
+						li(class="nav-item")
+							a(href="/node-details", class="nav-link") Status
+					form(method="post", action="/search", class="form-inline")
+						div(class="input-group")
+							input(type="text", class="form-control form-control-sm", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
+							span(class="input-group-btn")
+								input(type="submit", class="btn btn-primary", value="Search")
 		div(class="main-content")
 
 			div(class="container")
