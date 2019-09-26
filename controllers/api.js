@@ -35,5 +35,17 @@ module.exports = {
              res.locals.userMessage = errorAddress;
              return next();
          });
-     }
+     },
+     loadUtxos: function(req, res, next) {
+          dbApi.get_address_utxos(req.params.address).then(function(addrUtxos) {
+              if (!addrUtxos) {
+                  res.send("Unable to load address information.");
+                  return next();
+              }
+              res.send(addrUtxos)
+          }).catch(function(errorAddress) {
+              res.locals.userMessage = errorAddress;
+              return next();
+          });
+      }
 }

@@ -127,12 +127,17 @@ router.get("/api/assets", function(req, res, next) {
     return next();
 }, api.loadAssets);
 
-// API address
+// API address txs
 router.get("/api/address/:address", function(req, res, next) {
 
     return next();
 }, api.loadAddress);
 
+// API address utxos
+router.get("/api/addressutxos/:address", function(req, res, next) {
+
+    return next();
+}, api.loadUtxos);
 
 
 module.exports = router;

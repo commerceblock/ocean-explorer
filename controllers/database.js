@@ -280,6 +280,18 @@ module.exports = {
             });
         });
     },
+    // Get Utxos for address from Addr collection using txid and vout
+    get_address_utxos: function(address, cb) {
+        return new Promise(function(resolve, reject) {
+            Addr.find({"address":address,"isSpent":true}, function(error, addrUtxos) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(addrUtxos);
+            });
+        });
+    },
     // Get blockchain info from Info collection - Info collection should only have 1 entry
     get_blockchain_info: function(cb) {
         return new Promise(function(resolve, reject) {
