@@ -210,11 +210,23 @@ module.exports = {
                 if (asset) {
                     // res.redirect("/asset/"+query);
                     res.locals.userMessage = "Asset page coming soon!";
+                    res.render("index")
                     return;
                 }
             }).catch(function(err) {});
             res.locals.userMessage = "No results found for query: " + query;
             return next();
+        } else if (query.length == 33) {
+            dbApi.get_address_txs(query).then(function(addrTxs) {
+                if (addrTxs) {
+                    // res.redirect("/address/"+query);
+                    res.locals.userMessage = "Address page coming soon!";
+                    res.render("index")
+                    return;
+                }
+                res.locals.userMessage = "No results found for query: " + query;
+                return next();
+            })
         } else if (!isNaN(query)) {
             dbApi.get_block_height(parseInt(query)).then(function(blockByHeight) {
                 if (blockByHeight) {
