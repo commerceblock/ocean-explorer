@@ -19,6 +19,7 @@ var momentDurationFormat = require("moment-duration-format");
 var baseActionsRouter = require('./routes/router');
 var serveStatic = require('serve-static')
 var mongoose = require('mongoose')
+const cron = require('node-cron')
 
 var app = express();
 
@@ -81,25 +82,8 @@ mongoose.connect(dbConnect, {
     }
 });
 
-var mainstayConnect = 'https://' + env.attestation.host +
-    '/api/v1/latestcommitment?position=' + env.attestation.position;
-
-app.use(function(req, res, next) {
-	if (env.ocean && env.ocean.rpc) {
-		res.locals.host = env.ocean.host;
-		res.locals.port  = env.ocean.port;
-		res.locals.username = env.ocean.rpc.username;
-
-		global.client = new bitcoin({
-	  		host: env.ocean.host,
-	  		port: env.ocean.port,
-	  		username: env.ocean.rpc.username,
-	  		password: env.ocean.rpc.password,
-	  		timeout: 5000
-	    });
-	}
-	res.locals.env = env;
-
+// Update attestation information once a minute
+cron.schedule("* * * * *",()=> {
     dbApi.get_blockchain_info().then(function(info) {
         if (info) {
             global.attestedheight = info.latestAttestedHeight;
@@ -138,6 +122,26 @@ app.use(function(req, res, next) {
     }).catch(function(err) {
         console.log("ERROR: Could not get blockchain info to update attestation " + err);
     });
+})
+
+var mainstayConnect = 'https://' + env.attestation.host +
+    '/api/v1/latestcommitment?position=' + env.attestation.position;
+
+app.use(function(req, res, next) {
+	if (env.ocean && env.ocean.rpc) {
+		res.locals.host = env.ocean.host;
+		res.locals.port  = env.ocean.port;
+		res.locals.username = env.ocean.rpc.username;
+
+		global.client = new bitcoin({
+            host: env.ocean.host,
+            port: env.ocean.port,
+            username: env.ocean.rpc.username,
+            password: env.ocean.rpc.password,
+            timeout: 5000
+	    });
+	}
+	res.locals.env = env;
 
 	next();
 });
