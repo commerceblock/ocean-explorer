@@ -6,7 +6,8 @@
 
 var express = require('express')
   , router = express.Router()
-  , view = require("../controllers/view");
+  , view = require("../controllers/view")
+  , api = require("../controllers/api");
 
 const LIMIT_DEFAULT = 20;   // default limit for the number of blocks/transactions shown per page
 const OFFSET_DEFAULT = 0;   // default offest limit for the first blockheight to show per page
@@ -50,12 +51,28 @@ router.get("/blocks", function(req, res, next) {
 // Search redirect routing
 router.post("/search", function(req, res, next) {
 	if (!req.body.query) {
-        res.locals.userMessage = "Enter a block height, block hash, or transaction id.";
+        res.locals.userMessage = "Enter a block height, block hash, asset or transaction id.";
 		return next();
 	}
 
     return next();
 }, view.loadSearch, view.loadIndex);
+
+// Transaction page
+router.get("/tx/:transactionId", function(req, res, next) {
+	var txid = req.params.transactionId;
+
+	var output = -1;
+	if (req.query.output) {
+		output = parseInt(req.query.output);
+	}
+
+	res.locals.txid = txid;
+	res.locals.output = output;
+	res.locals.result = {};
+
+    return next();
+}, view.loadTransaction, view.loadIndex);
 
 // Block by blockheight routing
 router.get("/block-height/:blockHeight", function(req, res, next) {
@@ -85,20 +102,23 @@ router.get("/block/:blockHash", function(req, res, next) {
 	return next();
 }, view.loadBlockHash, view.loadIndex);
 
-// Transaction page
-router.get("/tx/:transactionId", function(req, res, next) {
-	var txid = req.params.transactionId;
+// Asset by asset (id) routing
+router.get("/asset/:asset", function(req, res, next) {
+  res.locals.assetid = req.params.asset
 
-	var output = -1;
-	if (req.query.output) {
-		output = parseInt(req.query.output);
-	}
+	return next();
+}, view.loadAsset);
 
-	res.locals.txid = txid;
-	res.locals.output = output;
-	res.locals.result = {};
+// Assets page
+router.get("/assets", function(req, res, next) {
+
+	return next();
+}, view.loadAssets);
+
+// API assets
+router.get("/api/assets", function(req, res, next) {
 
     return next();
-}, view.loadTransaction, view.loadIndex);
+}, api.loadAssets);
 
 module.exports = router;

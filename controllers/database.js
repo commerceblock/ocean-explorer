@@ -10,6 +10,7 @@
 var rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
+  , Asset = require("../models/asset")
   , Info = require("../models/info")
   , env = require("../helpers/env")
   , bitcoin = require("bitcoin-core");
@@ -55,6 +56,45 @@ async function new_tx(txid, txdata, blockheight, blockhash) {
         blockhash: blockhash
     });
     return await save_tx(newtx);
+}
+
+// Save new asset using the Asset model
+async function save_asset(asset) {
+    newasset = await asset.save();
+    console.log("Asset " + newasset.asset + " saved.");
+    return newasset;
+}
+
+// Create new asset using the Asset model and call save method,
+// or add reissuance amount to existing asset
+async function new_asset(asset, assetamount, assetlabel, token, tokenamount, issuancetxid, isreissuance, destroy=false) {
+    if (!isreissuance && !destroy) {
+        existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
+        if (existing_asset) {
+            return existing_asset;
+        }
+        var newasset = new Asset({
+            asset: asset,
+            assetamount: assetamount,
+            assetlabel: assetlabel,
+            token: token,
+            tokenamount: tokenamount,
+            issuancetx: issuancetxid
+        });
+        return await save_asset(newasset);
+    }
+    if (destroy) {
+        existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":-assetamount,"destroyedamount":assetamount}});
+        console.log("Asset " + asset + " destroy recorded.")
+    } else {
+        // Must be reissuance -> Update existing asset's assetamount
+        existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount,"reissuedamount":assetamount}});
+        console.log("Asset " + asset + " reissuance recorded.")
+    }
+    if (!existing_asset) {
+        throw("Failed to find asset "+asset+" for reissuance/destruction.");
+    }
+    return existing_asset
 }
 
 // Save new info using the Info model
@@ -161,6 +201,30 @@ module.exports = {
             });
         });
     },
+    // Get asset from Assets collection using assetid
+    get_asset: function(assetid, cb) {
+        return new Promise(function(resolve, reject) {
+            Asset.findOne({asset: assetid}, function(error, asset) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(asset);
+            });
+        });
+    },
+    // Get all assets from Assets collection
+    get_all_assets: function(cb) {
+        return new Promise(function(resolve, reject) {
+            Asset.find({}, function(error, assets) {
+              if (error) {
+                  reject(error);
+                  return;
+              }
+              resolve(assets);
+            });
+          });
+    },
     // Get blockchain info from Info collection - Info collection should only have 1 entry
     get_blockchain_info: function(cb) {
         return new Promise(function(resolve, reject) {
@@ -236,9 +300,26 @@ module.exports = {
             try{
                 // Get block and save
                 await new_block(blockhash, height, result.getblock);
-
-                // Get block transactions and save
+                // Get block transactions
                 for (var i = 0; i < result.transactions.length; i++) {
+                    // Check for asset issuance/reissuance
+                    if (result.transactions[i]["vin"][0]["issuance"] != undefined) {
+                        await new_asset(
+                          result.transactions[i]["vin"][0]["issuance"]["asset"],
+                          result.transactions[i]["vin"][0]["issuance"]["assetamount"],
+                          result.transactions[i]["vin"][0]["issuance"]["assetlabel"],
+                          result.transactions[i]["vin"][0]["issuance"]["token"],
+                          result.transactions[i]["vin"][0]["issuance"]["tokenamount"],
+                          result.transactions[i]["txid"],
+                          result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
+                        )
+                    }
+                    // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue 
+                    vout = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
+                    if (vout != null && vout["value"] > 0) {
+                        await new_asset(vout["asset"],vout["value"],"","","","","",true)
+                    }
+                    // save Txs
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
                 }
 
