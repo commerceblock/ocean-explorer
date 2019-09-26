@@ -117,23 +117,26 @@ async function new_addr(vin, vout) {
     // Set vin's isSpent=true
     if (vin.length) {
         for (const inp of vin) {
-            await Addr.findOneAndUpdate({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
+            await Addr.findOneAndUpdate({"address":vout["address"],"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
             ? console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.") : null;
         }
     }
     // Save vout's
     if (vout.length) {
         newaddrs = []
-        for (const outp of vout) {
-            addr = await Addr.findOne({"txid":vout["txid"],"vout":vout["vout"]});  // Check if addr entry exists
-            if (addr)
-                continue;
-            var newaddr = new Addr({
-                address: outp["address"][0],
-                txid:    outp["txid"],
-                vout:    outp["vout"]
-            });
-            newaddrs.push(newaddr)
+        for (const outp of vout) {                  // For each output
+            for (const addr of outp["address"]) {   // For each address
+                // Check if addr entry exists
+                existing_addr = await Addr.findOne({"address":vout["address"],"txid":vout["txid"],"vout":vout["vout"]});
+                if (existing_addr)
+                    continue
+                var newaddr = new Addr({
+                    address: addr,
+                    txid:    outp["txid"],
+                    vout:    outp["vout"]
+                });
+                newaddrs.push(newaddr)
+            }
         }
         return await save_addr(newaddrs);
     }
@@ -394,7 +397,7 @@ module.exports = {
                         .map(item => {return({txid:item["txid"],vout:item["vout"]})});
                     // Get addresses, txid and vin of txs
                     vout = result.transactions[i]["vout"].map(item => {return({
-                        address:item["scriptPubKey"]["addresses"] ? item["scriptPubKey"]["addresses"] : "",
+                        address:item["scriptPubKey"]["addresses"] ? item["scriptPubKey"]["addresses"] : " ",
                         txid:result.transactions[i]["txid"],
                         vout:item["n"]
                     })});
