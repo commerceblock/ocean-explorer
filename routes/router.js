@@ -121,6 +121,18 @@ router.get("/address/:address", function(req, res, next) {
     return next();
 }, view.loadAddress, view.loadIndex);
 
+// API single block
+router.get("/api/block/:block", function(req, res, next) {
+
+    return next();
+}, api.loadBlock);
+
+// API single tx
+router.get("/api/tx/:txid", function(req, res, next) {
+
+    return next();
+}, api.loadTx);
+
 // API single asset
 router.get("/api/asset/:asset", function(req, res, next) {
 

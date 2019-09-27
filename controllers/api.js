@@ -10,6 +10,41 @@
 var dbApi = require("../controllers/database");
 
 module.exports = {
+    // Get single block data from hash and dump JSON
+    loadBlock: function(req, res, next) {
+        try {
+            if (req.params.block.length == 64) {
+                dbApi.get_block_hash(req.params.block).then(function(block) {
+                    if (!block) {
+                        res.send("Unable to load block information.");
+                        return next();
+                    }
+                    res.send(block)
+                })
+            } else {
+                dbApi.get_block_height(req.params.block).then(function(block) {
+                    if (!block) {
+                        res.send("Unable to load block information.");
+                        return next();
+                    }
+                    res.send(block)
+                })
+            }
+        } catch (errorBlock) {
+            res.send(errorBlock);
+        }
+     },
+    loadTx: function(req, res, next) {
+         dbApi.get_tx(req.params.txid).then(function(tx) {
+             if (!tx) {
+                 res.send("Unable to load transaction information.");
+                 return next();
+             }
+             res.send(tx)
+         }).catch(function(errorTx) {
+             res.send(errorTx);
+         });
+     },
    // Get single asset data and dump JSON
    loadAsset: function(req, res, next) {
         dbApi.get_asset(req.params.asset).then(function(asset) {
@@ -19,8 +54,7 @@ module.exports = {
             }
             res.send(asset)
         }).catch(function(errorAsset) {
-            res.locals.userMessage = errorAsset;
-            return next();
+            res.send(errorAsset);
         });
     },
     // Get assets data and dump JSON
@@ -32,8 +66,7 @@ module.exports = {
              }
              res.send(assets)
          }).catch(function(errorAssets) {
-             res.locals.userMessage = errorAssets;
-             return next();
+             res.send(errorAssets);
          });
      },
     // Get address data and dump JSON
@@ -45,8 +78,7 @@ module.exports = {
              }
              res.send(addrTxs)
          }).catch(function(errorAddress) {
-             res.locals.userMessage = errorAddress;
-             return next();
+             res.send(errorAddress);
          });
      },
      loadUtxos: function(req, res, next) {
@@ -57,8 +89,7 @@ module.exports = {
               }
               res.send(addrUtxos)
           }).catch(function(errorAddress) {
-              res.locals.userMessage = errorAddress;
-              return next();
+              res.send(errorAddress);
           });
       }
 }
