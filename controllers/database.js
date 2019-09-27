@@ -396,10 +396,11 @@ module.exports = {
                     vin = result.transactions[i]["vin"].filter(item => item["coinbase"] == undefined)
                         .map(item => {return({txid:item["txid"],vout:item["vout"]})});
                     // Get addresses, txid and vin of txs
-                    vout = result.transactions[i]["vout"].map(item => {return({
-                        address:item["scriptPubKey"]["addresses"] ? item["scriptPubKey"]["addresses"] : " ",
-                        txid:result.transactions[i]["txid"],
-                        vout:item["n"]
+                    vout = result.transactions[i]["vout"].filter(item => item["scriptPubKey"]["addresses"] != undefined)
+                        .map(item => {return({
+                            address:item["scriptPubKey"]["addresses"],
+                            txid:result.transactions[i]["txid"],
+                            vout:item["n"]
                     })});
                     await new_addr(vin,vout)
                 }
