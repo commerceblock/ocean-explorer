@@ -92,4 +92,23 @@ module.exports = {
               res.send(errorAddress);
           });
       }
+    // Get info data and dump JSON
+    loadInfo: function(req, res, next) {
+        dbApi.get_blockchain_info().then(function(info) {
+            if (!info) {
+                res.send("Unable to load info");
+                return next();
+            }
+            resp = {}
+            resp['chain'] = info.chain;
+            resp['blockheight'] = info.latestStoredHeight;
+            resp['blockhash'] = info.blockchaininfo.bestblockhash;
+            resp['attestedheight'] = info.latestAttestedHeight;
+            resp['attestationtxid'] = info.latestAttestationTxid;
+            resp['mainstayposition'] = res.locals.env.attestation.position;
+            res.send(resp);
+        }).catch(function(errorInfo) {
+            res.send(errorInfo);
+        });
+    }
 }
