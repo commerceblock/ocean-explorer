@@ -153,5 +153,9 @@ router.get("/api/addressutxos/:address", function(req, res, next) {
     return next();
 }, api.loadUtxos);
 
+// API info
+router.get("/api/info", function(req, res, next) {
+    return next();
+}, api.loadInfo);
 
 module.exports = router;
