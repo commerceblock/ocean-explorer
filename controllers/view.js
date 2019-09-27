@@ -193,35 +193,40 @@ module.exports = {
     loadSearch: function(req, res, next) {
         var query = req.body.query.toLowerCase();
         if (query.length == 64) {
+            // Try find tx, block or asset
             dbApi.get_tx(query).then(function(tx) {
                 if (tx) {
                     res.redirect("/tx/" + query);
                     return;
                 }
-                dbApi.get_block_hash(query).then(function(blockByHash) {
-                    if (blockByHash) {
-                        res.redirect("/block/" + query);
-                        return;
-                    }
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                }).catch(function(err) {
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                });
-            }).catch(function(err) {
-                dbApi.get_block_hash(query).then(function(blockByHash) {
-                    if (blockByHash) {
-                        res.redirect("/block/" + query);
-                        return;
-                    }
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                }).catch(function(err) {
-                    res.locals.userMessage = "No results found for query: " + query;
-                    return next();
-                });
-            });
+            }).catch(function(err) {});
+            dbApi.get_block_hash(query).then(function(blockByHash) {
+                if (blockByHash) {
+                    res.redirect("/block/" + query);
+                    return;
+                }
+            }).catch(function(err) {});
+            dbApi.get_asset(query).then(function(asset) {
+                if (asset) {
+                    // res.redirect("/asset/"+query);
+                    res.locals.userMessage = "Asset page coming soon!";
+                    res.render("index")
+                    return;
+                }
+            }).catch(function(err) {});
+            res.locals.userMessage = "No results found for query: " + query;
+            return next();
+        } else if (query.length == 33) {
+            dbApi.get_address_txs(query).then(function(addrTxs) {
+                if (addrTxs) {
+                    // res.redirect("/address/"+query);
+                    res.locals.userMessage = "Address page coming soon!";
+                    res.render("index")
+                    return;
+                }
+                res.locals.userMessage = "No results found for query: " + query;
+                return next();
+            })
         } else if (!isNaN(query)) {
             dbApi.get_block_height(parseInt(query)).then(function(blockByHeight) {
                 if (blockByHeight) {
@@ -360,6 +365,55 @@ module.exports = {
         }).catch(function(errorInfo) {
             res.locals.userMessage = errorInfo;
             res.render("blocks");
+        });
+    },
+    loadAsset: function(req, res, next) {
+        dbApi.get_asset(res.locals.assetid).then(function(asset) {
+            if (!asset) {
+                res.locals.userMessage = "Failed to load asset "+ res.locals.assetid;
+                return next();
+            }
+            res.locals.asset = asset
+            // res.render("assets")
+            res.locals.userMessage = "Asset page coming soon!";
+            res.render("index")
+        }).catch(function(errorAsset) {
+            res.locals.userMessage = errorAsset;
+            return next();
+        });
+    },
+    // Load assets
+    loadAssets: function(req, res, next){
+        dbApi.get_all_assets().then(function(assets) {
+            if (!assets) {
+                res.locals.userMessage = "Unable to load assets";
+                return next();
+            }
+            res.locals.assets = [];
+            assets.forEach ( asset => {
+                res.locals.assets.push(asset);
+            });
+            // res.render("assets")
+            res.locals.userMessage = "Assets page coming soon!";
+            res.render("index")
+        }).catch(function(errorAsset) {
+           res.locals.userMessage = errorAsset;
+           return next();
+        });
+    },
+    loadAddress: function(req, res, next) {
+        dbApi.get_address_txs(res.locals.address).then(function(addrTxs) {
+            if (!addrTxs) {
+                res.locals.userMessage = "Failed to load address "+res.locals.address+" transactions.";
+                return next();
+            }
+            res.locals.addrTxs = addrTxs
+            // res.render("address")
+            res.locals.userMessage = "Address page coming soon!";
+            res.render("index")
+        }).catch(function(errorAddr) {
+            res.locals.userMessage = errorAddr;
+            return next();
         });
     },
     // Load index page - Display the 10 latest blocks

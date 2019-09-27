@@ -19,6 +19,7 @@ var momentDurationFormat = require("moment-duration-format");
 var baseActionsRouter = require('./routes/router');
 var serveStatic = require('serve-static')
 var mongoose = require('mongoose')
+const cron = require('node-cron')
 
 var app = express();
 
@@ -84,44 +85,48 @@ mongoose.connect(dbConnect, {
 var mainstayConnect = 'https://' + env.attestation.host +
     '/api/v1/latestcommitment?position=' + env.attestation.position;
 
-app.use(function(req, res, next) {
-	if (env.ocean && env.ocean.rpc) {
-		res.locals.host = env.ocean.host;
-		res.locals.port  = env.ocean.port;
-		res.locals.username = env.ocean.rpc.username;
-
-		global.client = new bitcoin({
-	  		host: env.ocean.host,
-	  		port: env.ocean.port,
-	  		username: env.ocean.rpc.username,
-	  		password: env.ocean.rpc.password,
-	  		timeout: 5000
-	    });
-	}
-	res.locals.env = env;
-
-    https.get(mainstayConnect, function(res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            var parsedResponse
-            try {
-                parsedResponse = JSON.parse(chunk)
-                global.attestedhash = parsedResponse["response"]["commitment"]
-                dbApi.get_block_hash(attestedhash).then(function(blockByHash) {
-                    if (blockByHash) {
-                        global.attestedheight = blockByHash.height
+// Update attestation information once a minute
+cron.schedule("* * * * *",()=> {
+    dbApi.get_blockchain_info().then(function(info) {
+        if (info) {
+            global.attestedheight = info.latestAttestedHeight;
+            global.attestationtxid = info.latestAttestationTxid;
+            https.get(mainstayConnect, function(res) {
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    var parsedResponse
+                    try {
+                        parsedResponse = JSON.parse(chunk)
+                        attestedhash = parsedResponse["response"]["commitment"]
+                        dbApi.get_block_hash(attestedhash).then(function(blockByHash) {
+                            if (blockByHash) {
+                                global.attestedheight = blockByHash.height
+                                global.attestationtxid = parsedResponse["response"]["txid"]
+                                info.latestAttestedHeight = global.attestedheight;
+                                info.latestAttestationTxid = global.attestationtxid;
+                                dbApi.update_blockchain_info(info).then(function(updated) {
+                                }).catch(function(err) {
+                                    console.log("ERROR: Could not save blockchain info for attestation update " + err);
+                                });
+                            }
+                        }).catch(function(err) {
+                            console.log("ERROR ATTESTATION_API: Failed getting block for commitment")
+                        });
+                    } catch(err) {
+                        console.log("ERROR ATTESTATION_API: Failed parsing http response")
                     }
-                }).catch(function(err) {
-                    console.log("ERROR ATTESTATION_API: Failed getting block for commitment")
                 });
-            } catch(err) {
-                console.log("ERROR ATTESTATION_API: Failed parsing http response")
-            }
-        });
-    }).on('error', function(err) {
-        console.log("Error ATTESTATION_API: Request Failed: " + err)
-    }).end();
+            }).on('error', function(err) {
+                console.log("ERROR ATTESTATION_API: Request Failed: " + err)
+            }).end();
+        }
+    }).catch(function(err) {
+        console.log("ERROR: Could not get blockchain info to update attestation " + err);
+    });
+})
 
+app.use(function(req, res, next) {
+	res.locals.env = env;
 	next();
 });
 

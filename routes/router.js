@@ -6,17 +6,14 @@
 
 var express = require('express')
   , router = express.Router()
-  , view = require("../controllers/view");
+  , view = require("../controllers/view")
+  , api = require("../controllers/api");
 
 const LIMIT_DEFAULT = 20;   // default limit for the number of blocks/transactions shown per page
 const OFFSET_DEFAULT = 0;   // default offest limit for the first blockheight to show per page
 
 // Index page
 router.get("/", function(req, res, next) {
-  if (client == null) {
-		res.locals.userMessage = "Unable to connect to Ocean Node";
-		res.render("index");
-	}
 	var sort = "desc";
 	if (req.query.sort) {
 		sort = req.query.sort;
@@ -60,12 +57,28 @@ router.get("/blocks", function(req, res, next) {
 // Search redirect routing
 router.post("/search", function(req, res, next) {
 	if (!req.body.query) {
-        res.locals.userMessage = "Enter a block height, block hash, or transaction id.";
+        res.locals.userMessage = "Enter a block height, block hash, asset or transaction id.";
 		return next();
 	}
 
     return next();
 }, view.loadSearch, view.loadIndex);
+
+// Transaction page
+router.get("/tx/:transactionId", function(req, res, next) {
+	var txid = req.params.transactionId;
+
+	var output = -1;
+	if (req.query.output) {
+		output = parseInt(req.query.output);
+	}
+
+	res.locals.txid = txid;
+	res.locals.output = output;
+	res.locals.result = {};
+
+    return next();
+}, view.loadTransaction, view.loadIndex);
 
 // Block by blockheight routing
 router.get("/block-height/:blockHeight", function(req, res, next) {
@@ -95,20 +108,64 @@ router.get("/block/:blockHash", function(req, res, next) {
 	return next();
 }, view.loadBlockHash, view.loadIndex);
 
-// Transaction page
-router.get("/tx/:transactionId", function(req, res, next) {
-	var txid = req.params.transactionId;
+// Asset by asset (id) routing
+router.get("/asset/:asset", function(req, res, next) {
+  res.locals.assetid = req.params.asset
 
-	var output = -1;
-	if (req.query.output) {
-		output = parseInt(req.query.output);
-	}
+	return next();
+}, view.loadAsset, view.loadIndex);
 
-	res.locals.txid = txid;
-	res.locals.output = output;
-	res.locals.result = {};
+// Assets page
+router.get("/assets", function(req, res, next) {
+
+	return next();
+}, view.loadAssets, view.loadIndex);
+
+// Address page
+router.get("/address/:address", function(req, res, next) {
 
     return next();
-}, view.loadTransaction, view.loadIndex);
+}, view.loadAddress, view.loadIndex);
+
+// API single block
+router.get("/api/block/:block", function(req, res, next) {
+
+    return next();
+}, api.loadBlock);
+
+// API single tx
+router.get("/api/tx/:txid", function(req, res, next) {
+
+    return next();
+}, api.loadTx);
+
+// API single asset
+router.get("/api/asset/:asset", function(req, res, next) {
+
+    return next();
+}, api.loadAsset);
+
+// API assets
+router.get("/api/assets", function(req, res, next) {
+
+    return next();
+}, api.loadAssets);
+
+// API address txs
+router.get("/api/address/:address", function(req, res, next) {
+
+    return next();
+}, api.loadAddress);
+
+// API address utxos
+router.get("/api/addressutxos/:address", function(req, res, next) {
+
+    return next();
+}, api.loadUtxos);
+
+// API info
+router.get("/api/info", function(req, res, next) {
+    return next();
+}, api.loadInfo);
 
 module.exports = router;

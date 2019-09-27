@@ -9,13 +9,15 @@
  */
 
 var mongoose = require('mongoose')
-  , env = require("../helpers/env.js")
-  , bitcoin = require("bitcoin-core")
-  , rpcApi = require("../controllers/rpc")
-  , Block = require("../models/block")
-  , Tx = require("../models/tx")
-  , Info = require("../models/info")
-  , dbApi = require("../controllers/database");
+    , env = require("../helpers/env.js")
+    , bitcoin = require("bitcoin-core")
+    , rpcApi = require("../controllers/rpc")
+    , Block = require("../models/block")
+    , Tx = require("../models/tx")
+    , Asset = require("../models/asset")
+    , Addr = require("../models/addr")
+    , Info = require("../models/info")
+    , dbApi = require("../controllers/database");
 
 // dbbuilder.js usage
 function usage() {
@@ -106,14 +108,18 @@ function doWork() {
                     Info.remove({}, function(errInfo) {
                         Tx.remove({}, function(errTx) {
                             Block.remove({}, function(errBlock) {
-                                dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
-                                    if (error) {
-                                        console.error(error);
-                                        process.exit(1);
-                                    } else {
-                                        console.log("Finished " + mode);
-                                        process.exit(0);
-                                    }
+                                Asset.remove({}, function(errAsset) {
+                                    Addr.remove({}, function(errAddr) {
+                                        dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
+                                            if (error) {
+                                                console.error(error);
+                                                process.exit(1);
+                                            } else {
+                                                console.log("Finished " + mode);
+                                                process.exit(0);
+                                            }
+                                        });
+                                    });
                                 });
                             });
                         });
