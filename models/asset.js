@@ -1,7 +1,7 @@
 /*
  * @asset.js Asset Model for Mongo database based on mongoose
  *
- * @author Tomos Wootton 2018
+ * @author Tomos Wootton 2019
  *
  */
 

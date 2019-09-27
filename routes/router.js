@@ -107,18 +107,55 @@ router.get("/asset/:asset", function(req, res, next) {
   res.locals.assetid = req.params.asset
 
 	return next();
-}, view.loadAsset);
+}, view.loadAsset, view.loadIndex);
 
 // Assets page
 router.get("/assets", function(req, res, next) {
 
 	return next();
-}, view.loadAssets);
+}, view.loadAssets, view.loadIndex);
+
+// Address page
+router.get("/address/:address", function(req, res, next) {
+
+    return next();
+}, view.loadAddress, view.loadIndex);
+
+// API single block
+router.get("/api/block/:block", function(req, res, next) {
+
+    return next();
+}, api.loadBlock);
+
+// API single tx
+router.get("/api/tx/:txid", function(req, res, next) {
+
+    return next();
+}, api.loadTx);
+
+// API single asset
+router.get("/api/asset/:asset", function(req, res, next) {
+
+    return next();
+}, api.loadAsset);
 
 // API assets
 router.get("/api/assets", function(req, res, next) {
 
     return next();
 }, api.loadAssets);
+
+// API address txs
+router.get("/api/address/:address", function(req, res, next) {
+
+    return next();
+}, api.loadAddress);
+
+// API address utxos
+router.get("/api/addressutxos/:address", function(req, res, next) {
+
+    return next();
+}, api.loadUtxos);
+
 
 module.exports = router;

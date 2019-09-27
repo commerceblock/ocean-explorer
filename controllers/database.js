@@ -11,6 +11,7 @@ var rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
   , Asset = require("../models/asset")
+  , Addr = require("../models/addr")
   , Info = require("../models/info")
   , env = require("../helpers/env")
   , bitcoin = require("bitcoin-core");
@@ -85,16 +86,61 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
     }
     if (destroy) {
         existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":-assetamount,"destroyedamount":assetamount}});
+        if (!existing_asset) {
+            throw("Failed to find asset "+asset+" for destruction.");
+        }
         console.log("Asset " + asset + " destroy recorded.")
     } else {
         // Must be reissuance -> Update existing asset's assetamount
         existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount,"reissuedamount":assetamount}});
+        if (!existing_asset) {
+            throw("Failed to find asset "+asset+" for reissuance.");
+        }
         console.log("Asset " + asset + " reissuance recorded.")
     }
-    if (!existing_asset) {
-        throw("Failed to find asset "+asset+" for reissuance/destruction.");
-    }
     return existing_asset
+}
+
+
+
+// Save new addr using the Address model
+async function save_addr(addrs) {
+    for (const addr of addrs) {
+        newaddr = await addr.save();
+    }
+    console.log("Tx " + newaddr.txid + " vout adderesses saved.");
+    return newaddr;
+}
+
+// Create new address using the Addr model and call save method
+async function new_addr(vin, vout) {
+    // Set vin's isSpent=true
+    if (vin.length) {
+        for (const inp of vin) {
+            await Addr.updateMany({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
+            ? console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.") : null;
+        }
+    }
+    // Save vout's
+    if (vout.length) {
+        newaddrs = []
+        for (const outp of vout) {                  // For each output
+            for (const addr of outp["address"]) {   // For each address
+                // Check if addr entry exists
+                existing_addr = await Addr.findOne({"address":vout["address"],"txid":vout["txid"],"vout":vout["vout"]});
+                if (existing_addr)
+                    continue
+                var newaddr = new Addr({
+                    address: addr,
+                    txid:    outp["txid"],
+                    vout:    outp["vout"]
+                });
+                newaddrs.push(newaddr)
+            }
+        }
+        return await save_addr(newaddrs);
+    }
+    return
 }
 
 // Save new info using the Info model
@@ -225,6 +271,30 @@ module.exports = {
             });
           });
     },
+    // Get Txs for address from Addr collection
+    get_address_txs: function(address, cb) {
+        return new Promise(function(resolve, reject) {
+            Addr.find({"address":address}, function(error, addrTxs) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(addrTxs);
+            });
+        });
+    },
+    // Get Utxos for address from Addr collection
+    get_address_utxos: function(address, cb) {
+        return new Promise(function(resolve, reject) {
+            Addr.find({"address":address,"isSpent":false}, function(error, addrUtxos) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(addrUtxos);
+            });
+        });
+    },
     // Get blockchain info from Info collection - Info collection should only have 1 entry
     get_blockchain_info: function(cb) {
         return new Promise(function(resolve, reject) {
@@ -314,13 +384,25 @@ module.exports = {
                           result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
                         )
                     }
-                    // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue 
-                    vout = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
-                    if (vout != null && vout["value"] > 0) {
-                        await new_asset(vout["asset"],vout["value"],"","","","","",true)
+                    // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
+                    vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
+                    if (vout_OP_RET != null && vout_OP_RET["value"] > 0) {
+                        await new_asset(vout_OP_RET["asset"],vout_OP_RET["value"],"","","","","",true)
                     }
-                    // save Txs
+                    // Save Txs
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
+                    // Save Address
+                    // Get txid and vout of input txs that are not coinbase
+                    vin = result.transactions[i]["vin"].filter(item => item["coinbase"] == undefined)
+                        .map(item => {return({txid:item["txid"],vout:item["vout"]})});
+                    // Get addresses, txid and vin of txs
+                    vout = result.transactions[i]["vout"].filter(item => item["scriptPubKey"]["addresses"] != undefined)
+                        .map(item => {return({
+                            address:item["scriptPubKey"]["addresses"],
+                            txid:result.transactions[i]["txid"],
+                            vout:item["n"]
+                    })});
+                    await new_addr(vin,vout)
                 }
 
                 // Get blockchain info and save
