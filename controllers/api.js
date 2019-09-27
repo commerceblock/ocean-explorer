@@ -33,7 +33,7 @@ module.exports = {
         } catch (errorBlock) {
             res.send(errorBlock);
         }
-     },
+    },
     loadTx: function(req, res, next) {
          dbApi.get_tx(req.params.txid).then(function(tx) {
              if (!tx) {
@@ -44,7 +44,7 @@ module.exports = {
          }).catch(function(errorTx) {
              res.send(errorTx);
          });
-     },
+    },
    // Get single asset data and dump JSON
    loadAsset: function(req, res, next) {
         dbApi.get_asset(req.params.asset).then(function(asset) {
@@ -68,7 +68,7 @@ module.exports = {
          }).catch(function(errorAssets) {
              res.send(errorAssets);
          });
-     },
+    },
     // Get address data and dump JSON
     loadAddress: function(req, res, next) {
          dbApi.get_address_txs(req.params.address).then(function(addrTxs) {
@@ -80,7 +80,7 @@ module.exports = {
          }).catch(function(errorAddress) {
              res.send(errorAddress);
          });
-     },
+    },
      loadUtxos: function(req, res, next) {
           dbApi.get_address_utxos(req.params.address).then(function(addrUtxos) {
               if (!addrUtxos) {
@@ -91,7 +91,7 @@ module.exports = {
           }).catch(function(errorAddress) {
               res.send(errorAddress);
           });
-      }
+    },
     // Get info data and dump JSON
     loadInfo: function(req, res, next) {
         dbApi.get_blockchain_info().then(function(info) {
