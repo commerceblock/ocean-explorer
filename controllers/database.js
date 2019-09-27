@@ -117,7 +117,7 @@ async function new_addr(vin, vout) {
     // Set vin's isSpent=true
     if (vin.length) {
         for (const inp of vin) {
-            await Addr.findOneAndUpdate({"address":vout["address"],"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
+            await Addr.updateMany({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
             ? console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.") : null;
         }
     }
@@ -286,7 +286,7 @@ module.exports = {
     // Get Utxos for address from Addr collection
     get_address_utxos: function(address, cb) {
         return new Promise(function(resolve, reject) {
-            Addr.find({"address":address,"isSpent":true}, function(error, addrUtxos) {
+            Addr.find({"address":address,"isSpent":false}, function(error, addrUtxos) {
                 if (error) {
                     reject(error);
                     return;
