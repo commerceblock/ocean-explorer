@@ -25,7 +25,7 @@ Install [MongoDB](https://docs.mongodb.com/manual/installation/). Start the `mon
 1. Clone this repo
 2. `npm install` to install all required dependencies
 3. `npm run prod` to build front end assets
-4. Specify connection info for `ocean`, `mongo` and `attestation API` in [env.js](app/env.js)
+4. Specify connection info for `ocean`, `mongo` and `attestation API` in [env.js](helpers/env.js)
 5. Sync the database with the blockchain by running the script `scripts/dbbuilder.js`
     - Run using `scripts/dbbuilder.js init clear`
         - Clear all collections/indices

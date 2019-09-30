@@ -408,6 +408,7 @@ function getBlockData(rpcClient, blockHash, withInputs=false) {
 	});
 }
 
+
 module.exports = {
 	getBlockchainInfo: getBlockchainInfo,
 	getNetworkInfo: getNetworkInfo,
@@ -417,7 +418,7 @@ module.exports = {
 	getBlocksByHeight: getBlocksByHeight,
 	getBlockByHash: getBlockByHash,
 	getBlockHash: getBlockHash,
-    getBlockCount: getBlockCount,
+  getBlockCount: getBlockCount,
 	getTransactionInputs: getTransactionInputs,
 	getBlockData: getBlockData,
 	getRawTransaction: getRawTransaction,

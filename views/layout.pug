@@ -29,23 +29,22 @@ html
 				button(type="button", class="header__toggle layered text-zeta text-primary", data-toggle="collapse", data-target="#navbarNav")
 					svg(class="icon")
 						use(xlink:href="/sprite.svg#menu", href="/sprite.svg#menu")
-				
+
 				div(class="collapse navbar-collapse header__overlay", id="navbarNav")
-					if (client)
-						ul(class="header__nav mb-2r flex flex-wrap items-center grid grid--md font-medium")
-							li(class="grid__item header__item")
-								a(href="/blocks", class="header__link") Blocks
-							li(class="grid__item header__item")
-								a(href="/mempool-summary", class="header__link") Mempool
-							li(class="grid__item header__item")
-								a(href="/node-details", class="header__link") Status
-						form(method="post", action="/search", class="form-inline")
-							div(class="field layered w-12/12 max-w-lambda text-mu")
-								input(type="text", class="field__input w-12/12", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
-								div(class="icon field__icon text-quinary")
-									button(type="submit")
-										svg(class="icon")
-											use(xlink:href="/sprite.svg#search", href="/sprite.svg#search")
+					ul(class="header__nav mb-2r flex flex-wrap items-center grid grid--md font-medium")
+						li(class="grid__item header__item")
+							a(href="/blocks", class="header__link") Blocks
+						li(class="grid__item header__item")
+							a(href="/mempool-summary", class="header__link") Mempool
+						li(class="grid__item header__item")
+							a(href="/node-details", class="header__link") Status
+					form(method="post", action="/search", class="form-inline")
+						div(class="field layered w-12/12 max-w-lambda text-mu")
+							input(type="text", class="field__input w-12/12", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
+							div(class="icon field__icon text-quinary")
+								button(type="submit")
+									svg(class="icon")
+										use(xlink:href="/sprite.svg#search", href="/sprite.svg#search")
 
 		div(class="main-content")
 
