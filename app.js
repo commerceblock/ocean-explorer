@@ -97,7 +97,7 @@ cron.schedule("* * * * *",()=> {
                     var parsedResponse
                     try {
                         parsedResponse = JSON.parse(chunk)
-                        attestedhash = parsedResponse["response"]["commitment"]
+                        global.attestedhash = parsedResponse["response"]["commitment"]
                         dbApi.get_block_hash(attestedhash).then(function(blockByHash) {
                             if (blockByHash) {
                                 global.attestedheight = blockByHash.height
@@ -110,14 +110,14 @@ cron.schedule("* * * * *",()=> {
                                 });
                             }
                         }).catch(function(err) {
-                            console.log("ERROR ATTESTATION_API: Failed getting block for commitment")
+                            console.log("ERROR ATTESTATION_API: Failed getting block for commitment " + err);
                         });
                     } catch(err) {
-                        console.log("ERROR ATTESTATION_API: Failed parsing http response")
+                        console.log("ERROR ATTESTATION_API: Failed parsing http response " + err);
                     }
                 });
             }).on('error', function(err) {
-                console.log("ERROR ATTESTATION_API: Request Failed: " + err)
+                console.log("ERROR ATTESTATION_API: Request Failed: " + err);
             }).end();
         }
     }).catch(function(err) {
