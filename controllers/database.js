@@ -272,7 +272,18 @@ module.exports = {
           });
     },
     // Get Txs for address from Addr collection
-    get_address_txs: function(address, cb) {
+    get_address_txs: function(address, utxo=false, cb) {
+        if (utxo) {
+          return new Promise(function(resolve, reject) {
+              Addr.find({"address":address,"isSpent":false}, function(errorAddress, addrUtxos) {
+                  if (errorAddress) {
+                      reject(errorAddress);
+                      return;
+                  }
+                  resolve(addrUtxos);
+              });
+          });
+        }
         return new Promise(function(resolve, reject) {
             Addr.find({"address":address}, function(error, addrTxs) {
                 if (error) {
@@ -280,18 +291,6 @@ module.exports = {
                     return;
                 }
                 resolve(addrTxs);
-            });
-        });
-    },
-    // Get Utxos for address from Addr collection
-    get_address_utxos: function(address, cb) {
-        return new Promise(function(resolve, reject) {
-            Addr.find({"address":address,"isSpent":false}, function(error, addrUtxos) {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                resolve(addrUtxos);
             });
         });
     },
