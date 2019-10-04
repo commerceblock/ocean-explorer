@@ -143,15 +143,17 @@ router.get("/api/assets", function(req, res, next) {
 
 // API address txs
 router.get("/api/address/:address", function(req, res, next) {
+    res.locals.utxoOnly = false   //include UTXOs
 
     return next();
 }, api.loadAddress);
 
 // API address utxos
 router.get("/api/addressutxos/:address", function(req, res, next) {
+    res.locals.utxoOnly = true    //do not include UTXOs
 
     return next();
-}, api.loadUtxos);
+}, api.loadAddress);
 
 // API info
 router.get("/api/info", function(req, res, next) {
