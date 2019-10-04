@@ -120,7 +120,7 @@ module.exports = {
         }).catch(function(errorAddress) {
             res.send(errorAddress)
         });
-      },
+    },
     // Get info data and dump JSON
     loadInfo: function(req, res, next) {
         dbApi.get_blockchain_info().then(function(info) {
