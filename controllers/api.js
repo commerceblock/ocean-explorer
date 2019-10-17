@@ -76,8 +76,33 @@ module.exports = {
              res.send(errorTx);
          });
     },
-   // Get single asset data and dump JSON
-   loadAsset: function(req, res, next) {
+    // Get single pegout data and dump JSON
+    loadPegout: function(req, res, next) {
+         dbApi.get_pegout(req.params.txid).then(function(pegout) {
+             if (!pegout) {
+                 res.send("Pegout does not exist for txid ".concat(req.params.txid, "."));
+                 return;
+             }
+             res.send(pegout);
+         }).catch(function(errorPegout) {
+             res.send(errorPegout);
+         });
+    },
+    // Get pegouts data and dump JSON
+    loadPegouts: function(req, res, next) {
+        var unpaid = "unpaid" in req.params ? req.params.unpaid == 'true' : false;
+        dbApi.get_all_pegouts(unpaid).then(function(pegouts) {
+             if (!pegouts) {
+                 res.send("No pegouts to load.");
+                 return;
+             }
+             res.send(pegouts);
+         }).catch(function(errorPegouts) {
+             res.send(errorPegouts);
+         });
+    },
+    // Get single asset data and dump JSON
+    loadAsset: function(req, res, next) {
         dbApi.get_asset(req.params.asset).then(function(asset) {
             if (!asset) {
                 res.send("Unable to load asset information.");

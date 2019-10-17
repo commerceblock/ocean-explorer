@@ -129,6 +129,24 @@ router.get("/api/tx/:txid", function(req, res, next) {
     return next();
 }, api.loadTx);
 
+// API single pegout
+router.get("/api/pegout/:txid", function(req, res, next) {
+
+    return next();
+}, api.loadPegout);
+
+// API pegouts
+router.get("/api/pegouts", function(req, res, next) {
+
+    return next();
+}, api.loadPegouts);
+
+// API pegouts (with unpaid only option)
+router.get("/api/pegouts/:unpaid", function(req, res, next) {
+
+    return next();
+}, api.loadPegouts);
+
 // API single asset
 router.get("/api/asset/:asset", function(req, res, next) {
 

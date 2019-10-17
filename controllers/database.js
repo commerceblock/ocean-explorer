@@ -13,6 +13,7 @@ var rpcApi = require("../controllers/rpc")
   , Asset = require("../models/asset")
   , Addr = require("../models/addr")
   , Info = require("../models/info")
+  , Pegout = require("../models/pegout")
   , env = require("../helpers/env")
   , bitcoin = require("bitcoin-core");
 
@@ -57,6 +58,28 @@ async function new_tx(txid, txdata, blockheight, blockhash) {
         blockhash: blockhash
     });
     return await save_tx(newtx);
+}
+
+// Save new pegout using the Pegout model
+async function save_pegout(pegout) {
+    newpegout = await pegout.save();
+    console.log("Pegout " + pegout.txid + " saved.");
+    return newpegout;
+}
+
+// Create new pegout using the Pegout model and call save method
+async function new_pegout(txid, out) {
+    pegout = await Pegout.findOne({txid: txid}); // check first if pegout exists
+    if (pegout) {
+        return pegout;
+    }
+    var newpegout = new Pegout({
+        txid: txid,
+        address: out["scriptPubKey"]["pegout_hex"],
+        amount: out["value"],
+        isPaid: false
+    });
+    return await save_pegout(newpegout);
 }
 
 // Save new asset using the Asset model
@@ -247,6 +270,41 @@ module.exports = {
             });
         });
     },
+    // Get pegout from Pegouts collection using txid
+    get_pegout: function(txid, cb) {
+        return new Promise(function(resolve, reject) {
+            Pegout.findOne({txid: txid}, function(error, pegout) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(pegout);
+            });
+        });
+    },
+    // Get all pegouts from Pegouts collection
+    get_all_pegouts: function(unpaid=true, cb) {
+        if (unpaid) {
+            return new Promise(function(resolve, reject) {
+              Pegout.find({"isPaid": false}, function(errorPegout, pegoutUnpaid) {
+                  if (errorPegout) {
+                      reject(errorPegout);
+                      return;
+                  }
+                  resolve(pegoutUnpaid);
+              });
+            });
+        }
+        return new Promise(function(resolve, reject) {
+            Pegout.find({}, function(errorPegout, pegout) {
+                if (errorPegout) {
+                    reject(errorPegout);
+                    return;
+                }
+                resolve(pegout);
+            });
+        });
+    },
     // Get asset from Assets collection using assetid
     get_asset: function(assetid, cb) {
         return new Promise(function(resolve, reject) {
@@ -396,9 +454,13 @@ module.exports = {
                         )
                     }
                     // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
-                    vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
+                    vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"].includes("OP_RETURN"))
                     if (vout_OP_RET != null && vout_OP_RET["value"] > 0) {
                         await new_asset(vout_OP_RET["asset"],vout_OP_RET["value"],"","","","","",true)
+
+                        if ("pegout_hex" in vout_OP_RET["scriptPubKey"] && "assetlabel" in vout_OP_RET && vout_OP_RET["assetlabel"] == "CBT") {
+                            await new_pegout(result.transactions[i]["txid"], vout_OP_RET);
+                        }
                     }
                     // Save Txs
                     await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
