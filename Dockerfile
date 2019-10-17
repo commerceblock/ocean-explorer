@@ -4,6 +4,7 @@ RUN set -x \
     && yum install -y epel-release \
     && curl --silent --location https://rpm.nodesource.com/setup_8.x | bash - \
     && yum install -y iproute nc make nodejs git \
+    && yum group install "Development Tools" \
     && yum clean all \
     && rm -rf /var/cache/yum
 
