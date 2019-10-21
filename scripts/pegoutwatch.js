@@ -25,14 +25,14 @@ dbConnect = dbConnect + ':' + env.dbsettings.port;
 dbConnect = dbConnect + '/' + env.dbsettings.database;
 
 // connect to db and start db builder main method
-mongoose.connect(dbConnect, { useNewUrlParser: true }, function(err) {
+mongoose.connect(dbConnect, { useNewUrlParser: true }, async function(err) {
     if (err) {
         console.error('Unable to connect to database: %s @ %s',
             env.dbsettings.user, dbConnect.split('@')[1]);
         console.error(err);
         process.exit(1);
     }
-    doWork();
+    process.exit(await doWork());
 });
 
 mongoose.Promise = Promise
@@ -44,11 +44,12 @@ db.once("open", function(callback) {
 });
 
 // Main pegout watch method
-function doWork() {
-    dbApi.get_all_pegouts(true).then(function(pegouts) { // get unpaid pegouts only
+async function doWork() {
+    try {
+        var pegouts = await dbApi.get_all_pegouts(true); // get unpaid pegouts only
         if (pegouts.length == 0) {
             console.log("No unpaid pegouts.");
-            process.exit(0);
+            return 0;
         }
         // Hardcoded CBT contract and ABI
         var contractAddress = '0x076C97e1c869072eE22f8c91978C99B4bcB02591'
@@ -58,44 +59,40 @@ function doWork() {
         var contract = new web3.eth.Contract(abiArray, contractAddress, {from: myAddress})
         var privateKey = new Buffer.from(env.eth.priv, 'hex')
 
-        contract.methods.balanceOf(myAddress).call().then(function(balance){console.log(balance)})
+        const balance = await contract.methods.balanceOf(myAddress).call();
+        console.log("Balance " + balance/1e18);
+
+        var gasPrice = await web3.eth.getGasPrice();
+        console.log("gasPrice " + gasPrice);
+        var gasLimit = ! env.eth.gasLimit ? 210000 : parseInt(env.eth.gasLimit, 10);
+        console.log("gasLimit " + gasLimit);
 
         // For each pegout create an erc20 payment, sign and send via web3
-        pegouts.forEach(function (item, index) {
-            var toAddress = item["address"];
-            var amount = web3.utils.toHex(item["amount"]);
+        for (const pegout of pegouts) {
+            var toAddress = pegout["address"];
+            var amount = web3.utils.toHex(pegout["amount"]);
 
-            console.log(toAddress + "   " + amount);
+            console.log("Pegout to " + toAddress);
+            console.log("Amount " + amount);
 
-            web3.eth.getTransactionCount(myAddress).then(function(v) {
-                var rawTransaction = {
-                    "from": myAddress,
-                    "gasPrice": web3.utils.toHex(2 * 1e9),  // env or api
-                    "gasLimit": web3.utils.toHex(210000),   // env or api
-                    "to": contractAddress,
-                    "value": "0x0",
-                    "data": contract.methods.transfer(toAddress, amount).encodeABI(),
-                    "nonce": web3.utils.toHex(v)
-                }
-                var transaction = new Tx(rawTransaction);
-                transaction.sign(privateKey)
+            var rawTransaction = {
+                "from": myAddress,
+                "gasPrice": web3.utils.toHex(gasPrice),  // env or api
+                "gasLimit": web3.utils.toHex(210000),   // env or api
+                "to": contractAddress,
+                "value": "0x0",
+                "data": contract.methods.transfer(toAddress, amount).encodeABI(),
+                "nonce": web3.utils.toHex(await web3.eth.getTransactionCount(myAddress))
+            }
+            var transaction = new Tx(rawTransaction);
+            transaction.sign(privateKey)
 
-                web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex')).then(function(receipt) {
-                    console.log(receipt);
-                    process.exit(0);
-                }).catch(function(err) {
-                    console.error(err);
-                    process.exit(1);
-                });
-            }).catch(function(err) {
-                console.error(err);
-                process.exit(1);
-            });
-        });
-    }).catch(function(error) {
-        if (error) {
-            console.error(error);
-            process.exit(1);
-        }
-    });
+            await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
+            console.log(receipt);
+        };
+        return 0;
+    } catch (error) {
+        console.error(error);
+        return 1;
+    }
 }

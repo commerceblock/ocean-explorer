@@ -34,4 +34,12 @@ module.exports = {
         "address": process.env.DB_HOST,
         "port": process.env.DB_PORT
   },
+
+  // Eth config required for pegout
+  eth: {
+    host: process.env.ETH_HOST,
+    address: process.env.ETH_ADDRESS,
+    priv: process.env.ETH_PRIV,
+    gasLimit: process.env.ETH_GAS_LIMIT
+  }
 };
