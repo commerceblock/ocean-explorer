@@ -16,6 +16,10 @@ if [ -f /run/secrets/mongo_user ]; then
     export DB_USER="$(cat /run/secrets/mongo_user)"
 fi
 
+if [ -f /run/secrets/eth_priv ]; then
+    export ETH_PRIV="$(cat /run/secrets/eth_priv)"
+fi
+
 case "$1" in
         explorer)
             echo "Running explorer"
@@ -42,6 +46,10 @@ case "$1" in
             ;;
         shell)
             bash
+            ;;
+        pegoutwatch)
+            echo "Running pegout watch"
+            node scripts/pegoutwatch.js
             ;;
         *)
             echo $"Usage: $0 {explorer|clear|init|check|update}"
