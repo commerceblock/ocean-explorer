@@ -73,7 +73,7 @@ async function doWork() {
             var amount = web3.utils.toHex(pegout["amount"]);
 
             console.log("Pegout to " + toAddress);
-            console.log("Amount " + amount);
+            console.log("Amount " + pegout["amount"]);
 
             var rawTransaction = {
                 "from": myAddress,
@@ -89,6 +89,9 @@ async function doWork() {
 
             await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
             console.log(receipt);
+            pegout.isPaid = true;
+            pegout.receipt = receipt;
+            pegout.save();
         };
         return 0;
     } catch (error) {
