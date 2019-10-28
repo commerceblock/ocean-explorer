@@ -70,7 +70,8 @@ async function doWork() {
         // For each pegout create an erc20 payment, sign and send via web3
         for (const pegout of pegouts) {
             var toAddress = pegout["address"];
-            var amount = web3.utils.toHex(pegout["amount"]);
+            var amountBig = new web3.utils.BN(pegout["amount"])
+            var amount = web3.utils.toHex(web3.utils.toWei(amountBig))
 
             console.log("Pegout to " + toAddress);
             console.log("Amount " + pegout["amount"]);
@@ -87,11 +88,11 @@ async function doWork() {
             var transaction = new Tx(rawTransaction);
             transaction.sign(privateKey)
 
-            await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
-            console.log(receipt);
+            var receipt = await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
+            console.log(receipt["transactionHash"]);
             pegout.isPaid = true;
             pegout.receipt = receipt;
-            pegout.save();
+            await pegout.save();
         };
         return 0;
     } catch (error) {
