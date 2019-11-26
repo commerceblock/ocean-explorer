@@ -375,9 +375,7 @@ module.exports = {
         return next();
       }
       res.locals.asset = asset
-      // res.render("assets")
-      res.locals.userMessage = "Asset page coming soon!";
-      res.render("index")
+      res.render("asset");
     }).catch(function(errorAsset) {
       res.locals.userMessage = errorAsset;
       return next();
