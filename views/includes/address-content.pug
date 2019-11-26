@@ -1,0 +1,32 @@
+ul(class='nav nav-tabs')
+	li(class="nav-item")
+		a(data-toggle="tab", href="#tab-summary", class="nav-link active", role="tab") Summary
+	li(class="nav-item")
+		a(data-toggle="tab", href="#tab-raw", class="nav-link", role="tab") Raw
+
+div(class="tab-content")
+	div(id="tab-summary", class="tab-pane active", role="tabpanel")
+		div(class="table-container")
+			table(class="table table--primary min-w-700 table-striped")
+				thead
+					tr
+						th(class="data-header") Transaction ID
+						th(class="data-header") Is Spent
+						th(class="data-header") Vout
+						th(class="data-header") Asset
+						th(class="data-header text-right") Value
+				tbody
+					each tx in addrTxs
+						if (tx)
+							tr(class="monospace")
+								td
+									a(href=("/tx/" + tx.txid)) #{tx.txid.slice(0,30)}...
+								td #{tx.isSpent}
+								td #{tx.vout}
+								td
+									a(href=("/asset/" + tx.asset)) #{tx.asset.slice(0,30)}...
+								td(class="text-right") #{tx.value}
+
+	div(id="tab-raw", class="tab-pane", role="tabpanel")
+		pre
+			code #{JSON.stringify(addrTxs, null, 4)}
