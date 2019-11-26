@@ -8,8 +8,11 @@
  *
  */
 
+const axios = require('axios').default;
 var dbApi = require("../controllers/database");
 var Decimal = require('decimal.js');
+
+const gtsa_map_json = 'https://s3.eu-west-1.amazonaws.com/gtsa-mapping/map.json';
 
 // Helper function that returns vin txes for a specific tx
 function getTxInputs(tx, isLimited=false, limit=5) {
@@ -374,8 +377,23 @@ module.exports = {
         res.locals.userMessage = "Failed to load asset "+ res.locals.assetid;
         return next();
       }
-      res.locals.asset = asset
-      res.render("asset");
+
+      let map_data = null
+      axios.get(gtsa_map_json)
+        .then(({ data }) => {
+          map_data = data.assets ? Object.values(data.assets) : null;
+        }).finally(() => {
+          if (map_data) {
+            const mapped_asset = map_data.find(({ tokenid }) => tokenid === asset.asset)
+            if (mapped_asset) {
+              asset.ref = mapped_asset.ref
+              asset.mass = mapped_asset.mass
+            }
+          }
+
+          res.locals.asset = asset
+          res.render("asset");
+        });
     }).catch(function(errorAsset) {
       res.locals.userMessage = errorAsset;
       return next();
@@ -388,11 +406,30 @@ module.exports = {
         res.locals.userMessage = "Unable to load assets";
         return next();
       }
+
       res.locals.assets = [];
-      assets.forEach(asset => {
-        res.locals.assets.push(asset);
-      });
-      res.render("assets");
+
+      const generateAssetList = (map_data) => {
+        assets.forEach(asset => {
+          if (map_data) {
+            const mapped_asset = map_data.find(({ tokenid }) => tokenid === asset.asset)
+            if (mapped_asset) {
+              asset.ref = mapped_asset.ref
+              asset.mass = mapped_asset.mass
+            }
+          }
+          res.locals.assets.push(asset);
+        });
+      };
+
+      let map_data = null
+      axios.get(gtsa_map_json)
+        .then(({ data }) => {
+          map_data = data.assets ? Object.values(data.assets) : null;
+        }).finally(() => {
+          generateAssetList(map_data);
+          res.render("assets");
+        });
     }).catch(function(errorAsset) {
       res.locals.userMessage = errorAsset;
       return next();
