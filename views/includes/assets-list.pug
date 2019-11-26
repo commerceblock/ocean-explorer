@@ -7,7 +7,7 @@ div(class="table-container")
 				th(class="data-header") reissuedamount
 				th(class="data-header") issuancetx
 				th(class="data-header") mass
-				th(class="data-header") ref
+				th(class="data-header text-right") ref
 		tbody
 			each asset in assets
 				if (asset)
@@ -19,4 +19,4 @@ div(class="table-container")
 						td
 							a(href=("/tx/" + asset.issuancetx)) #{asset.issuancetx.slice(0,20)}...
 						td #{asset.mass}
-						td #{asset.ref}
+						td(class="text-right") #{asset.ref}
