@@ -193,60 +193,42 @@ module.exports = {
         res.render("node-details");
     });
   },
-  // Handle searching for tx/block height/block hash and redirect to appropriate controller
+  // Handle searching for tx/block height/block hash/asset/address and redirect to appropriate controller
   loadSearch: function(req, res, next) {
-    var query = req.body.query.toLowerCase();
-    if (query.length == 64) {
-      // Try find tx, block or asset
-      dbApi.get_tx(query).then(function(tx) {
-        if (tx) {
-          res.redirect("/tx/" + query);
-          return;
-        }
-      }).catch(function(err) {});
-      dbApi.get_block_hash(query).then(function(blockByHash) {
-        if (blockByHash) {
-          res.redirect("/block/" + query);
-          return;
-        }
-      }).catch(function(err) {});
-      dbApi.get_asset(query).then(function(asset) {
-        if (asset) {
-          // res.redirect("/asset/"+query);
-          res.locals.userMessage = "Asset page coming soon!";
-          res.render("index")
-          return;
-        }
-      }).catch(function(err) {});
-      res.locals.userMessage = "No results found for query: " + query;
-      return next();
-    } else if (query.length == 33) {
-      dbApi.get_address_txs(query).then(function(addrTxs) {
-        if (addrTxs) {
-          // res.redirect("/address/"+query);
-          res.locals.userMessage = "Address page coming soon!";
-          res.render("index")
-          return;
-        }
-        res.locals.userMessage = "No results found for query: " + query;
-        return next();
-      })
-    } else if (!isNaN(query)) {
-      dbApi.get_block_height(parseInt(query)).then(function(blockByHeight) {
-        if (blockByHeight) {
-            res.redirect("/block-height/" + query);
-            return;
-        }
-        res.locals.userMessage = "No results found for query: " + query;
-        return next();
-      }).catch(function(err) {
-        res.locals.userMessage = "No results found for query: " + query;
-        return next();
-      });
-    } else {
-      res.locals.userMessage = "Invalid query: " + query;
+    if (!req.body.query) {
+      res.render("search");
       return next();
     }
+
+    let query = req.body.query.toLowerCase();
+    if (query.length !== 64 && query.length !== 33 && isNaN(query)) {
+      res.locals.userMessage = "Invalid query: " + query;
+      res.render("search");
+      return next();
+    }
+
+    // Test if we can redirect to a matching transaction, block has, asset, address or block height
+    const tests = [
+      { fx: dbApi.get_tx, path: "/tx/", applicable: (query.length === 64) },
+      { fx: dbApi.get_block_hash, path: "/block/", applicable: (query.length === 64) },
+      { fx: dbApi.get_asset, path: "/asset/", applicable: (query.length === 64) },
+      { fx: dbApi.get_address_txs, path: "/address/", applicable: (query.length === 33) },
+      { fx: dbApi.get_block_height, path: "/block-height/", applicable: !isNaN(query) },
+    ]
+    tests.forEach(test => {
+      if (test.applicable) {
+        test.fx(query).then(function(result) {
+          if (result) {
+            res.redirect(test.path + query);
+            return;
+          }
+        }).catch(function(err) {});
+      }
+    })
+
+    res.locals.userMessage = "No results found for query: " + query;
+    res.render("search");
+    return next();
   },
   // Handle loading transaction details for a particular txid
   loadTransaction: function(req, res, next) {
