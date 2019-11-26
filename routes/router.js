@@ -128,6 +128,7 @@ router.get("/assets", function(req, res, next) {
 
 // Address page
 router.get("/address/:address", function(req, res, next) {
+  res.locals.address = req.params.address
 
   return next();
 }, view.loadAddress, view.loadIndex);

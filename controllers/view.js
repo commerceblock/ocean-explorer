@@ -136,6 +136,36 @@ function getBlockTxes(block, req, res, cb) {
   });
 }
 
+// Function takes array of Addr collection entries and includes
+// asset and value info from tx collection
+function include_tx_data(addrTxes) {
+  return new Promise(function(resolve, reject) {
+    // Make promises for tx data of each tx
+    txPromises = []
+    addrTxes.forEach(function(addrTx) {
+      txPromises.push(dbApi.get_tx(addrTx["txid"]))
+    })
+    Promise.all(txPromises).then(function(infoTxs) {   // wait for all promises to fullfuil
+      newAddrTxes = addrTxes.map(addrTx => {
+        // Find and include asset and value in addrTx
+        infoTx = infoTxs.find(infoTx => infoTx["txid"] == addrTx["txid"])
+        infoTxVout = infoTx["getrawtransaction"]["vout"].find(infoTxVout => infoTxVout["n"] == addrTx["vout"]);
+        addrTx = addrTx.toObject()
+        return({
+          ...addrTx,
+          asset:infoTxVout["asset"],
+          value:infoTxVout["value"]
+        })
+      });
+      resolve(newAddrTxes)
+    }).catch(function(errorPromises) {
+      reject(errorPromises)
+    });
+  }).catch(function(errorFn) {
+    reject(errorFn)
+  })
+}
+
 module.exports = {
   // Get mempool data from blockchain info and render mempool page
   loadMempool: function(req, res) {
@@ -419,14 +449,25 @@ module.exports = {
   },
   loadAddress: function(req, res, next) {
     dbApi.get_address_txs(res.locals.address).then(function(addrTxs) {
-      if (!addrTxs) {
-        res.locals.userMessage = "Failed to load address "+res.locals.address+" transactions.";
+      if (!addrTxs || !addrTxs[0]) {
+        res.locals.userMessage = "No transactions could be found for the address " + res.locals.address + ".";
         return next();
       }
+
       res.locals.addrTxs = addrTxs
-      // res.render("address")
-      res.locals.userMessage = "Address page coming soon!";
-      res.render("index")
+
+      // include asset and value data to addrTxes
+      include_tx_data(addrTxs).then(newAddrTxes => {
+        if (newAddrTxes) {
+          res.locals.addrTxs = newAddrTxes
+        }
+
+      }).catch((errorTx) => {
+        res.locals.userMessage = 'Unable to load tx information.';
+        return next();
+      }).finally(() => {
+        res.render("address")
+      })
     }).catch(function(errorAddr) {
       res.locals.userMessage = errorAddr;
       return next();
