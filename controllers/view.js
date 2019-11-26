@@ -244,6 +244,7 @@ module.exports = {
     }
 
     // Test if we can redirect to a matching transaction, block has, asset, address or block height
+    const promises = []
     const tests = [
       { fx: dbApi.get_tx, path: "/tx/", applicable: is_tx_block_asset },
       { fx: dbApi.get_block_hash, path: "/block/", applicable: is_tx_block_asset },
@@ -251,20 +252,25 @@ module.exports = {
       { fx: dbApi.get_address_txs, path: "/address/", applicable: (query.length === 34) },
       { fx: dbApi.get_block_height, path: "/block-height/", applicable: !isNaN(query) },
     ]
+
     tests.forEach(test => {
       if (test.applicable) {
-        test.fx(query).then(result => {
-          if (result) {
+        const promise = test.fx(query).then(result => {
+          if (result || result[0]) {
             res.redirect(test.path + query);
             return;
           }
         }).catch(err => {});
+        promises.push(promise);
       }
-    })
+    });
 
-    res.locals.userMessage = "No results found for query: " + query;
-    res.render("search");
-    return next();
+    Promise.all(promises).then((values) => {
+      res.locals.userMessage = "No results found for query: " + query;
+      res.render("search");
+      return next();
+    });
+
   },
   // Handle loading transaction details for a particular txid
   loadTransaction: function(req, res, next) {
