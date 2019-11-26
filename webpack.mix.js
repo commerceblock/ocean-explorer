@@ -19,6 +19,7 @@ mix.js(`${src}/js/main.js`, `${dist}/js/app.js`)
       path.join(__dirname, `${src}/js/**/*.{js,vue}`),
     ],
     extractorPattern: /[a-zA-Z0-9-:%_/]+/g,
+    extensions: ['pug', 'js'],
     whitelistPatterns: [
       /enter$/, /enter-active$/, /enter-to$/,
       /leave$/, /leave-active$/, /leave-to$/,
