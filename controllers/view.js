@@ -231,7 +231,7 @@ module.exports = {
     }
 
     let query = req.body.query.toLowerCase();
-    if (query.length !== 64 && query.length !== 33 && isNaN(query)) {
+    if (query.length !== 64 && query.length !== 34 && isNaN(query)) {
       res.locals.userMessage = "Invalid query: " + query;
       res.render("search");
       return next();
@@ -242,7 +242,7 @@ module.exports = {
       { fx: dbApi.get_tx, path: "/tx/", applicable: (query.length === 64) },
       { fx: dbApi.get_block_hash, path: "/block/", applicable: (query.length === 64) },
       { fx: dbApi.get_asset, path: "/asset/", applicable: (query.length === 64) },
-      { fx: dbApi.get_address_txs, path: "/address/", applicable: (query.length === 33) },
+      { fx: dbApi.get_address_txs, path: "/address/", applicable: (query.length === 34) },
       { fx: dbApi.get_block_height, path: "/block-height/", applicable: !isNaN(query) },
     ]
     tests.forEach(test => {
