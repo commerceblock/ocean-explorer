@@ -230,29 +230,35 @@ module.exports = {
       return next();
     }
 
-    let query = req.body.query.toLowerCase();
-    if (query.length !== 64 && query.length !== 34 && isNaN(query)) {
+    let query = req.body.query
+    const is_tx_block_asset = (query.length === 64);
+    if (!is_tx_block_asset && query.length !== 34 && isNaN(query)) {
       res.locals.userMessage = "Invalid query: " + query;
       res.render("search");
       return next();
     }
 
+    // only set to lowercase if is a tx, block, or asset
+    if (is_tx_block_asset) {
+      query = query.toLowerCase();
+    }
+
     // Test if we can redirect to a matching transaction, block has, asset, address or block height
     const tests = [
-      { fx: dbApi.get_tx, path: "/tx/", applicable: (query.length === 64) },
-      { fx: dbApi.get_block_hash, path: "/block/", applicable: (query.length === 64) },
-      { fx: dbApi.get_asset, path: "/asset/", applicable: (query.length === 64) },
+      { fx: dbApi.get_tx, path: "/tx/", applicable: is_tx_block_asset },
+      { fx: dbApi.get_block_hash, path: "/block/", applicable: is_tx_block_asset },
+      { fx: dbApi.get_asset, path: "/asset/", applicable: is_tx_block_asset },
       { fx: dbApi.get_address_txs, path: "/address/", applicable: (query.length === 34) },
       { fx: dbApi.get_block_height, path: "/block-height/", applicable: !isNaN(query) },
     ]
     tests.forEach(test => {
       if (test.applicable) {
-        test.fx(query).then(function(result) {
+        test.fx(query).then(result => {
           if (result) {
             res.redirect(test.path + query);
             return;
           }
-        }).catch(function(err) {});
+        }).catch(err => {});
       }
     })
 
