@@ -385,20 +385,18 @@ module.exports = {
     // Load assets
     loadAssets: function(req, res, next){
         dbApi.get_all_assets().then(function(assets) {
-            if (!assets) {
-                res.locals.userMessage = "Unable to load assets";
-                return next();
-            }
-            res.locals.assets = [];
-            assets.forEach ( asset => {
-                res.locals.assets.push(asset);
-            });
-            // res.render("assets")
-            res.locals.userMessage = "Assets page coming soon!";
-            res.render("index")
+          if (!assets) {
+            res.locals.userMessage = "Unable to load assets";
+            return next();
+          }
+          res.locals.assets = [];
+          assets.forEach(asset => {
+            res.locals.assets.push(asset);
+          });
+          res.render("assets");
         }).catch(function(errorAsset) {
-           res.locals.userMessage = errorAsset;
-           return next();
+          res.locals.userMessage = errorAsset;
+          return next();
         });
     },
     loadAddress: function(req, res, next) {
