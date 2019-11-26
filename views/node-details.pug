@@ -1,96 +1,96 @@
 extends layout
 
 block headContent
-    title Node Status
+	title Node Status
 
 block content
-    h1 Node Status
+	h1 Node Status
 
-    if (getblockchaininfo)
-        if (false)
-            pre
-                code #{JSON.stringify(getblockchaininfo, null, 4)}
+	if (getblockchaininfo)
+		if (false)
+			pre
+				code #{JSON.stringify(getblockchaininfo, null, 4)}
 
-        if (true)
-            div(class="table-container mb-2r")
-                table(class="table table--primary")
-                    tr
-                        th(class="table-active properties-header") Chain
-                        td(class="monospace") #{getblockchaininfo.chain}
+		if (true)
+			div(class="table-container mb-2r")
+				table(class="table table--primary")
+					tr
+						th(class="table-active properties-header") Chain
+						td(class="monospace") #{getblockchaininfo.chain}
 
-                    tr
-                        th(class="table-active properties-header") Block Count
-                        td(class="monospace") #{getblockchaininfo.blocks.toLocaleString()}
-                            span(class="text-muted")  (header count: #{getblockchaininfo.headers.toLocaleString()})
+					tr
+						th(class="table-active properties-header") Block Count
+						td(class="monospace") #{getblockchaininfo.blocks.toLocaleString()}
+							span(class="text-muted")  (header count: #{getblockchaininfo.headers.toLocaleString()})
 
-                    tr
-                        th(class="table-active properties-header") Best Block Hash
-                        td(class="monospace")
-                            a(href="/block/" + bestblockhash) #{bestblockhash}
+					tr
+						th(class="table-active properties-header") Best Block Hash
+						td(class="monospace")
+							a(href="/block/" + bestblockhash) #{bestblockhash}
 
-                    tr
-                        th(class="table-active properties-header") Mainstay Position
-                        td(class="monospace")
-                            a(href="http://" + env.attestation.host + "/position/" + env.attestation.position) #{env.attestation.position}
+					tr
+						th(class="table-active properties-header") Mainstay Position
+						td(class="monospace")
+							a(href="http://" + env.attestation.host + "/position/" + env.attestation.position) #{env.attestation.position}
 
-                    tr
-                        th(class="table-active properties-header") Latest Attested Height
-                        td(class="monospace")
-                            if (attestedheight !== undefined)
-                                a(href="/block-height/" + attestedheight) #{attestedheight}
-                            else
-                                strong(class="text-danger") Attestation Unavailable
+					tr
+						th(class="table-active properties-header") Latest Attested Height
+						td(class="monospace")
+							if (attestedheight !== undefined)
+								a(href="/block-height/" + attestedheight) #{attestedheight}
+							else
+								strong(class="text-danger") Attestation Unavailable
 
-                    tr
-                        th(class="table-active properties-header") Latest Attestation Txid
-                        td(class="monospace")
-                            if (attestationtxid !== undefined)
-                                a(href="http://" + env.attestation.host + "/tx/" + attestationtxid) #{attestationtxid}
-                            else
-                                strong(class="text-danger") Attestation Unavailable
+					tr
+						th(class="table-active properties-header") Latest Attestation Txid
+						td(class="monospace")
+							if (attestationtxid !== undefined)
+								a(href="http://" + env.attestation.host + "/tx/" + attestationtxid) #{attestationtxid}
+							else
+								strong(class="text-danger") Attestation Unavailable
 
-                    tr
-                        th(class="table-active properties-header") Median Time
-                        td(class="monospace") #{getblockchaininfo.mediantime}
+					tr
+						th(class="table-active properties-header") Median Time
+						td(class="monospace") #{getblockchaininfo.mediantime}
 
-                    tr
-                        th(class="table-active properties-header") Status
-                        td(class="monospace")
-                            if (getblockchaininfo.initialblockdownload)
-                                span Initial block download progress #{(100 * getblockchaininfo.verificationprogress).toLocaleString()}%
-                            else
-                                span Synchronized with network
+					tr
+						th(class="table-active properties-header") Status
+						td(class="monospace")
+							if (getblockchaininfo.initialblockdownload)
+								span Initial block download progress #{(100 * getblockchaininfo.verificationprogress).toLocaleString()}%
+							else
+								span Synchronized with network
 
-                    tr
-                        th(class="table-active properties-header") Warnings
-                        td(class="monospace")
-                            if (getblockchaininfo.warnings && getblockchaininfo.warnings.trim().length > 0)
-                                span #{getblockchaininfo.warnings}
-                            else
-                                span None
+					tr
+						th(class="table-active properties-header") Warnings
+						td(class="monospace")
+							if (getblockchaininfo.warnings && getblockchaininfo.warnings.trim().length > 0)
+								span #{getblockchaininfo.warnings}
+							else
+								span None
 
-                    tr
-                        th(class="table-active properties-header") Version
-                        td(class="monospace") #{getnetworkinfo.version}
-                            span(class="monospace")  (#{getnetworkinfo.subversion})
-                    tr
-                        th(class="table-active properties-header") Protocol Version
-                        td(class="monospace") #{getnetworkinfo.protocolversion}
+					tr
+						th(class="table-active properties-header") Version
+						td(class="monospace") #{getnetworkinfo.version}
+							span(class="monospace")  (#{getnetworkinfo.subversion})
+					tr
+						th(class="table-active properties-header") Protocol Version
+						td(class="monospace") #{getnetworkinfo.protocolversion}
 
-                    tr
-                        th(class="table-active properties-header") Connections
-                        td(class="monospace") #{getnetworkinfo.connections.toLocaleString()}
+					tr
+						th(class="table-active properties-header") Connections
+						td(class="monospace") #{getnetworkinfo.connections.toLocaleString()}
 
-                    - var startTimeAgo = moment.duration(uptimeSeconds * 1000);
-                    tr
-                        th(class="table-active properties-header") Uptime
-                        td(class="monospace") #{startTimeAgo.format()}
+					- var startTimeAgo = moment.duration(uptimeSeconds * 1000);
+					tr
+						th(class="table-active properties-header") Uptime
+						td(class="monospace") #{startTimeAgo.format()}
 
-                    tr
-                        th(class="table-active properties-header") Network Traffic
-                        td(class="monospace")
-                            span Total Download: #{utils.formatBytes(getnettotals.totalbytesrecv)}
-                            span(class="text-muted")  (avg #{utils.formatBytes(getnettotals.totalbytesrecv / uptimeSeconds)}/s)
-                            br
-                            span Total Upload: #{utils.formatBytes(getnettotals.totalbytessent)}
-                            span(class="text-muted")  (avg #{utils.formatBytes(getnettotals.totalbytessent / uptimeSeconds)}/s)
+					tr
+						th(class="table-active properties-header") Network Traffic
+						td(class="monospace")
+							span Total Download: #{utils.formatBytes(getnettotals.totalbytesrecv)}
+							span(class="text-muted")  (avg #{utils.formatBytes(getnettotals.totalbytesrecv / uptimeSeconds)}/s)
+							br
+							span Total Upload: #{utils.formatBytes(getnettotals.totalbytessent)}
+							span(class="text-muted")  (avg #{utils.formatBytes(getnettotals.totalbytessent / uptimeSeconds)}/s)
