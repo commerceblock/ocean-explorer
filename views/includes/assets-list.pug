@@ -13,7 +13,7 @@ div(class="table-container")
 				if (asset)
 					tr(class="monospace")
 						td
-							a(href=("/asset/" + asset.asset)) #{asset.asset}
+							a(href=("/asset/" + asset.asset)) #{asset.asset.slice(0,30)}...
 						td #{asset.assetamount}
 						td #{asset.reissuedamount}
 						td
