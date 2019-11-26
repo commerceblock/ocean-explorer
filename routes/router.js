@@ -54,15 +54,20 @@ router.get("/blocks", function(req, res, next) {
   return next();
 }, view.loadBlocks);
 
+// Search page
+router.get("/search", function(req, res, next) {
+
+  return next();
+}, view.loadSearch);
+
 // Search redirect routing
 router.post("/search", function(req, res, next) {
   if (!req.body.query) {
     res.locals.userMessage = "Enter a block height, block hash, asset or transaction id.";
-    return next();
   }
 
   return next();
-}, view.loadSearch, view.loadIndex);
+}, view.loadSearch);
 
 // Transaction page
 router.get("/tx/:transactionId", function(req, res, next) {
