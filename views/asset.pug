@@ -1,0 +1,11 @@
+extends layout
+
+block headContent
+	title Asset #{asset.asset}
+
+block content
+	h1(class="h2")
+		span Asset
+		p(class="monospace text-mu overflow-ellipsis") #{asset.asset}
+
+	include includes/asset-content.pug
