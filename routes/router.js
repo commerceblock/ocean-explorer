@@ -14,15 +14,15 @@ const OFFSET_DEFAULT = 0;   // default offest limit for the first blockheight to
 
 // Index page
 router.get("/", function(req, res, next) {
-	var sort = "desc";
-	if (req.query.sort) {
-		sort = req.query.sort;
-	}
+  var sort = "desc";
+  if (req.query.sort) {
+    sort = req.query.sort;
+  }
 
-	res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
-	res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
-	res.locals.sort = sort;
-	res.locals.paginationBaseUrl = "/";
+  res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
+  res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
+  res.locals.sort = sort;
+  res.locals.paginationBaseUrl = "/";
 
   return next();
 }, view.loadIndex);
@@ -30,144 +30,144 @@ router.get("/", function(req, res, next) {
 // Node Details page
 router.get("/node-details", function(req, res, next) {
 
-    return next();
+  return next();
 }, view.loadInfo);
 
 // Mempool Summary page
 router.get("/mempool-summary", function(req, res, next) {
 
-	return next();
+  return next();
 }, view.loadMempool);
 
 // Blocks page
 router.get("/blocks", function(req, res, next) {
-	var sort = "desc";
-	if (req.query.sort) {
-		sort = req.query.sort;
-	}
+  var sort = "desc";
+  if (req.query.sort) {
+    sort = req.query.sort;
+  }
 
-	res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
-	res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
-	res.locals.sort = sort;
-	res.locals.paginationBaseUrl = "/blocks";
+  res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
+  res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
+  res.locals.sort = sort;
+  res.locals.paginationBaseUrl = "/blocks";
 
-    return next();
+  return next();
 }, view.loadBlocks);
 
 // Search redirect routing
 router.post("/search", function(req, res, next) {
-	if (!req.body.query) {
-        res.locals.userMessage = "Enter a block height, block hash, asset or transaction id.";
-		return next();
-	}
-
+  if (!req.body.query) {
+    res.locals.userMessage = "Enter a block height, block hash, asset or transaction id.";
     return next();
+  }
+
+  return next();
 }, view.loadSearch, view.loadIndex);
 
 // Transaction page
 router.get("/tx/:transactionId", function(req, res, next) {
-	var txid = req.params.transactionId;
+  var txid = req.params.transactionId;
 
-	var output = -1;
-	if (req.query.output) {
-		output = parseInt(req.query.output);
-	}
+  var output = -1;
+  if (req.query.output) {
+    output = parseInt(req.query.output);
+  }
 
-	res.locals.txid = txid;
-	res.locals.output = output;
-	res.locals.result = {};
+  res.locals.txid = txid;
+  res.locals.output = output;
+  res.locals.result = {};
 
-    return next();
+  return next();
 }, view.loadTransaction, view.loadIndex);
 
 // Block by blockheight routing
 router.get("/block-height/:blockHeight", function(req, res, next) {
-	var blockHeight = parseInt(req.params.blockHeight);
+  var blockHeight = parseInt(req.params.blockHeight);
 
-	res.locals.blockHeight = blockHeight;
-	res.locals.result = {};
+  res.locals.blockHeight = blockHeight;
+  res.locals.result = {};
 
-	res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
-	res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
-	res.locals.paginationBaseUrl = "/block-height/" + blockHeight;
+  res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
+  res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
+  res.locals.paginationBaseUrl = "/block-height/" + blockHeight;
 
-    return next();
+  return next();
 }, view.loadBlockHeight, view.loadIndex);
 
 // Block by blockhash routing
 router.get("/block/:blockHash", function(req, res, next) {
-	var blockHash = req.params.blockHash;
+  var blockHash = req.params.blockHash;
 
-	res.locals.blockHash = blockHash;
-	res.locals.result = {};
+  res.locals.blockHash = blockHash;
+  res.locals.result = {};
 
-	res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
-	res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
-	res.locals.paginationBaseUrl = "/block/" + blockHash;
+  res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT;
+  res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT;
+  res.locals.paginationBaseUrl = "/block/" + blockHash;
 
-	return next();
+  return next();
 }, view.loadBlockHash, view.loadIndex);
 
 // Asset by asset (id) routing
 router.get("/asset/:asset", function(req, res, next) {
   res.locals.assetid = req.params.asset
 
-	return next();
+  return next();
 }, view.loadAsset, view.loadIndex);
 
 // Assets page
 router.get("/assets", function(req, res, next) {
 
-	return next();
+  return next();
 }, view.loadAssets, view.loadIndex);
 
 // Address page
 router.get("/address/:address", function(req, res, next) {
 
-    return next();
+  return next();
 }, view.loadAddress, view.loadIndex);
 
 // API single block
 router.get("/api/block/:block", function(req, res, next) {
 
-    return next();
+  return next();
 }, api.loadBlock);
 
 // API single tx
 router.get("/api/tx/:txid", function(req, res, next) {
 
-    return next();
+  return next();
 }, api.loadTx);
 
 // API single asset
 router.get("/api/asset/:asset", function(req, res, next) {
 
-    return next();
+  return next();
 }, api.loadAsset);
 
 // API assets
 router.get("/api/assets", function(req, res, next) {
 
-    return next();
+  return next();
 }, api.loadAssets);
 
 // API address txs
 router.get("/api/address/:address", function(req, res, next) {
-    res.locals.utxoOnly = false   //include UTXOs
+  res.locals.utxoOnly = false   //include UTXOs
 
-    return next();
+  return next();
 }, api.loadAddress);
 
 // API address utxos
 router.get("/api/addressutxos/:address", function(req, res, next) {
-    res.locals.utxoOnly = true    //do not include UTXOs
+  res.locals.utxoOnly = true    //do not include UTXOs
 
-    return next();
+  return next();
 }, api.loadAddress);
 
 // API info
 router.get("/api/info", function(req, res, next) {
-    return next();
+  return next();
 }, api.loadInfo);
 
 module.exports = router;
