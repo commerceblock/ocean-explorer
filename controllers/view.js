@@ -431,10 +431,16 @@ module.exports = {
         return next();
       }
 
-      res.locals.assets = [];
+      res.locals.gold_assets = [];
+      res.locals.policy_assets = [];
 
       const generateAssetList = (map_data) => {
         assets.forEach(asset => {
+          if (asset.assetlabel) {
+            res.locals.policy_assets.push(asset);
+            return;
+          }
+
           if (map_data) {
             const mapped_asset = map_data.find(({ tokenid }) => tokenid === asset.asset)
             if (mapped_asset) {
@@ -442,7 +448,7 @@ module.exports = {
               asset.mass = mapped_asset.mass
             }
           }
-          res.locals.assets.push(asset);
+          res.locals.gold_assets.push(asset);
         });
       };
 
