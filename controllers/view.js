@@ -492,7 +492,6 @@ module.exports = {
             }
 
             res.locals.goldReceived += addr.value
-            return
           }
         })
       }).catch((errorTx) => {
