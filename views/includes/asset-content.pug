@@ -12,6 +12,11 @@ div(class="tab-content")
 					th(class="table-active properties-header") asset
 					td(class="monospace") #{asset.asset}
 
+				if (asset.assetlabel)
+					tr
+						th(class="table-active properties-header") assetlabel
+						td(class="monospace") #{asset.assetlabel}
+
 				tr
 					th(class="table-active properties-header") assetamount
 					td(class="monospace") #{asset.assetamount}
@@ -25,13 +30,15 @@ div(class="tab-content")
 					td(class="monospace")
 						a(href=("/tx/" + asset.issuancetx)) #{asset.issuancetx}
 
-				tr
-					th(class="table-active properties-header") mass
-					td(class="monospace") #{asset.mass}
+				if (asset.mass)
+					tr
+						th(class="table-active properties-header") mass
+						td(class="monospace") #{asset.mass}
 
-				tr
-					th(class="table-active properties-header") ref
-					td(class="monospace") #{asset.ref}
+				if (asset.ref)
+					tr
+						th(class="table-active properties-header") ref
+						td(class="monospace") #{asset.ref}
 
 	div(id="tab-raw", class="tab-pane", role="tabpanel")
 		pre
