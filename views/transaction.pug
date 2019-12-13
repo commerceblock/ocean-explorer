@@ -172,7 +172,7 @@ block content
 											td
 												if (vout.scriptPubKey)
 													if (vout.scriptPubKey.addresses)
-														a(id="output-" + voutIndex)
+														a(href=("/address/" + vout.scriptPubKey.addresses[0]) id="output-" + voutIndex)
 															div(class="monospace", style="word-break: break-word;")
 																span #{vout.scriptPubKey.addresses[0]}
 													else if (vout.scriptPubKey.type == 'fee')
