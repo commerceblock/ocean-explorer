@@ -478,7 +478,6 @@ module.exports = {
       res.locals.addrTxs = addrTxs
       res.locals.goldReceived = 0
       res.locals.goldUnspent = 0
-      res.locals.policyReceived = 0
 
       // include asset and value data to addrTxes
       include_tx_data(addrTxs).then(newAddrTxes => {
@@ -495,8 +494,6 @@ module.exports = {
             res.locals.goldReceived += addr.value
             return
           }
-
-          res.locals.policyReceived += addr.value
         })
       }).catch((errorTx) => {
         res.locals.userMessage = 'Unable to load tx information.';
