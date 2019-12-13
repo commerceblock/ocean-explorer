@@ -293,6 +293,7 @@ module.exports = {
       '1-75r': '1.75rem',
       '2r': '2rem',
       '3-5r': '3.5rem',
+      '12-5r': '12.5rem',
     }),
     maxWidth: {
       '50': '50px',

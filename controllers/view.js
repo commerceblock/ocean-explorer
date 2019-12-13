@@ -136,6 +136,39 @@ function getBlockTxes(block, req, res, cb) {
   });
 }
 
+// Function takes array of Addr collection entries and includes
+// asset and value info from tx collection
+function include_tx_data(addrTxes) {
+  return new Promise(function(resolve, reject) {
+    // Make promises for tx data of each tx
+    txPromises = []
+    addrTxes.forEach(function(addrTx) {
+      txPromises.push(dbApi.get_tx(addrTx["txid"]))
+    })
+    Promise.all(txPromises).then(function(infoTxs) {   // wait for all promises to fullfuil
+      newAddrTxes = addrTxes.map(addrTx => {
+        // Find and include asset and value in addrTx
+        infoTx = infoTxs.find(infoTx => infoTx["txid"] == addrTx["txid"])
+        infoTxVout = infoTx["getrawtransaction"]["vout"].find(infoTxVout => infoTxVout["n"] == addrTx["vout"])
+        addrTx = addrTx.toObject()
+
+        return {
+          ...addrTx,
+          asset: infoTxVout.asset,
+          assetlabel: infoTxVout.assetlabel,
+          value: infoTxVout.value
+        }
+      })
+
+      resolve(newAddrTxes)
+    }).catch(function(errorPromises) {
+      reject(errorPromises)
+    });
+  }).catch(function(errorFn) {
+    reject(errorFn)
+  })
+}
+
 module.exports = {
   // Get mempool data from blockchain info and render mempool page
   loadMempool: function(req, res) {
@@ -193,60 +226,54 @@ module.exports = {
         res.render("node-details");
     });
   },
-  // Handle searching for tx/block height/block hash and redirect to appropriate controller
+  // Handle searching for tx/block height/block hash/asset/address and redirect to appropriate controller
   loadSearch: function(req, res, next) {
-    var query = req.body.query.toLowerCase();
-    if (query.length == 64) {
-      // Try find tx, block or asset
-      dbApi.get_tx(query).then(function(tx) {
-        if (tx) {
-          res.redirect("/tx/" + query);
-          return;
-        }
-      }).catch(function(err) {});
-      dbApi.get_block_hash(query).then(function(blockByHash) {
-        if (blockByHash) {
-          res.redirect("/block/" + query);
-          return;
-        }
-      }).catch(function(err) {});
-      dbApi.get_asset(query).then(function(asset) {
-        if (asset) {
-          // res.redirect("/asset/"+query);
-          res.locals.userMessage = "Asset page coming soon!";
-          res.render("index")
-          return;
-        }
-      }).catch(function(err) {});
-      res.locals.userMessage = "No results found for query: " + query;
-      return next();
-    } else if (query.length == 33) {
-      dbApi.get_address_txs(query).then(function(addrTxs) {
-        if (addrTxs) {
-          // res.redirect("/address/"+query);
-          res.locals.userMessage = "Address page coming soon!";
-          res.render("index")
-          return;
-        }
-        res.locals.userMessage = "No results found for query: " + query;
-        return next();
-      })
-    } else if (!isNaN(query)) {
-      dbApi.get_block_height(parseInt(query)).then(function(blockByHeight) {
-        if (blockByHeight) {
-            res.redirect("/block-height/" + query);
-            return;
-        }
-        res.locals.userMessage = "No results found for query: " + query;
-        return next();
-      }).catch(function(err) {
-        res.locals.userMessage = "No results found for query: " + query;
-        return next();
-      });
-    } else {
-      res.locals.userMessage = "Invalid query: " + query;
+    if (!req.body.query) {
+      res.render("search");
       return next();
     }
+
+    let query = req.body.query
+    const is_tx_block_asset = (query.length === 64);
+    if (!is_tx_block_asset && query.length !== 34 && isNaN(query)) {
+      res.locals.userMessage = "Invalid query: " + query;
+      res.render("search");
+      return next();
+    }
+
+    // only set to lowercase if is a tx, block, or asset
+    if (is_tx_block_asset) {
+      query = query.toLowerCase();
+    }
+
+    // Test if we can redirect to a matching transaction, block has, asset, address or block height
+    const promises = []
+    const tests = [
+      { fx: dbApi.get_tx, path: "/tx/", applicable: is_tx_block_asset },
+      { fx: dbApi.get_block_hash, path: "/block/", applicable: is_tx_block_asset },
+      { fx: dbApi.get_asset, path: "/asset/", applicable: is_tx_block_asset },
+      { fx: dbApi.get_address_txs, path: "/address/", applicable: (query.length === 34) },
+      { fx: dbApi.get_block_height, path: "/block-height/", applicable: !isNaN(query) },
+    ]
+
+    tests.forEach(test => {
+      if (test.applicable) {
+        const promise = test.fx(query).then(result => {
+          if (result || result[0]) {
+            res.redirect(test.path + query);
+            return;
+          }
+        }).catch(err => {});
+        promises.push(promise);
+      }
+    });
+
+    Promise.all(promises).then((values) => {
+      res.locals.userMessage = "No results found for query: " + query;
+      res.render("search");
+      return next();
+    });
+
   },
   // Handle loading transaction details for a particular txid
   loadTransaction: function(req, res, next) {
@@ -407,10 +434,16 @@ module.exports = {
         return next();
       }
 
-      res.locals.assets = [];
+      res.locals.gold_assets = [];
+      res.locals.policy_assets = [];
 
       const generateAssetList = (map_data) => {
         assets.forEach(asset => {
+          if (asset.assetlabel) {
+            res.locals.policy_assets.push(asset);
+            return;
+          }
+
           if (map_data) {
             const mapped_asset = map_data.find(({ tokenid }) => tokenid === asset.asset)
             if (mapped_asset) {
@@ -418,7 +451,7 @@ module.exports = {
               asset.mass = mapped_asset.mass
             }
           }
-          res.locals.assets.push(asset);
+          res.locals.gold_assets.push(asset);
         });
       };
 
@@ -437,14 +470,36 @@ module.exports = {
   },
   loadAddress: function(req, res, next) {
     dbApi.get_address_txs(res.locals.address).then(function(addrTxs) {
-      if (!addrTxs) {
-        res.locals.userMessage = "Failed to load address "+res.locals.address+" transactions.";
+      if (!addrTxs || !addrTxs[0]) {
+        res.locals.userMessage = "No transactions could be found for the address " + res.locals.address + ".";
         return next();
       }
+
       res.locals.addrTxs = addrTxs
-      // res.render("address")
-      res.locals.userMessage = "Address page coming soon!";
-      res.render("index")
+      res.locals.goldReceived = 0
+      res.locals.goldUnspent = 0
+
+      // include asset and value data to addrTxes
+      include_tx_data(addrTxs).then(newAddrTxes => {
+        if (newAddrTxes) {
+          res.locals.addrTxs = newAddrTxes
+        }
+
+        newAddrTxes.forEach(addr => {
+          if (!addr.assetlabel) {
+            if (!addr.isSpent) {
+              res.locals.goldUnspent += addr.value
+            }
+
+            res.locals.goldReceived += addr.value
+          }
+        })
+      }).catch((errorTx) => {
+        res.locals.userMessage = 'Unable to load tx information.';
+        return next();
+      }).finally(() => {
+        res.render("address")
+      })
     }).catch(function(errorAddr) {
       res.locals.userMessage = errorAddr;
       return next();
