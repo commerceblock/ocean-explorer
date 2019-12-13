@@ -149,14 +149,17 @@ function include_tx_data(addrTxes) {
       newAddrTxes = addrTxes.map(addrTx => {
         // Find and include asset and value in addrTx
         infoTx = infoTxs.find(infoTx => infoTx["txid"] == addrTx["txid"])
-        infoTxVout = infoTx["getrawtransaction"]["vout"].find(infoTxVout => infoTxVout["n"] == addrTx["vout"]);
+        infoTxVout = infoTx["getrawtransaction"]["vout"].find(infoTxVout => infoTxVout["n"] == addrTx["vout"])
         addrTx = addrTx.toObject()
-        return({
+
+        return {
           ...addrTx,
-          asset:infoTxVout["asset"],
-          value:infoTxVout["value"]
-        })
-      });
+          asset: infoTxVout.asset,
+          assetlabel: infoTxVout.assetlabel,
+          value: infoTxVout.value
+        }
+      })
+
       resolve(newAddrTxes)
     }).catch(function(errorPromises) {
       reject(errorPromises)
@@ -473,6 +476,9 @@ module.exports = {
       }
 
       res.locals.addrTxs = addrTxs
+      res.locals.goldReceived = 0
+      res.locals.goldUnspent = 0
+      res.locals.policyReceived = 0
 
       // include asset and value data to addrTxes
       include_tx_data(addrTxs).then(newAddrTxes => {
@@ -480,6 +486,18 @@ module.exports = {
           res.locals.addrTxs = newAddrTxes
         }
 
+        newAddrTxes.forEach(addr => {
+          if (!addr.assetlabel) {
+            if (!addr.isSpent) {
+              res.locals.goldUnspent += addr.value
+            }
+
+            res.locals.goldReceived += addr.value
+            return
+          }
+
+          res.locals.policyReceived += addr.value
+        })
       }).catch((errorTx) => {
         res.locals.userMessage = 'Unable to load tx information.';
         return next();
