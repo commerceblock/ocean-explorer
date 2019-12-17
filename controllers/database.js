@@ -127,20 +127,22 @@ async function new_addr(vin, vout) {
         for (const outp of vout) {                  // For each output
             for (const addr of outp["address"]) {   // For each address
                 // Check if addr entry exists
-                existing_addr = await Addr.findOne({"address":vout["address"],"txid":vout["txid"],"vout":vout["vout"]});
-                if (existing_addr)
-                    continue
+                existing_addr = await Addr.findOne({"address":addr,"txid":outp["txid"],"vout":outp["vout"]});
+                if (existing_addr) {
+                    continue;
+                }
                 var newaddr = new Addr({
                     address: addr,
                     txid:    outp["txid"],
-                    vout:    outp["vout"]
+                    vout:    outp["vout"],
+                    value:   outp["value"],
+                    asset:   outp["asset"],
                 });
-                newaddrs.push(newaddr)
+                newaddrs.push(newaddr);
             }
         }
-        return await save_addr(newaddrs);
+        return newaddrs.length > 0 ? await save_addr(newaddrs) : null;
     }
-    return
 }
 
 // Save new info using the Info model
@@ -411,7 +413,9 @@ module.exports = {
                         .map(item => {return({
                             address:item["scriptPubKey"]["addresses"],
                             txid:result.transactions[i]["txid"],
-                            vout:item["n"]
+                            vout:item["n"],
+                            value:item["value"],
+                            asset:item["asset"],
                     })});
                     await new_addr(vin,vout)
                 }

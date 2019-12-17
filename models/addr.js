@@ -13,9 +13,12 @@ var mongoose = require('mongoose')
 var AddrSchema = new Schema({
     address:    { type: String, index: true },
     txid:       String,
-    vout:       { type: Number, index: true},
+    asset:      { type: String, index: true },
+    vout:       Number,
+    value:      Number,
     isSpent:    { type: Boolean, default: false }
 });
 
+//
 // Address model used for saving and/or lookups
 module.exports = mongoose.model('Addr', AddrSchema);
