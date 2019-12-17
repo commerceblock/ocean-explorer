@@ -205,7 +205,7 @@ block content
 													span(class="monospace") #{asset}
 												else
 													if result.transaction.tokenAsset && vout.asset == result.transaction.tokenAsset
-														span(class="tag tag-reissuance monospace") #{genesisAsset}
+														span(class="tag tag-reissuance monospace") TOKEN
 													else
 														- var asset = genesisAsset
 														if (vout.assetlabel)

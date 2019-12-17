@@ -14,6 +14,8 @@ var AddrSchema = new Schema({
     address:    { type: String, index: true },
     txid:       String,
     asset:      { type: String, index: true },
+    assetlabel: String,
+    istoken:    Boolean,
     vout:       Number,
     value:      Number,
     isSpent:    { type: Boolean, default: false }

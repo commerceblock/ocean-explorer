@@ -446,12 +446,12 @@ module.exports = {
       res.locals.goldUnspent = 0
       res.locals.addrTxs = addrTxs
       addrTxs.forEach(addr => {
-          if (!addr.assetlabel) {
-            if (!addr.isSpent) {
-              res.locals.goldUnspent += addr.value
-            }
-            res.locals.goldReceived += addr.value
+        if (!addr.assetlabel && !addr.istoken) {
+          if (!addr.isSpent) {
+            res.locals.goldUnspent += addr.value
           }
+          res.locals.goldReceived += addr.value
+        }
       });
       res.render("address");
     }).catch(function(errorAddr) {

@@ -137,6 +137,8 @@ async function new_addr(vin, vout) {
                     vout:    outp["vout"],
                     value:   outp["value"],
                     asset:   outp["asset"],
+                    assetlabel: outp["assetlabel"],
+                    istoken: outp["istoken"],
                 });
                 newaddrs.push(newaddr);
             }
@@ -386,7 +388,9 @@ module.exports = {
                 // Get block transactions
                 for (var i = 0; i < result.transactions.length; i++) {
                     // Check for asset issuance/reissuance
+                    var token = "";
                     if (result.transactions[i]["vin"][0]["issuance"] != undefined) {
+                        token = result.transactions[i]["vin"][0]["issuance"]["token"];
                         await new_asset(
                           result.transactions[i]["vin"][0]["issuance"]["asset"],
                           result.transactions[i]["vin"][0]["issuance"]["assetamount"],
@@ -411,11 +415,13 @@ module.exports = {
                     // Get addresses, txid and vin of txs
                     vout = result.transactions[i]["vout"].filter(item => item["scriptPubKey"]["addresses"] != undefined)
                         .map(item => {return({
-                            address:item["scriptPubKey"]["addresses"],
-                            txid:result.transactions[i]["txid"],
-                            vout:item["n"],
-                            value:item["value"],
-                            asset:item["asset"],
+                            address: item["scriptPubKey"]["addresses"],
+                            txid: result.transactions[i]["txid"],
+                            vout: item["n"],
+                            value: item["value"],
+                            asset: item["asset"],
+                            assetlabel: item["assetlabel"] ? item["assetlabel"] : "",
+                            istoken: item["asset"] === token,
                     })});
                     await new_addr(vin,vout)
                 }
