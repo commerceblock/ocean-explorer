@@ -1,4 +1,4 @@
-h4(class="h5") Gold Assets
+h4(class="h5") #{genesisAsset} Assets
 div(class="table-container")
 	table(class="table table--primary min-w-700 table-striped")
 		thead
@@ -10,7 +10,7 @@ div(class="table-container")
 				th(class="data-header") mass
 				th(class="data-header text-right") ref
 		tbody
-			each asset in gold_assets
+			each asset in assets
 				if (asset)
 					tr(class="monospace")
 						td

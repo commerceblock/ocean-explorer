@@ -401,7 +401,7 @@ module.exports = {
         return next();
       }
 
-      res.locals.gold_assets = [];
+      res.locals.assets = [];
       res.locals.policy_assets = [];
 
       const generateAssetList = (map_data) => {
@@ -418,7 +418,7 @@ module.exports = {
               asset.mass = mapped_asset.mass
             }
           }
-          res.locals.gold_assets.push(asset);
+          res.locals.assets.push(asset);
         });
       };
 
@@ -442,15 +442,15 @@ module.exports = {
         return next();
       }
       res.locals.addrTxs = addrTxs
-      res.locals.goldReceived = 0
-      res.locals.goldUnspent = 0
+      res.locals.assetReceived = 0
+      res.locals.assetUnspent = 0
       res.locals.addrTxs = addrTxs
       addrTxs.forEach(addr => {
         if (!addr.assetlabel && !addr.istoken) {
           if (!addr.isSpent) {
-            res.locals.goldUnspent += addr.value
+            res.locals.assetUnspent += addr.value
           }
-          res.locals.goldReceived += addr.value
+          res.locals.assetReceived += addr.value
         }
       });
       res.render("address");

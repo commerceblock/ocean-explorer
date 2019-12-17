@@ -6,10 +6,10 @@ block headContent
 block content
 	h1(class="h2") Assets
 
-	if (gold_assets)
-		include includes/assets-list-gold.pug
+	if (assets)
+		include includes/assets-list.pug
 	else
-		p No gold assets found
+		p No #{genesisAsset} assets found
 
 	if (policy_assets)
 		include includes/assets-list-policy.pug
