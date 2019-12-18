@@ -9,17 +9,20 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
 // Address schema
-// Indices used: address, vout
+// Indices used: address, asset
 var AddrSchema = new Schema({
     address:    { type: String, index: true },
     txid:       String,
-    asset:      { type: String, index: true },
+    vout:       Number,
+    asset:      String,
     assetlabel: String,
     istoken:    Boolean,
-    vout:       Number,
     value:      Number,
     isSpent:    { type: Boolean, default: false }
 });
+
+// Compounded index for quick lookup on txid/vout pairs
+AddrSchema.index({ txid: 1, vout: 1 });
 
 //
 // Address model used for saving and/or lookups
