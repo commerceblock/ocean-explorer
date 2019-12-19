@@ -1,30 +1,32 @@
 div(class="table-container mb-2r e:mb-3-75r")
-	table(class="table table--primary")
-		tr
-			th(class="table-active properties-header w-12-5r") #{genesisAsset} Received
-			td(class="monospace") #{assetReceived}
+    table(class="table table--primary")
+        tr
+            th(class="table-active properties-header w-12-5r") #{genesisAsset} Received
+            td(class="monospace") #{assetReceived}
 
-		tr
-			th(class="table-active properties-header w-12-5r") #{genesisAsset} Unspent
-			td(class="monospace") #{assetUnspent}
+        tr
+            th(class="table-active properties-header w-12-5r") #{genesisAsset} Unspent
+            td(class="monospace") #{assetUnspent}
 
 div(class="table-container")
-	table(class="table table--primary min-w-700 table-striped")
-		thead
-			tr
-				th(class="data-header") Transaction ID
-				th(class="data-header") Spent
-				th(class="data-header") Vout
-				th(class="data-header") Asset
-				th(class="data-header text-right") Value
-		tbody
-			each tx in addrTxs
-				if (tx)
-					tr(class="monospace")
-						td
-							a(href=("/tx/" + tx.txid)) #{tx.txid.slice(0,30)}...
-						td #{tx.isSpent}
-						td #{tx.vout}
-						td
-							a(href=("/asset/" + tx.asset)) #{tx.asset.slice(0,30)}...
-						td(class="text-right") #{tx.value}
+    table(class="table table--primary min-w-700 table-striped")
+        thead
+            tr
+                th(class="data-header") Transaction ID
+                th(class="data-header") Spent
+                th(class="data-header") Vout
+                th(class="data-header") Asset
+                th(class="data-header text-right") Value
+        tbody
+            each tx in addrTxs
+                if (tx)
+                    tr(class="monospace")
+                        td
+                            a(href=("/tx/" + tx.txid)) #{tx.txid.slice(0,30)}...
+                        td
+                            if (tx.spent && tx.spent != "")
+                                a(href=("/tx/" + tx.spent)) #{tx.spent.slice(0,15)}...
+                        td #{tx.vout}
+                        td
+                            a(href=("/asset/" + tx.asset)) #{tx.asset.slice(0,30)}...
+                        td(class="text-right") #{tx.value}

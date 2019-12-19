@@ -18,7 +18,7 @@ var AddrTxSchema = new Schema({
     assetlabel: String,
     istoken:    Boolean,
     value:      Number,
-    isSpent:    { type: Boolean, default: false }
+    spent:      { type: String, default: ""}
 });
 
 // Compounded index for quick lookup on txid/vout pairs

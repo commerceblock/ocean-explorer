@@ -112,14 +112,14 @@ async function save_addrtx(addrs) {
 }
 
 // Create new address using the AddrTx model and call save method
-async function new_addrtx(vin, vout) {
-    // Set vin's isSpent=true
+async function new_addrtx(vin, vout, txid) {
+    // Set vin's spent true
     if (vin.length) {
         for (const inp of vin) {
             // find unspent and update
             updated = await AddrTx.findOne({"txid":inp["txid"],"vout":inp["vout"]});
-            if (updated && !updated.isSpent) {
-                updated.isSpent = true;
+            if (updated && updated.spent == "") {
+                updated.spent = txid;
                 await updated.save();
                 console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.");
                 // update balance
@@ -341,7 +341,7 @@ module.exports = {
     get_address_txs: function(address, utxo=false, cb) {
         if (utxo) {
           return new Promise(function(resolve, reject) {
-              AddrTx.find({"address":address,"isSpent":false}, function(errorAddress, addrUtxos) {
+              AddrTx.find({"address":address,"spent":""}, function(errorAddress, addrUtxos) {
                   if (errorAddress) {
                       reject(errorAddress);
                       return;
@@ -488,7 +488,7 @@ module.exports = {
                             assetlabel: item["assetlabel"] ? item["assetlabel"] : "",
                             istoken: token == "" ? issuance_asset != "" && item["asset"] != issuance_asset : item["asset"] == token,
                     })});
-                    await new_addrtx(vin,vout)
+                    await new_addrtx(vin,vout,result.transactions[i]["txid"])
                 }
 
                 // Get blockchain info and save
