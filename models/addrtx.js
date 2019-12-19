@@ -1,5 +1,5 @@
 /*
- * @addr.js Address Model for Mongo database based on mongoose
+ * @addr.js AddressTx Model for Mongo database based on mongoose
  *
  * @author Tomos Wootton 2019
  *
@@ -8,9 +8,9 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
-// Address schema
-// Indices used: address, asset
-var AddrSchema = new Schema({
+// AddressTx schema
+// Indices used: address, (txid, vout)
+var AddrTxSchema = new Schema({
     address:    { type: String, index: true },
     txid:       String,
     vout:       Number,
@@ -22,8 +22,8 @@ var AddrSchema = new Schema({
 });
 
 // Compounded index for quick lookup on txid/vout pairs
-AddrSchema.index({ txid: 1, vout: 1 });
+AddrTxSchema.index({ txid: 1, vout: 1 });
 
 //
 // Address model used for saving and/or lookups
-module.exports = mongoose.model('Addr', AddrSchema);
+module.exports = mongoose.model('AddrTx', AddrTxSchema);

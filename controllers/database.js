@@ -12,7 +12,7 @@ var rpcApi = require("../controllers/rpc")
   , Tx = require("../models/tx")
   , Asset = require("../models/asset")
   , Balance = require("../models/balance")
-  , Addr = require("../models/addr")
+  , AddrTx = require("../models/addrtx")
   , Info = require("../models/info")
   , env = require("../helpers/env")
   , bitcoin = require("bitcoin-core");
@@ -102,8 +102,8 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
     return existing_asset
 }
 
-// Save new addr using the Address model
-async function save_addr(addrs) {
+// Save new addr using the AddressTx model
+async function save_addrtx(addrs) {
     for (const addr of addrs) {
         newaddr = await addr.save();
     }
@@ -111,13 +111,13 @@ async function save_addr(addrs) {
     return newaddr;
 }
 
-// Create new address using the Addr model and call save method
-async function new_addr(vin, vout) {
+// Create new address using the AddrTx model and call save method
+async function new_addrtx(vin, vout) {
     // Set vin's isSpent=true
     if (vin.length) {
         for (const inp of vin) {
             // find unspent and update
-            updated = await Addr.findOne({"txid":inp["txid"],"vout":inp["vout"]});
+            updated = await AddrTx.findOne({"txid":inp["txid"],"vout":inp["vout"]});
             if (updated && !updated.isSpent) {
                 updated.isSpent = true;
                 await updated.save();
@@ -133,11 +133,11 @@ async function new_addr(vin, vout) {
         for (const outp of vout) {                  // For each output
             for (const addr of outp["address"]) {   // For each address
                 // Check if addr entry exists
-                existing_addr = await Addr.findOne({"address":addr,"txid":outp["txid"],"vout":outp["vout"]});
+                existing_addr = await AddrTx.findOne({"address":addr,"txid":outp["txid"],"vout":outp["vout"]});
                 if (existing_addr) {
                     continue;
                 }
-                var newaddr = new Addr({
+                var newaddr = new AddrTx({
                     address: addr,
                     txid:    outp["txid"],
                     vout:    outp["vout"],
@@ -150,7 +150,7 @@ async function new_addr(vin, vout) {
                 await update_balance_from_unspent(newaddr);
             }
         }
-        return newaddrs.length > 0 ? await save_addr(newaddrs) : null;
+        return newaddrs.length > 0 ? await save_addrtx(newaddrs) : null;
     }
 }
 
@@ -337,11 +337,11 @@ module.exports = {
             });
         });
     },
-    // Get Txs for address from Addr collection
+    // Get Txs for address from AddrTx collection
     get_address_txs: function(address, utxo=false, cb) {
         if (utxo) {
           return new Promise(function(resolve, reject) {
-              Addr.find({"address":address,"isSpent":false}, function(errorAddress, addrUtxos) {
+              AddrTx.find({"address":address,"isSpent":false}, function(errorAddress, addrUtxos) {
                   if (errorAddress) {
                       reject(errorAddress);
                       return;
@@ -351,7 +351,7 @@ module.exports = {
           });
         }
         return new Promise(function(resolve, reject) {
-            Addr.find({"address":address}, function(error, addrTxs) {
+            AddrTx.find({"address":address}, function(error, addrTxs) {
                 if (error) {
                     reject(error);
                     return;
@@ -488,7 +488,7 @@ module.exports = {
                             assetlabel: item["assetlabel"] ? item["assetlabel"] : "",
                             istoken: token == "" ? issuance_asset != "" && item["asset"] != issuance_asset : item["asset"] == token,
                     })});
-                    await new_addr(vin,vout)
+                    await new_addrtx(vin,vout)
                 }
 
                 // Get blockchain info and save

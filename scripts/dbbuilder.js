@@ -15,7 +15,7 @@ var mongoose = require('mongoose')
     , Block = require("../models/block")
     , Tx = require("../models/tx")
     , Asset = require("../models/asset")
-    , Addr = require("../models/addr")
+    , AddrTx = require("../models/addrtx")
     , Info = require("../models/info")
     , dbApi = require("../controllers/database");
 
@@ -109,7 +109,7 @@ function doWork() {
                         Tx.remove({}, function(errTx) {
                             Block.remove({}, function(errBlock) {
                                 Asset.remove({}, function(errAsset) {
-                                    Addr.remove({}, function(errAddr) {
+                                    AddrTx.remove({}, function(errAddr) {
                                         dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
                                             if (error) {
                                                 console.error(error);
