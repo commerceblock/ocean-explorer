@@ -338,10 +338,11 @@ module.exports = {
         });
     },
     // Get Txs for address from AddrTx collection
-    get_address_txs: function(address, utxo=false, cb) {
+    get_address_txs: function(address, utxo=false, skip=0, limit=100, cb) {
         if (utxo) {
           return new Promise(function(resolve, reject) {
-              AddrTx.find({"address":address,"spent":""}, function(errorAddress, addrUtxos) {
+              AddrTx.find({"address":address,"spent":""}, null, {skip: skip, limit: limit},
+                function(errorAddress, addrUtxos) {
                   if (errorAddress) {
                       reject(errorAddress);
                       return;
@@ -351,7 +352,8 @@ module.exports = {
           });
         }
         return new Promise(function(resolve, reject) {
-            AddrTx.find({"address":address}, function(error, addrTxs) {
+            AddrTx.find({"address":address}, null, {skip: skip, limit: limit},
+                function(error, addrTxs) {
                 if (error) {
                     reject(error);
                     return;
