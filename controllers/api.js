@@ -49,10 +49,18 @@ module.exports = {
    loadAsset: function(req, res, next) {
         dbApi.get_asset(req.params.asset).then(function(asset) {
             if (!asset) {
-                res.send("Unable to load asset information.");
-                return next();
+                dbApi.get_asset_token(req.params.asset).then(function(asset) {
+                    if (!asset) {
+                        res.send("Unable to load asset information.");
+                        return next();
+                    }
+                    res.send(asset);
+                }).catch(function(errorAsset) {
+                    res.send(errorAsset);
+                });
+            } else {
+                res.send(asset);
             }
-            res.send(asset)
         }).catch(function(errorAsset) {
             res.send(errorAsset);
         });

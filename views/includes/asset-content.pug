@@ -1,33 +1,37 @@
 div(class="table-container")
-	table(class="table table--primary")
-		tr
-			th(class="table-active properties-header") asset
-			td(class="monospace") #{asset.asset}
+    table(class="table table--primary")
+        tr
+            th(class="table-active properties-header") asset
+            td(class="monospace") #{asset.asset}
 
-		if (asset.assetlabel)
-			tr
-				th(class="table-active properties-header") assetlabel
-				td(class="monospace") #{asset.assetlabel}
+        tr
+            th(class="table-active properties-header") token
+            td(class="monospace") #{asset.token}
 
-		tr
-			th(class="table-active properties-header") assetamount
-			td(class="monospace") #{asset.assetamount}
+        if (asset.assetlabel)
+            tr
+                th(class="table-active properties-header") assetlabel
+                td(class="monospace") #{asset.assetlabel}
 
-		tr
-			th(class="table-active properties-header") reissuedamount
-			td(class="monospace") #{asset.reissuedamount}
+        tr
+            th(class="table-active properties-header") assetamount
+            td(class="monospace") #{asset.assetamount}
 
-		tr
-			th(class="table-active properties-header") issuancetx
-			td(class="monospace")
-				a(href=("/tx/" + asset.issuancetx)) #{asset.issuancetx}
+        tr
+            th(class="table-active properties-header") reissuedamount
+            td(class="monospace") #{asset.reissuedamount}
 
-		if (asset.mass)
-			tr
-				th(class="table-active properties-header") mass
-				td(class="monospace") #{asset.mass}
+        tr
+            th(class="table-active properties-header") issuancetx
+            td(class="monospace")
+                a(href=("/tx/" + asset.issuancetx)) #{asset.issuancetx}
 
-		if (asset.ref)
-			tr
-				th(class="table-active properties-header") ref
-				td(class="monospace") #{asset.ref}
+        if (asset.mass)
+            tr
+                th(class="table-active properties-header") mass
+                td(class="monospace") #{asset.mass}
+
+        if (asset.ref)
+            tr
+                th(class="table-active properties-header") ref
+                td(class="monospace") #{asset.ref}

@@ -301,10 +301,22 @@ module.exports = {
             });
         });
     },
-    // Get asset from Assets collection using assetid
+    // Get asset from Assets collection using asset id
     get_asset: function(assetid, cb) {
         return new Promise(function(resolve, reject) {
             Asset.findOne({asset: assetid}, function(error, asset) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(asset);
+            });
+        });
+    },
+    // Get asset from Assets collection using token id
+    get_asset_token: function(tokenid, cb) {
+        return new Promise(function(resolve, reject) {
+            Asset.findOne({token: tokenid}, function(error, asset) {
                 if (error) {
                     reject(error);
                     return;

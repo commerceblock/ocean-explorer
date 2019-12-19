@@ -9,12 +9,12 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
 // Asset schema
-// Indices used: asset
+// Indices used: asset and token
 var AssetSchema = new Schema({
     asset:            { type: String, index: { unique: true } },
     assetamount:      { type: Number, default: 0},
     assetlabel:       { type: String, default: ""},
-    token:            String,
+    token:            { type: String, index: { unique: true } },
     tokenamount:      { type: Number, default: 0},
     issuancetx:       String,
     reissuedamount:   { type: Number, default: 0},

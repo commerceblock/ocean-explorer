@@ -219,6 +219,7 @@ module.exports = {
       { fx: dbApi.get_tx, path: "/tx/", applicable: is_tx_block_asset },
       { fx: dbApi.get_block_hash, path: "/block/", applicable: is_tx_block_asset },
       { fx: dbApi.get_asset, path: "/asset/", applicable: is_tx_block_asset },
+      { fx: dbApi.get_asset_token, path: "/asset/", applicable: is_tx_block_asset },
       { fx: dbApi.get_address_txs, path: "/address/", applicable: (query.length === 34) },
       { fx: dbApi.get_block_height, path: "/block-height/", applicable: !isNaN(query) },
     ]
@@ -368,12 +369,33 @@ module.exports = {
   loadAsset: function(req, res, next) {
     dbApi.get_asset(res.locals.assetid).then(function(asset) {
       if (!asset) {
-        res.locals.userMessage = "Failed to load asset "+ res.locals.assetid;
-        return next();
-      }
-
-      let map_data = null
-      axios.get(gtsa_map_json)
+        dbApi.get_asset_token(res.locals.assetid).then(function(asset) {
+            if (!asset) {
+                res.locals.userMessage = "Failed to load asset "+ res.locals.assetid;
+                return next();
+            }
+            let map_data = null
+            axios.get(gtsa_map_json)
+            .then(({ data }) => {
+              map_data = data.assets ? Object.values(data.assets) : null;
+            }).finally(() => {
+              if (map_data) {
+                const mapped_asset = map_data.find(({ tokenid }) => tokenid === asset.asset)
+                if (mapped_asset) {
+                  asset.ref = mapped_asset.ref
+                  asset.mass = mapped_asset.mass
+                }
+              }
+              res.locals.asset = asset
+              res.render("asset");
+            });
+        }).catch(function(errorAsset) {
+            res.locals.userMessage = errorAsset;
+            return next();
+        });
+      } else {
+        let map_data = null
+        axios.get(gtsa_map_json)
         .then(({ data }) => {
           map_data = data.assets ? Object.values(data.assets) : null;
         }).finally(() => {
@@ -384,10 +406,10 @@ module.exports = {
               asset.mass = mapped_asset.mass
             }
           }
-
           res.locals.asset = asset
           res.render("asset");
         });
+      }
     }).catch(function(errorAsset) {
       res.locals.userMessage = errorAsset;
       return next();
