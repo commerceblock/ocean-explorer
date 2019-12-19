@@ -46,7 +46,7 @@ table(class="table table--secondary")
 						span(class="monospace") #{asset}
 					else
 						if tx.tokenAsset && vout.asset == tx.tokenAsset
-							span(class="tag tag-reissuance monospace") #{genesisAsset}
+							span(class="tag tag-reissuance monospace") TOKEN
 						else
 							- var asset = genesisAsset
 							if (vout.assetlabel)

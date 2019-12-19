@@ -136,39 +136,6 @@ function getBlockTxes(block, req, res, cb) {
   });
 }
 
-// Function takes array of Addr collection entries and includes
-// asset and value info from tx collection
-function include_tx_data(addrTxes) {
-  return new Promise(function(resolve, reject) {
-    // Make promises for tx data of each tx
-    txPromises = []
-    addrTxes.forEach(function(addrTx) {
-      txPromises.push(dbApi.get_tx(addrTx["txid"]))
-    })
-    Promise.all(txPromises).then(function(infoTxs) {   // wait for all promises to fullfuil
-      newAddrTxes = addrTxes.map(addrTx => {
-        // Find and include asset and value in addrTx
-        infoTx = infoTxs.find(infoTx => infoTx["txid"] == addrTx["txid"])
-        infoTxVout = infoTx["getrawtransaction"]["vout"].find(infoTxVout => infoTxVout["n"] == addrTx["vout"])
-        addrTx = addrTx.toObject()
-
-        return {
-          ...addrTx,
-          asset: infoTxVout.asset,
-          assetlabel: infoTxVout.assetlabel,
-          value: infoTxVout.value
-        }
-      })
-
-      resolve(newAddrTxes)
-    }).catch(function(errorPromises) {
-      reject(errorPromises)
-    });
-  }).catch(function(errorFn) {
-    reject(errorFn)
-  })
-}
-
 module.exports = {
   // Get mempool data from blockchain info and render mempool page
   loadMempool: function(req, res) {
@@ -434,7 +401,7 @@ module.exports = {
         return next();
       }
 
-      res.locals.gold_assets = [];
+      res.locals.assets = [];
       res.locals.policy_assets = [];
 
       const generateAssetList = (map_data) => {
@@ -451,7 +418,7 @@ module.exports = {
               asset.mass = mapped_asset.mass
             }
           }
-          res.locals.gold_assets.push(asset);
+          res.locals.assets.push(asset);
         });
       };
 
@@ -474,32 +441,22 @@ module.exports = {
         res.locals.userMessage = "No transactions could be found for the address " + res.locals.address + ".";
         return next();
       }
-
       res.locals.addrTxs = addrTxs
-      res.locals.goldReceived = 0
-      res.locals.goldUnspent = 0
-
-      // include asset and value data to addrTxes
-      include_tx_data(addrTxs).then(newAddrTxes => {
-        if (newAddrTxes) {
-          res.locals.addrTxs = newAddrTxes
+      res.locals.assetReceived = 0
+      res.locals.assetUnspent = 0
+      res.locals.addrTxs = addrTxs
+      res.locals.assetUnspent = 0;
+      res.locals.assetReceived = 0;
+      dbApi.get_address_balance(res.locals.address).then(function(balance) {
+        if (balance) {
+          res.locals.assetUnspent = balance.unspent / (10**8);
+          res.locals.assetReceived = balance.received / (10**8);
         }
-
-        newAddrTxes.forEach(addr => {
-          if (!addr.assetlabel) {
-            if (!addr.isSpent) {
-              res.locals.goldUnspent += addr.value
-            }
-
-            res.locals.goldReceived += addr.value
-          }
-        })
-      }).catch((errorTx) => {
-        res.locals.userMessage = 'Unable to load tx information.';
+        res.render("address");
+      }).catch(function(errorBalance){
+        res.locals.userMessage = errorBalance;
         return next();
-      }).finally(() => {
-        res.render("address")
-      })
+      });
     }).catch(function(errorAddr) {
       res.locals.userMessage = errorAddr;
       return next();

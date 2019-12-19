@@ -11,7 +11,8 @@ var rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
   , Asset = require("../models/asset")
-  , Addr = require("../models/addr")
+  , Balance = require("../models/balance")
+  , AddrTx = require("../models/addrtx")
   , Info = require("../models/info")
   , env = require("../helpers/env")
   , bitcoin = require("bitcoin-core");
@@ -101,10 +102,8 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
     return existing_asset
 }
 
-
-
-// Save new addr using the Address model
-async function save_addr(addrs) {
+// Save new addr using the AddressTx model
+async function save_addrtx(addrs) {
     for (const addr of addrs) {
         newaddr = await addr.save();
     }
@@ -112,13 +111,20 @@ async function save_addr(addrs) {
     return newaddr;
 }
 
-// Create new address using the Addr model and call save method
-async function new_addr(vin, vout) {
-    // Set vin's isSpent=true
+// Create new address using the AddrTx model and call save method
+async function new_addrtx(vin, vout, txid) {
+    // Set vin's spent true
     if (vin.length) {
         for (const inp of vin) {
-            await Addr.updateMany({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
-            ? console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.") : null;
+            // find unspent and update
+            updated = await AddrTx.findOne({"txid":inp["txid"],"vout":inp["vout"]});
+            if (updated && updated.spent == "") {
+                updated.spent = txid;
+                await updated.save();
+                console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.");
+                // update balance
+                await update_balance_from_spent(updated);
+            }
         }
     }
     // Save vout's
@@ -127,20 +133,68 @@ async function new_addr(vin, vout) {
         for (const outp of vout) {                  // For each output
             for (const addr of outp["address"]) {   // For each address
                 // Check if addr entry exists
-                existing_addr = await Addr.findOne({"address":vout["address"],"txid":vout["txid"],"vout":vout["vout"]});
-                if (existing_addr)
-                    continue
-                var newaddr = new Addr({
+                existing_addr = await AddrTx.findOne({"address":addr,"txid":outp["txid"],"vout":outp["vout"]});
+                if (existing_addr) {
+                    continue;
+                }
+                var newaddr = new AddrTx({
                     address: addr,
                     txid:    outp["txid"],
-                    vout:    outp["vout"]
+                    vout:    outp["vout"],
+                    value:   outp["value"],
+                    asset:   outp["asset"],
+                    assetlabel: outp["assetlabel"],
+                    istoken: outp["istoken"],
                 });
-                newaddrs.push(newaddr)
+                newaddrs.push(newaddr);
+                await update_balance_from_unspent(newaddr);
             }
         }
-        return await save_addr(newaddrs);
+        return newaddrs.length > 0 ? await save_addrtx(newaddrs) : null;
     }
-    return
+}
+
+// Update address Balance entries from a spent output
+async function update_balance_from_spent(spent) {
+    if (spent.assetlabel != "" || spent.istoken) // skip policy and tokens
+        return
+
+    balance = await Balance.findOne({"address": spent.address});
+    if (balance) {
+        spent_val = Math.round(spent.value * (10**8));
+        balance.unspent -= spent_val;
+        balance.assets.set(spent.asset, balance.assets.get(spent.asset) - spent_val)
+        await balance.save();
+    }
+    console.log(spent.address + " Balance updated from spent.");
+}
+
+// Update address Balance entries from an unspent output
+async function update_balance_from_unspent(unspent) {
+    if (unspent.assetlabel != "" || unspent.istoken) // skip policy and tokens
+        return
+
+    unspent_val = Math.round(unspent.value * (10**8));
+    balance = await Balance.findOne({"address": unspent.address});
+    if (balance) {
+        balance.unspent += unspent_val;
+        balance.received += unspent_val;
+        asset_balance = balance.assets.get(unspent.asset);
+        if (asset_balance)
+            balance.assets.set(unspent.asset, asset_balance + unspent_val);
+        else
+            balance.assets.set(unspent.asset, unspent_val);
+        await balance.save();
+    } else {
+        var newbalance = new Balance({
+            address: unspent.address,
+            received: unspent_val,
+            unspent: unspent_val,
+            assets: { [unspent.asset] : unspent_val }
+        });
+        await newbalance.save();
+    }
+    console.log(unspent.address + " Balance updated from unspent.");
 }
 
 // Save new info using the Info model
@@ -271,11 +325,24 @@ module.exports = {
             });
           });
     },
-    // Get Txs for address from Addr collection
-    get_address_txs: function(address, utxo=false, cb) {
+    // Get Balance for address from Balance collection
+    get_address_balance: function(address, cb) {
+        return new Promise(function(resolve, reject) {
+            Balance.findOne({"address":address}, function(error, balance) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(balance);
+            });
+        });
+    },
+    // Get Txs for address from AddrTx collection
+    get_address_txs: function(address, utxo=false, skip=0, limit=100, cb) {
         if (utxo) {
           return new Promise(function(resolve, reject) {
-              Addr.find({"address":address,"isSpent":false}, function(errorAddress, addrUtxos) {
+              AddrTx.find({"address":address,"spent":""}, null, {skip: skip, limit: limit},
+                function(errorAddress, addrUtxos) {
                   if (errorAddress) {
                       reject(errorAddress);
                       return;
@@ -285,7 +352,8 @@ module.exports = {
           });
         }
         return new Promise(function(resolve, reject) {
-            Addr.find({"address":address}, function(error, addrTxs) {
+            AddrTx.find({"address":address}, null, {skip: skip, limit: limit},
+                function(error, addrTxs) {
                 if (error) {
                     reject(error);
                     return;
@@ -384,7 +452,12 @@ module.exports = {
                 // Get block transactions
                 for (var i = 0; i < result.transactions.length; i++) {
                     // Check for asset issuance/reissuance
+                    var token = "";
+                    var issuance_asset = "";
                     if (result.transactions[i]["vin"][0]["issuance"] != undefined) {
+                        token = result.transactions[i]["vin"][0]["issuance"]["isreissuance"] ?
+                            "" : result.transactions[i]["vin"][0]["issuance"]["token"];
+                        issuance_asset = result.transactions[i]["vin"][0]["issuance"]["asset"];
                         await new_asset(
                           result.transactions[i]["vin"][0]["issuance"]["asset"],
                           result.transactions[i]["vin"][0]["issuance"]["assetamount"],
@@ -409,11 +482,15 @@ module.exports = {
                     // Get addresses, txid and vin of txs
                     vout = result.transactions[i]["vout"].filter(item => item["scriptPubKey"]["addresses"] != undefined)
                         .map(item => {return({
-                            address:item["scriptPubKey"]["addresses"],
-                            txid:result.transactions[i]["txid"],
-                            vout:item["n"]
+                            address: item["scriptPubKey"]["addresses"],
+                            txid: result.transactions[i]["txid"],
+                            vout: item["n"],
+                            value: item["value"],
+                            asset: item["asset"],
+                            assetlabel: item["assetlabel"] ? item["assetlabel"] : "",
+                            istoken: token == "" ? issuance_asset != "" && item["asset"] != issuance_asset : item["asset"] == token,
                     })});
-                    await new_addr(vin,vout)
+                    await new_addrtx(vin,vout,result.transactions[i]["txid"])
                 }
 
                 // Get blockchain info and save

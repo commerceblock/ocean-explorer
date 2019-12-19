@@ -9,37 +9,6 @@
 
 var dbApi = require("../controllers/database");
 
-// Function takes array of Addr collection entries and includes
-// asset and value info from tx collection
-function include_tx_data(addrTxes) {
-    return new Promise(function(resolve, reject) {
-        // Make promises for tx data of each tx
-        txPromises = []
-        addrTxes.forEach(function(addrTx) {
-            txPromises.push(dbApi.get_tx(addrTx["txid"]))
-        })
-        Promise.all(txPromises).then(function(infoTxs) {   // wait for all promises to fullfuil
-            newAddrTxes = addrTxes.map(addrTx => {
-                // Find and include asset and value in addrTx
-                infoTx = infoTxs.find(infoTx => infoTx["txid"] == addrTx["txid"])
-                infoTxVout = infoTx["getrawtransaction"]["vout"].find(infoTxVout => infoTxVout["n"] == addrTx["vout"]);
-                addrTx = addrTx.toObject()
-                return({
-                    ...addrTx,
-                    asset:infoTxVout["asset"],
-                    value:infoTxVout["value"]
-                })
-            });
-            resolve(newAddrTxes)
-        }).catch(function(errorPromises) {
-            reject(errorPromises)
-        });
-    }).catch(function(errorFn) {
-        reject(errorFn)
-    })
-}
-
-
 module.exports = {
     // Get single block data from hash and dump JSON
     loadBlock: function(req, res, next) {
@@ -107,16 +76,7 @@ module.exports = {
                 res.send("Unable to load address information.");
                 return next();
             }
-            // include asset and value data to addrTxes
-            include_tx_data(addrTxes).then(function(newAddrTxes) {
-                if (!newAddrTxes) {
-                    res.send("Unable to load tx information.");
-                    return next();
-                }
-                res.send(newAddrTxes);
-            }).catch(function(errorTx) {
-              res.send(errorTx);
-            });
+            res.send(addrTxes);
         }).catch(function(errorAddress) {
             res.send(errorAddress)
         });
