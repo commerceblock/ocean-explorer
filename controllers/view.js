@@ -445,15 +445,18 @@ module.exports = {
       res.locals.assetReceived = 0
       res.locals.assetUnspent = 0
       res.locals.addrTxs = addrTxs
-      addrTxs.forEach(addr => {
-        if (!addr.assetlabel && !addr.istoken) {
-          if (!addr.isSpent) {
-            res.locals.assetUnspent += addr.value
-          }
-          res.locals.assetReceived += addr.value
+      res.locals.assetUnspent = 0;
+      res.locals.assetReceived = 0;
+      dbApi.get_address_balance(res.locals.address).then(function(balance) {
+        if (balance) {
+          res.locals.assetUnspent = balance.unspent / (10**8);
+          res.locals.assetReceived = balance.received / (10**8);
         }
+        res.render("address");
+      }).catch(function(errorBalance){
+        res.locals.userMessage = errorBalance;
+        return next();
       });
-      res.render("address");
     }).catch(function(errorAddr) {
       res.locals.userMessage = errorAddr;
       return next();

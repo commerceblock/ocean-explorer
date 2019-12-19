@@ -11,6 +11,7 @@ var rpcApi = require("../controllers/rpc")
   , Block = require("../models/block")
   , Tx = require("../models/tx")
   , Asset = require("../models/asset")
+  , Balance = require("../models/balance")
   , Addr = require("../models/addr")
   , Info = require("../models/info")
   , env = require("../helpers/env")
@@ -101,8 +102,6 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
     return existing_asset
 }
 
-
-
 // Save new addr using the Address model
 async function save_addr(addrs) {
     for (const addr of addrs) {
@@ -117,8 +116,15 @@ async function new_addr(vin, vout) {
     // Set vin's isSpent=true
     if (vin.length) {
         for (const inp of vin) {
-            await Addr.updateMany({"txid":inp["txid"],"vout":inp["vout"]},{$set:{"isSpent":true}})
-            ? console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.") : null;
+            // find unspent and update
+            updated = await Addr.findOne({"txid":inp["txid"],"vout":inp["vout"]});
+            if (updated && !updated.isSpent) {
+                updated.isSpent = true;
+                await updated.save();
+                console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.");
+                // update balance
+                await update_balance_from_spent(updated);
+            }
         }
     }
     // Save vout's
@@ -141,10 +147,54 @@ async function new_addr(vin, vout) {
                     istoken: outp["istoken"],
                 });
                 newaddrs.push(newaddr);
+                await update_balance_from_unspent(newaddr);
             }
         }
         return newaddrs.length > 0 ? await save_addr(newaddrs) : null;
     }
+}
+
+// Update address Balance entries from a spent output
+async function update_balance_from_spent(spent) {
+    if (spent.assetlabel != "" || spent.istoken) // skip policy and tokens
+        return
+
+    balance = await Balance.findOne({"address": spent.address});
+    if (balance) {
+        spent_val = Math.round(spent.value * (10**8));
+        balance.unspent -= spent_val;
+        balance.assets.set(spent.asset, balance.assets.get(spent.asset) - spent_val)
+        await balance.save();
+    }
+    console.log(spent.address + " Balance updated from spent.");
+}
+
+// Update address Balance entries from an unspent output
+async function update_balance_from_unspent(unspent) {
+    if (unspent.assetlabel != "" || unspent.istoken) // skip policy and tokens
+        return
+
+    unspent_val = Math.round(unspent.value * (10**8));
+    balance = await Balance.findOne({"address": unspent.address});
+    if (balance) {
+        balance.unspent += unspent_val;
+        balance.received += unspent_val;
+        asset_balance = balance.assets.get(unspent.asset);
+        if (asset_balance)
+            balance.assets.set(unspent.asset, asset_balance + unspent_val);
+        else
+            balance.assets.set(unspent.asset, unspent_val);
+        await balance.save();
+    } else {
+        var newbalance = new Balance({
+            address: unspent.address,
+            received: unspent_val,
+            unspent: unspent_val,
+            assets: { [unspent.asset] : unspent_val }
+        });
+        await newbalance.save();
+    }
+    console.log(unspent.address + " Balance updated from unspent.");
 }
 
 // Save new info using the Info model
@@ -275,6 +325,18 @@ module.exports = {
             });
           });
     },
+    // Get Balance for address from Balance collection
+    get_address_balance: function(address, cb) {
+        return new Promise(function(resolve, reject) {
+            Balance.findOne({"address":address}, function(error, balance) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(balance);
+            });
+        });
+    },
     // Get Txs for address from Addr collection
     get_address_txs: function(address, utxo=false, cb) {
         if (utxo) {
@@ -389,8 +451,11 @@ module.exports = {
                 for (var i = 0; i < result.transactions.length; i++) {
                     // Check for asset issuance/reissuance
                     var token = "";
+                    var issuance_asset = "";
                     if (result.transactions[i]["vin"][0]["issuance"] != undefined) {
-                        token = result.transactions[i]["vin"][0]["issuance"]["token"];
+                        token = result.transactions[i]["vin"][0]["issuance"]["isreissuance"] ?
+                            "" : result.transactions[i]["vin"][0]["issuance"]["token"];
+                        issuance_asset = result.transactions[i]["vin"][0]["issuance"]["asset"];
                         await new_asset(
                           result.transactions[i]["vin"][0]["issuance"]["asset"],
                           result.transactions[i]["vin"][0]["issuance"]["assetamount"],
@@ -421,7 +486,7 @@ module.exports = {
                             value: item["value"],
                             asset: item["asset"],
                             assetlabel: item["assetlabel"] ? item["assetlabel"] : "",
-                            istoken: item["asset"] === token,
+                            istoken: token == "" ? issuance_asset != "" && item["asset"] != issuance_asset : item["asset"] == token,
                     })});
                     await new_addr(vin,vout)
                 }
