@@ -17,6 +17,7 @@ var mongoose = require('mongoose')
     , Asset = require("../models/asset")
     , AddrTx = require("../models/addrtx")
     , Info = require("../models/info")
+    , Balance = require("../models/balance")
     , dbApi = require("../controllers/database");
 
 // dbbuilder.js usage
@@ -110,14 +111,16 @@ function doWork() {
                             Block.remove({}, function(errBlock) {
                                 Asset.remove({}, function(errAsset) {
                                     AddrTx.remove({}, function(errAddr) {
-                                        dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
-                                            if (error) {
-                                                console.error(error);
-                                                process.exit(1);
-                                            } else {
-                                                console.log("Finished " + mode);
-                                                process.exit(0);
-                                            }
+                                        Balance.remove({}, function(errBalance) {
+                                            dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
+                                                if (error) {
+                                                    console.error(error);
+                                                    process.exit(1);
+                                                } else {
+                                                    console.log("Finished " + mode);
+                                                    process.exit(0);
+                                                }
+                                            });
                                         });
                                     });
                                 });
