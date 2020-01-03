@@ -69,7 +69,7 @@ async function save_asset(asset) {
 
 // Create new asset using the Asset model and call save method,
 // or add reissuance amount to existing asset
-async function new_asset(asset, assetamount, assetlabel, token, tokenamount, issuancetxid, isreissuance, destroy=false) {
+async function new_asset(asset, offset, assetamount, assetlabel, token, tokenamount, issuancetxid, isreissuance, destroy=false) {
     if (!isreissuance && !destroy) {
         existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
         if (existing_asset) {
@@ -81,22 +81,38 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
             assetlabel: assetlabel,
             token: token,
             tokenamount: tokenamount,
-            issuancetx: issuancetxid
+            issuancetx: issuancetxid,
+            offset: offset
         });
         return await save_asset(newasset);
     }
     if (destroy) {
-        existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":-assetamount,"destroyedamount":assetamount}});
+        existing_asset = await Asset.findOne({"asset":asset});
         if (!existing_asset) {
             throw("Failed to find asset "+asset+" for destruction.");
         }
+        if (existing_asset.offset >= offset) {
+            console.log("Asset " + asset + " already destroyed.");
+            return existing_asset;
+        }
+        existing_asset.assetamount -= assetamount;
+        existing_asset.destroyedamount += assetamount;
+        existing_asset.offset = offset;
+        await existing_asset.save();
         console.log("Asset " + asset + " destroy recorded.")
     } else {
-        // Must be reissuance -> Update existing asset's assetamount
-        existing_asset = await Asset.findOneAndUpdate({"asset":asset},{$inc:{"assetamount":assetamount,"reissuedamount":assetamount}});
+        existing_asset = await Asset.findOne({"asset":asset});
         if (!existing_asset) {
             throw("Failed to find asset "+asset+" for reissuance.");
         }
+        if (existing_asset.offset >= offset) {
+            console.log("Asset " + asset + " already reissued.");
+            return existing_asset;
+        }
+        existing_asset.assetamount += assetamount;
+        existing_asset.reissuedamount += assetamount;
+        existing_asset.offset = offset;
+        await existing_asset.save();
         console.log("Asset " + asset + " reissuance recorded.")
     }
     return existing_asset
@@ -120,7 +136,7 @@ async function new_addrtx(vin, vout, txid) {
             updated = await AddrTx.findOne({"txid":inp["txid"],"vout":inp["vout"]});
             if (updated && updated.spent == "") {
                 updated.spent = txid;
-                await updated.save();
+                await updated.save(); // TODO: AFTER THE UPDATE
                 console.log("Tx vout " + inp.vout + " of txid " + inp.txid + " marked as spent.");
                 // update balance
                 await update_balance_from_spent(updated);
@@ -463,6 +479,9 @@ module.exports = {
                 await new_block(blockhash, height, result.getblock);
                 // Get block transactions
                 for (var i = 0; i < result.transactions.length; i++) {
+                    // Save Txs
+                    tx = await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
+
                     // Check for asset issuance/reissuance
                     var token = "";
                     var issuance_asset = "";
@@ -472,6 +491,7 @@ module.exports = {
                         issuance_asset = result.transactions[i]["vin"][0]["issuance"]["asset"];
                         await new_asset(
                           result.transactions[i]["vin"][0]["issuance"]["asset"],
+                          tx._id,
                           result.transactions[i]["vin"][0]["issuance"]["assetamount"],
                           result.transactions[i]["vin"][0]["issuance"]["assetlabel"],
                           result.transactions[i]["vin"][0]["issuance"]["token"],
@@ -483,10 +503,8 @@ module.exports = {
                     // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
                     vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
                     if (vout_OP_RET != null && vout_OP_RET["value"] > 0) {
-                        await new_asset(vout_OP_RET["asset"],vout_OP_RET["value"],"","","","","",true)
+                        await new_asset(vout_OP_RET["asset"],tx._id,vout_OP_RET["value"],"","","","","",true)
                     }
-                    // Save Txs
-                    await new_tx(result.transactions[i]["txid"], result.transactions[i], height, blockhash);
                     // Save Address
                     // Get txid and vout of input txs that are not coinbase
                     vin = result.transactions[i]["vin"].filter(item => item["coinbase"] == undefined)

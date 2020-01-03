@@ -18,7 +18,8 @@ var AssetSchema = new Schema({
     tokenamount:      { type: Number, default: 0},
     issuancetx:       String,
     reissuedamount:   { type: Number, default: 0},
-    destroyedamount:  { type: Number, default: 0}
+    destroyedamount:  { type: Number, default: 0},
+    offset:           Schema.Types.ObjectId // offset from Tx table to keep track of updates
 });
 
 // Asset model used for saving and/or lookups
