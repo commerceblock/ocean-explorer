@@ -386,6 +386,9 @@ module.exports = {
                   asset.mass = mapped_asset.mass
                 }
               }
+              asset.assetamount /= (10**8);
+              asset.tokenamount /= (10**8);
+              asset.reissuedamount /= (10**8);
               res.locals.asset = asset
               res.render("asset");
             });
@@ -406,6 +409,9 @@ module.exports = {
               asset.mass = mapped_asset.mass
             }
           }
+          asset.assetamount /= (10**8);
+          asset.tokenamount /= (10**8);
+          asset.reissuedamount /= (10**8);
           res.locals.asset = asset
           res.render("asset");
         });
@@ -428,6 +434,9 @@ module.exports = {
 
       const generateAssetList = (map_data) => {
         assets.forEach(asset => {
+          asset.assetamount /= (10**8);
+          asset.tokenamount /= (10**8);
+          asset.reissuedamount /= (10**8);
           if (asset.assetlabel) {
             res.locals.policy_assets.push(asset);
             return;

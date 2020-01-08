@@ -120,10 +120,12 @@ async function new_asset(asset, offset, assetamount, assetlabel, token, tokenamo
 
 // Save new addr using the AddressTx model
 async function save_addrtx(addrs) {
+    if (addrs.length == 0)
+        return
     for (const addr of addrs) {
         newaddr = await addr.save();
     }
-    console.log("Tx " + newaddr.txid + " vout adderesses saved.");
+    console.log("Tx " + newaddr.txid + " vout addresses saved.");
     return newaddr;
 }
 
@@ -520,10 +522,10 @@ module.exports = {
                         await new_asset(
                           result.transactions[i]["vin"][0]["issuance"]["asset"],
                           tx._id,
-                          result.transactions[i]["vin"][0]["issuance"]["assetamount"],
+                          Math.round(result.transactions[i]["vin"][0]["issuance"]["assetamount"]*(10**8)),
                           result.transactions[i]["vin"][0]["issuance"]["assetlabel"],
                           result.transactions[i]["vin"][0]["issuance"]["token"],
-                          result.transactions[i]["vin"][0]["issuance"]["tokenamount"],
+                          Math.round(result.transactions[i]["vin"][0]["issuance"]["tokenamount"]*(10**8)),
                           result.transactions[i]["txid"],
                           result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
                         )
@@ -531,7 +533,7 @@ module.exports = {
                     // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
                     vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"] == "OP_RETURN")
                     if (vout_OP_RET != null && vout_OP_RET["value"] > 0) {
-                        await new_asset(vout_OP_RET["asset"],tx._id,vout_OP_RET["value"],"","","","","",true)
+                        await new_asset(vout_OP_RET["asset"],tx._id,Math.round(vout_OP_RET["value"]*(10**8)),"","","","","",true)
                     }
                     // Save Address
                     // Get txid and vout of input txs that are not coinbase

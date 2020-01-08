@@ -54,11 +54,17 @@ module.exports = {
                         res.send("Unable to load asset information.");
                         return next();
                     }
+                    asset.assetamount /= (10**8);
+                    asset.tokenamount /= (10**8);
+                    asset.reissuedamount /= (10**8);
                     res.send(asset);
                 }).catch(function(errorAsset) {
                     res.send(errorAsset);
                 });
             } else {
+                asset.assetamount /= (10**8);
+                asset.tokenamount /= (10**8);
+                asset.reissuedamount /= (10**8);
                 res.send(asset);
             }
         }).catch(function(errorAsset) {
@@ -67,12 +73,25 @@ module.exports = {
     },
     // Get assets data and dump JSON
     loadAssets: function(req, res, next) {
-         dbApi.get_all_assets().then(function(assets) {
-             if (!assets) {
-                 res.send("Unable to load assets.");
-                 return next();
-             }
-             res.send(assets)
+        dbApi.get_all_assets().then(function(assets) {
+            if (!assets) {
+                res.send("Unable to load assets.");
+                return next();
+            }
+            ret = {}
+            ret.assets = [];
+            ret.policy_assets = [];
+            assets.forEach(asset => {
+                asset.assetamount /= (10**8);
+                asset.tokenamount /= (10**8);
+                asset.reissuedamount /= (10**8);
+                if (asset.assetlabel) {
+                    ret.policy_assets.push(asset);
+                } else {
+                    ret.assets.push(asset);
+                }
+            });
+             res.send(ret);
          }).catch(function(errorAssets) {
              res.send(errorAssets);
          });
