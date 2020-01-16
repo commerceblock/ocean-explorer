@@ -395,6 +395,17 @@ module.exports = {
             });
         });
     },
+    get_balances: function(skip=0, limit=100, cb) {
+      return new Promise(function(resolve, reject) {
+          Balance.find({}, null, {skip, limit}, function(error, balances) {
+              if (error) {
+                  reject(error);
+                  return;
+              }
+              resolve(balances);
+          });
+      });
+    },
     // Get Txs for address from AddrTx collection
     get_address_txs: function(address, utxo=false, skip=0, limit=100, cb) {
         if (utxo) {
