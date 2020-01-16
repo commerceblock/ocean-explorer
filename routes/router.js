@@ -129,6 +129,9 @@ router.get("/assets", function(req, res, next) {
 // Address page
 router.get("/address/:address", function(req, res, next) {
   res.locals.address = req.params.address
+  res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : 100
+  res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT
+  res.locals.paginationBaseUrl = "/address/" + req.params.address
 
   return next();
 }, view.loadAddress, view.loadIndex);
