@@ -473,13 +473,13 @@ module.exports = {
         return next();
       }
       res.locals.addrTxs = addrTxs
+      res.locals.assetBalances = null
       res.locals.assetReceived = 0
       res.locals.assetUnspent = 0
-      res.locals.addrTxs = addrTxs
-      res.locals.assetUnspent = 0;
-      res.locals.assetReceived = 0;
+
       dbApi.get_address_balance(res.locals.address).then(function(balance) {
         if (balance) {
+          res.locals.assetBalances = balance.assets
           res.locals.assetUnspent = balance.unspent / (10**8);
           res.locals.assetReceived = balance.received / (10**8);
         }
