@@ -103,7 +103,24 @@ module.exports = {
                 res.send("Unable to load address information.");
                 return next();
             }
-            res.send(addrTxes);
+
+            const data = {
+                assetBalances: null,
+                assetReceived: 0,
+                assetUnspent: 0,
+                addrTxs: addrTxes
+            };
+
+            dbApi.get_address_balance(req.params.address).then(function(balance) {
+                if (balance) {
+                    data.assetBalances = balance.assets;
+                    data.assetUnspent = balance.unspent / (10**8);
+                    data.assetReceived = balance.received / (10**8);
+                }
+                res.send(data);
+            }).catch(function(errorBalance) {
+                res.send(errorBalance)
+            });
         }).catch(function(errorAddress) {
             res.send(errorAddress)
         });
