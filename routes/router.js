@@ -164,6 +164,11 @@ router.get("/api/address/:address", function(req, res, next) {
   return next();
 }, api.loadAddress);
 
+router.get("/api/addresses", function(req, res, next) {
+
+  return next();
+}, api.loadAddresses);
+
 // API address utxos
 router.get("/api/addressutxos/:address", function(req, res, next) {
   res.locals.utxoOnly = true    //do not include UTXOs

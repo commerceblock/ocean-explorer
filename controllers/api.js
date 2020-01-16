@@ -108,6 +108,18 @@ module.exports = {
             res.send(errorAddress)
         });
     },
+    // Get assets data and dump JSON
+    loadAddresses: function(req, res, next) {
+        dbApi.get_balances(0, null).then(function(balances) {
+            if (!balances) {
+                res.send("Unable to load address information.");
+                return next();
+            }
+            res.send(balances);
+        }).catch(function(error) {
+            res.send(error)
+        });
+    },
     // Get info data and dump JSON
     loadInfo: function(req, res, next) {
         dbApi.get_blockchain_info().then(function(info) {
