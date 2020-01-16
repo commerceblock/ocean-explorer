@@ -420,6 +420,23 @@ module.exports = {
             });
         });
     },
+    // Get Txs count for address from AddrTx collection
+    get_address_txs_count: function(address, utxo=false, cb) {
+      let query = { address }
+      if (utxo) {
+        query.spent = ''
+      }
+
+      return new Promise(function(resolve, reject) {
+          AddrTx.find(query, function(error, addrTxs) {
+              if (error) {
+                  reject(error);
+                  return;
+              }
+              resolve(addrTxs);
+          });
+      });
+    },
     // Get blockchain info from Info collection - Info collection should only have 1 entry
     get_blockchain_info: function(cb) {
         return new Promise(function(resolve, reject) {
