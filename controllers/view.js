@@ -493,6 +493,30 @@ module.exports = {
       return next();
     });
   },
+  loadAddresses: function(req, res, next) {
+    dbApi.get_balances_count().then(count => {
+      res.locals.balanceCount = count
+
+      if (count === 0) {
+        res.render("addresses")
+      }
+
+      dbApi.get_balances(res.locals.offset, res.locals.limit).then(balances => {
+        if (!balances) {
+          res.locals.userMessage = "Unable to load address information."
+        }
+
+        res.locals.addressBalances = balances
+        res.render("addresses");
+      }).catch(error => {
+        res.locals.userMessage = error
+        return next();
+      })
+    }).catch(error => {
+      res.locals.userMessage = error
+      return next();
+    });
+  },
   // Load index page - Display the 10 latest blocks
   loadIndex: function(req, res) {
     dbApi.get_blockchain_info().then(function(info) {
