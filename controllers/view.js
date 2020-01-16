@@ -467,25 +467,33 @@ module.exports = {
     });
   },
   loadAddress: function(req, res, next) {
-    dbApi.get_address_txs(res.locals.address).then(function(addrTxs) {
-      if (!addrTxs || !addrTxs[0]) {
+    dbApi.get_address_txs_count(res.locals.address).then((count) => {
+      res.locals.addressTxCount = count
+
+      if (count === 0) {
         res.locals.userMessage = "No transactions could be found for the address " + res.locals.address + ".";
         return next();
       }
-      res.locals.addrTxs = addrTxs
-      res.locals.assetBalances = null
-      res.locals.assetReceived = 0
-      res.locals.assetUnspent = 0
 
-      dbApi.get_address_balance(res.locals.address).then(function(balance) {
-        if (balance) {
-          res.locals.assetBalances = Object.fromEntries(balance.assets)
-          res.locals.assetUnspent = balance.unspent / (10**8);
-          res.locals.assetReceived = balance.received / (10**8);
-        }
-        res.render("address");
-      }).catch(function(errorBalance){
-        res.locals.userMessage = errorBalance;
+      dbApi.get_address_txs(res.locals.address, false, res.locals.offset, res.locals.limit).then(function(addrTxs) {
+        res.locals.addrTxs = addrTxs
+        res.locals.assetBalances = null
+        res.locals.assetReceived = 0
+        res.locals.assetUnspent = 0
+
+        dbApi.get_address_balance(res.locals.address).then(function(balance) {
+          if (balance) {
+            res.locals.assetBalances = Object.fromEntries(balance.assets)
+            res.locals.assetUnspent = balance.unspent / (10**8);
+            res.locals.assetReceived = balance.received / (10**8);
+          }
+          res.render("address");
+        }).catch(function(errorBalance) {
+          res.locals.userMessage = errorBalance;
+          return next();
+        });
+      }).catch(function(errorAddr) {
+        res.locals.userMessage = errorAddr;
         return next();
       });
     }).catch(function(errorAddr) {
