@@ -35,23 +35,23 @@ div(class="table-container mb-1r")
 					- var asset = genesisAsset
 					if (vin.prev_out.assetlabel)
 						- asset = vin.prev_out.assetlabel;
-						tr
-							th #{(txInputIndex)}
-							td
-								if (vin.prev_out.scriptPubKey && vin.prev_out.scriptPubKey.addresses)
-									div(class="monospace", style="word-break: break-word;") #{vin.prev_out.scriptPubKey.addresses[0]}
-									span(class="monospace text-muted") via tx
-									a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
-							td
-								span(class="monospace") #{asset}
-							td
-								if (vin.prev_out.value)
-									span(class="monospace") #{vin.prev_out.value}
+					tr
+						th #{(txInputIndex)}
+						td
+							if (vin.prev_out.scriptPubKey && vin.prev_out.scriptPubKey.addresses)
+								div(class="monospace", style="word-break: break-word;") #{vin.prev_out.scriptPubKey.addresses[0]}
+								span(class="monospace text-muted") via tx
+								a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
+						td
+							span(class="monospace") #{asset}
+						td
+							if (vin.prev_out.value)
+								span(class="monospace") #{vin.prev_out.value}
+							else
+								if (!vin.asset)
+									include ./unblind-modal.pug
 								else
-									if (!vin.asset)
-										include ./unblind-modal.pug
-									else
-										span(class="monospace") #{new Decimal(0)}
+									span(class="monospace") #{new Decimal(0)}
 				- txInputIndex += 1
 
 			tr
