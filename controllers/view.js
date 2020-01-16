@@ -479,7 +479,7 @@ module.exports = {
 
       dbApi.get_address_balance(res.locals.address).then(function(balance) {
         if (balance) {
-          res.locals.assetBalances = balance.assets
+          res.locals.assetBalances = Object.fromEntries(balance.assets)
           res.locals.assetUnspent = balance.unspent / (10**8);
           res.locals.assetReceived = balance.received / (10**8);
         }
