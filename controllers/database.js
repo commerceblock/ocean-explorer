@@ -406,6 +406,17 @@ module.exports = {
           });
       });
     },
+    get_balances_count: function() {
+      return new Promise(function(resolve, reject) {
+          Balance.countDocuments({}, function(error, count) {
+              if (error) {
+                  reject(error);
+                  return;
+              }
+              resolve(count);
+          });
+      });
+    },
     // Get Txs for address from AddrTx collection
     get_address_txs: function(address, utxo=false, skip=0, limit=100, cb) {
         if (utxo) {
