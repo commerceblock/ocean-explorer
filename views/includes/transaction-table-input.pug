@@ -1,0 +1,62 @@
+h6 Input (#{result.transaction.vin.length.toLocaleString()})
+div(class="table-container mb-1r")
+	table(class="table table--secondary")
+		thead
+			tr
+				th(style="width: 40px;")
+				th Input
+				th Asset
+				th Amount
+		tbody
+			- var txInputIndex = 1
+			each vin in result.transaction.vin
+				if (vin.coinbase)
+					tr
+						th #{(txInputIndex)}
+						td
+							span(class="tag monospace") coinbase
+						td(class="monospace") #{genesisAsset}
+						td(class="monospace") #{new Decimal(0)}
+				else if (vin.issuance)
+					- var asset = genesisAsset
+					if (vin.issuance.assetlabel)
+						- asset = vin.issuance.assetlabel;
+					tr
+						th #{(txInputIndex)}
+						td
+							if (!vin.issuance.isreissuance)
+								span(class="tag tag-issuance monospace") issuance
+							else
+								span(class="tag tag-reissuance monospace") reissuance
+						td
+							span(class="monospace") #{asset}
+						td(class="monospace") #{new Decimal(vin.issuance.assetamount)}
+				else if (vin.prev_out)
+					- var asset = genesisAsset
+					if (vin.prev_out.assetlabel)
+						- asset = vin.prev_out.assetlabel;
+						tr
+							th #{(txInputIndex)}
+							td
+								if (vin.prev_out.scriptPubKey && vin.prev_out.scriptPubKey.addresses)
+									div(class="monospace", style="word-break: break-word;") #{vin.prev_out.scriptPubKey.addresses[0]}
+									span(class="monospace text-muted") via tx
+									a(href=("/tx/" + vin.txid + "#output-" + vin.vout), class="monospace") #{vin.txid.substring(0, 14)}..., Output ##{vin.vout + 1}
+							td
+								span(class="monospace") #{asset}
+							td
+								if (vin.prev_out.value)
+									span(class="monospace") #{vin.prev_out.value}
+								else
+									if (!vin.asset)
+										include ./unblind-modal.pug
+									else
+										span(class="monospace") #{new Decimal(0)}
+				- txInputIndex += 1
+
+			tr
+				td
+				td
+				td
+				td
+					strong(class="monospace") #{totalInputValue}
