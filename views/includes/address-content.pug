@@ -19,7 +19,7 @@ if (assetBalances.constructor === Object && Object.entries(assetBalances).length
 
 			tbody
 				each balance, asset in assetBalances
-					tr
+					tr(class="monospace")
 						td
 							a(href=("/asset/" + asset)) #{asset}
 						td #{balance}
