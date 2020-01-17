@@ -506,6 +506,17 @@ module.exports = {
           res.locals.userMessage = "Unable to load address information."
         }
 
+        for (let i = 0; i < balances.length; i++) {
+          balances[i].received /= (10**8)
+          balances[i].unspent /= (10**8)
+
+          if (balances[i].assets) {
+            for (const [asset, val] of balances[i].assets.entries()) {
+              balances[i].assets.set(asset, val / (10**8))
+            }
+          }
+        }
+
         res.locals.addressBalances = balances
         res.render("addresses");
       }).catch(error => {
