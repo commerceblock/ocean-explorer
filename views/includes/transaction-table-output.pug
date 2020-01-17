@@ -1,0 +1,71 @@
+h6 Output (#{result.transaction.vout.length.toLocaleString()})
+div(class="table-container mb-1r")
+	table(class="table table--secondary")
+		thead
+			tr
+				th
+				th Output
+				th Asset
+				th Amount
+
+		tbody
+			each vout, voutIndex in result.transaction.vout
+				tr
+					th #{(voutIndex + 1)}
+					td
+						if (vout.scriptPubKey)
+							if (vout.scriptPubKey.addresses)
+								a(href=("/address/" + vout.scriptPubKey.addresses[0]) id="output-" + voutIndex)
+									div(class="monospace", style="word-break: break-word;")
+										span #{vout.scriptPubKey.addresses[0]}
+							else if (vout.scriptPubKey.type == 'fee')
+								span(class="tag tag-fee monospace") fees
+							else if (vout.scriptPubKey.type == 'registeraddress')
+								span(class="tag tag-policy monospace") registeraddress
+							else if (vout.scriptPubKey.type == 'lockedmultisig')
+								if (vout.request)
+									span(class="tag tag-lockedmulti monospace") Request
+								else if (vout.bid)
+									span(class="tag tag-lockedmulti monospace") Bid
+								else
+									span(class="tag tag-lockedmulti monospace") lockedmultisig
+							else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
+								div(class="monospace", style="word-break: break-word;")
+									span(class="monospace") OP_RETURN:
+									span(class="monospace text-muted") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
+							else if (vout.scriptPubKey.type == 'nonstandard' || vout.scriptPubKey.type == 'nulldata')
+								if (vout.value > 0)
+									span(class="tag tag-destruction monospace") destruction
+								else
+									span()
+					td
+						if (result.transaction.vin[0].coinbase)
+							- var asset = genesisAsset
+							if (vout.assetlabel)
+								- asset = vout.assetlabel;
+							if (vout.value == 0)
+								- asset = '';
+							span(class="monospace") #{asset}
+						else
+							if result.transaction.tokenAsset && vout.asset == result.transaction.tokenAsset
+								span(class="tag tag-reissuance monospace") TOKEN
+							else
+								- var asset = genesisAsset
+								if (vout.assetlabel)
+									- asset = vout.assetlabel;
+								span(class="monospace") #{asset}
+					td
+						if (vout.value)
+							span(class="monospace") #{vout.value}
+						else
+							if (!vout.asset)
+								include ./unblind-modal.pug
+							else
+								span(class="monospace") #{new Decimal(0)}
+
+			tr
+				td
+				td
+				td
+				td
+					strong(class="monospace") #{totalOutputValue}
