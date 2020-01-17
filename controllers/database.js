@@ -428,7 +428,7 @@ module.exports = {
       }
 
       return new Promise(function(resolve, reject) {
-          AddrTx.find(query, function(error, addrTxs) {
+          AddrTx.countDocuments(query, function(error, addrTxs) {
               if (error) {
                   reject(error);
                   return;
