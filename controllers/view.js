@@ -483,6 +483,12 @@ module.exports = {
 
         dbApi.get_address_balance(res.locals.address).then(function(balance) {
           if (balance) {
+            if (balance.assets) {
+              for (const [asset, val] of balance.assets.entries()) {
+                balance.assets.set(asset, val / (10**8))
+              }
+            }
+
             res.locals.assetBalances = Object.fromEntries(balance.assets)
             res.locals.assetUnspent = balance.unspent / (10**8);
             res.locals.assetReceived = balance.received / (10**8);
