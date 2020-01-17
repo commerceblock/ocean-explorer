@@ -54,6 +54,7 @@ module.exports = {
                         res.send("Unable to load asset information.");
                         return next();
                     }
+                    asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
                     asset.assetamount /= (10**8);
                     asset.tokenamount /= (10**8);
                     asset.reissuedamount /= (10**8);
@@ -62,6 +63,7 @@ module.exports = {
                     res.send(errorAsset);
                 });
             } else {
+                asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
                 asset.assetamount /= (10**8);
                 asset.tokenamount /= (10**8);
                 asset.reissuedamount /= (10**8);
@@ -82,6 +84,7 @@ module.exports = {
             ret.assets = [];
             ret.policy_assets = [];
             assets.forEach(asset => {
+                asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
                 asset.assetamount /= (10**8);
                 asset.tokenamount /= (10**8);
                 asset.reissuedamount /= (10**8);

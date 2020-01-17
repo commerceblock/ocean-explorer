@@ -1,23 +1,25 @@
 h4(class="h5") #{genesisAsset} Assets
 div(class="table-container")
-	table(class="table table--primary min-w-700 table-striped")
-		thead
-			tr
-				th(class="data-header") asset
-				th(class="data-header") assetamount
-				th(class="data-header") reissuedamount
-				th(class="data-header") issuancetx
-				th(class="data-header") mass
-				th(class="data-header text-right") ref
-		tbody
-			each asset in assets
-				if (asset)
-					tr(class="monospace")
-						td
-							a(href=("/asset/" + asset.asset)) #{asset.asset.slice(0,30)}...
-						td #{asset.assetamount}
-						td #{asset.reissuedamount}
-						td
-							a(href=("/tx/" + asset.issuancetx)) #{asset.issuancetx.slice(0,20)}...
-						td #{asset.mass}
-						td(class="text-right") #{asset.ref}
+    table(class="table table--primary min-w-700 table-striped")
+        thead
+            tr
+                th(class="data-header") asset
+                th(class="data-header") assetamount
+                th(class="data-header") issuedamount
+                th(class="data-header") reissuedamount
+                th(class="data-header") issuancetx
+                th(class="data-header") mass
+                th(class="data-header text-right") ref
+        tbody
+            each asset in assets
+                if (asset)
+                    tr(class="monospace")
+                        td
+                            a(href=("/asset/" + asset.asset)) #{asset.asset.slice(0,30)}...
+                        td #{asset.assetamount}
+                        td #{asset.issuedamount}
+                        td #{asset.reissuedamount}
+                        td
+                            a(href=("/tx/" + asset.issuancetx)) #{asset.issuancetx.slice(0,16)}...
+                        td #{asset.mass}
+                        td(class="text-right") #{asset.ref}
