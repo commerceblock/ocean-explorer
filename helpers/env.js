@@ -5,7 +5,7 @@
 
 module.exports = {
     // For testnet/mainnet ribbon display
-	testnet: true,
+	testnet: false,
     genesisAsset: process.env.GENESIS_ASSET,
     // Connection details for the Ocean node
     // Any bitcoin-like RPC blockchains are supported
