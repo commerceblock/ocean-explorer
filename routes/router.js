@@ -169,6 +169,8 @@ router.get("/api/address/balance/:address", function(req, res, next) {
 // API address txs
 router.get("/api/address/tx/:address", function(req, res, next) {
   res.locals.utxoOnly = false   //include UTXOs
+  res.locals.limit = LIMIT_DEFAULT
+  res.locals.offset = req.query.page ? parseInt(req.query.page) * LIMIT_DEFAULT : OFFSET_DEFAULT
 
   return next();
 }, api.loadAddress);
@@ -176,6 +178,8 @@ router.get("/api/address/tx/:address", function(req, res, next) {
 // API address utxos
 router.get("/api/address/utxos/:address", function(req, res, next) {
   res.locals.utxoOnly = true    //do not include UTXOs
+  res.locals.limit = LIMIT_DEFAULT
+  res.locals.offset = req.query.page ? parseInt(req.query.page) * LIMIT_DEFAULT : OFFSET_DEFAULT
 
   return next();
 }, api.loadAddress);

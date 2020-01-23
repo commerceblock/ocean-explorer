@@ -98,11 +98,17 @@ module.exports = {
     },
     // Get address data, include corresponding tx data from tx collection and dump JSON
     loadAddress: function(req, res, next) {
-        dbApi.get_address_txs(req.params.address, res.locals.utxoOnly).then(function(addrTxes) {
+        const data = {
+            addrTxs: []
+        }
+
+        dbApi.get_address_txs(req.params.address, res.locals.utxoOnly, res.locals.offset, res.locals.limit).then(function(addrTxes) {
             if (!addrTxes) {
                 res.send("Unable to load address information.");
                 return next();
             }
+
+            data.addrTxs = addrTxes
 
             res.send(data);
         }).catch(function(errorAddress) {
