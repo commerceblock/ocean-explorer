@@ -397,7 +397,7 @@ module.exports = {
     },
     get_balances: function(skip=0, limit=100, cb) {
       return new Promise(function(resolve, reject) {
-          Balance.find({}, null, {skip, limit}).sort({unspent: 'desc'}).exec(function(error, balances) {
+          Balance.find({unspent: {$gt: 0}}, null, {skip, limit}).sort({unspent: 'desc'}).exec(function(error, balances) {
               if (error) {
                   reject(error);
                   return;
@@ -408,7 +408,7 @@ module.exports = {
     },
     get_balances_count: function() {
       return new Promise(function(resolve, reject) {
-          Balance.countDocuments({}, function(error, count) {
+          Balance.countDocuments({unspent: {$gt: 0}}, function(error, count) {
               if (error) {
                   reject(error);
                   return;
