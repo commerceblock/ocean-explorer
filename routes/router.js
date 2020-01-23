@@ -160,6 +160,12 @@ router.get("/api/assets", function(req, res, next) {
   return next();
 }, api.loadAssets);
 
+// API address balance
+router.get("/api/address/balance/:address", function(req, res, next) {
+
+  return next();
+}, api.loadAddressBalance);
+
 // API address txs
 router.get("/api/address/:address", function(req, res, next) {
   res.locals.utxoOnly = false   //include UTXOs

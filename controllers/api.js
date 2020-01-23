@@ -104,25 +104,27 @@ module.exports = {
                 return next();
             }
 
-            const data = {
-                assetBalances: null,
-                assetReceived: 0,
-                assetUnspent: 0,
-                addrTxs: addrTxes
-            };
-
-            dbApi.get_address_balance(req.params.address).then(function(balance) {
-                if (balance) {
-                    data.assetBalances = balance.assets;
-                    data.assetUnspent = balance.unspent;
-                    data.assetReceived = balance.received;
-                }
-                res.send(data);
-            }).catch(function(errorBalance) {
-                res.send(errorBalance)
-            });
+            res.send(data);
         }).catch(function(errorAddress) {
             res.send(errorAddress)
+        });
+    },
+    loadAddressBalance: function(req, res, next) {
+        const data = {
+            assetBalances: null,
+            assetReceived: 0,
+            assetUnspent: 0
+        };
+
+        dbApi.get_address_balance(req.params.address).then(function(balance) {
+            if (balance) {
+                data.assetBalances = balance.assets;
+                data.assetUnspent = balance.unspent;
+                data.assetReceived = balance.received;
+            }
+            res.send(data);
+        }).catch(function(errorBalance) {
+            res.send(errorBalance)
         });
     },
     // Get info data and dump JSON
