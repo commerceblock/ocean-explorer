@@ -110,16 +110,33 @@ module.exports = {
     },
     // Get assets data and dump JSON
     loadAddresses: function(req, res, next) {
-        dbApi.get_balances(0, null).then(function(balances) {
-            if (!balances) {
-                res.send("Unable to load address information.");
-                return next();
-            }
+      const data = {
+          balances: [],
+          totalPages: 0
+      }
 
-            res.send(balances);
-        }).catch(function(error) {
-            res.send(error)
-        });
+      dbApi.get_balances_count().then((count) => {
+          if (count === 0) {
+              res.send(data);
+          }
+
+          data.totalPages = Math.ceil(count / res.locals.limit);
+
+          dbApi.get_balances(res.locals.offset, res.locals.limit).then(function(balances) {
+              if (!balances) {
+                  res.send("Unable to load address information.");
+                  return next();
+              }
+
+              data.balances = balances
+
+              res.send(data);
+          }).catch(function(error) {
+              res.send(error)
+          });
+      }).catch(function(error) {
+          res.send(error)
+      });
     },
     // Get info data and dump JSON
     loadInfo: function(req, res, next) {

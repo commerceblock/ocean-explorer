@@ -173,6 +173,8 @@ router.get("/api/address/:address", function(req, res, next) {
 }, api.loadAddress);
 
 router.get("/api/addresses", function(req, res, next) {
+  res.locals.limit = LIMIT_DEFAULT
+  res.locals.offset = req.query.page ? parseInt(req.query.page) * LIMIT_DEFAULT : OFFSET_DEFAULT
 
   return next();
 }, api.loadAddresses);
