@@ -387,14 +387,16 @@ module.exports = {
     get_address_balance: function(address, cb) {
         return new Promise(function(resolve, reject) {
             Balance.findOne({"address":address}).map(balance => {
-              if (balance.assets) {
-                for (const [asset, val] of balance.assets.entries()) {
-                  if (val === 0) {
-                    balance.assets.delete(asset)
-                  } else {
-                    balance.assets.set(asset, val / (10**8))
+              if (balance && balance.assets) {
+                const balance_entries = balance.assets.entries()
+                let refined_balance_entries = []
+                for (const [asset, val] of balance_entries) {
+                  if (val > 0) {
+                    refined_balance_entries.push([asset, val / (10**8)])
                   }
                 }
+
+                balance.assets = new Map(refined_balance_entries.sort((a, b) => b[1] - a[1]))
               }
 
               return balance
