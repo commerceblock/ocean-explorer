@@ -386,7 +386,19 @@ module.exports = {
     // Get Balance for address from Balance collection
     get_address_balance: function(address, cb) {
         return new Promise(function(resolve, reject) {
-            Balance.findOne({"address":address}, function(error, balance) {
+            Balance.findOne({"address":address}).map(balance => {
+              if (balance.assets) {
+                for (const [asset, val] of balance.assets.entries()) {
+                  if (val === 0) {
+                    balance.assets.delete(asset)
+                  } else {
+                    balance.assets.set(asset, val / (10**8))
+                  }
+                }
+              }
+
+              return balance
+            }).exec(function(error, balance) {
                 if (error) {
                     reject(error);
                     return;
