@@ -397,7 +397,34 @@ module.exports = {
     },
     get_balances: function(skip=0, limit=100, cb) {
       return new Promise(function(resolve, reject) {
-          Balance.find({unspent: {$gt: 0}}, null, {skip, limit}).sort({unspent: 'desc'}).exec(function(error, balances) {
+          Balance.find({unspent: {$gt: 0}}, null, {skip, limit}).sort({unspent: 'desc'}).map(balances => {
+              if (balances) {
+                  for (let i = 0; i < balances.length; i++) {
+                      transformBalance(balances[i])
+                  }
+              }
+
+              return balances
+
+              function transformBalance(balance) {
+                balance.received /= (10**8)
+                balance.unspent /= (10**8)
+
+                if (!balance.assets) {
+                  return
+                }
+
+                const balance_entries = balance.assets.entries()
+                let refined_balance_entries = []
+                for (const [asset, val] of balance_entries) {
+                    if (val > 0) {
+                        refined_balance_entries.push([asset, val / (10**8)])
+                    }
+                }
+
+                balance.assets = new Map(refined_balance_entries.sort((a, b) => b[1] - a[1]))
+              }
+          }).exec(function(error, balances) {
               if (error) {
                   reject(error);
                   return;

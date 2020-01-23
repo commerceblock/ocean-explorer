@@ -116,17 +116,6 @@ module.exports = {
                 return next();
             }
 
-            for (let i = 0; i < balances.length; i++) {
-              balances[i].received /= (10**8)
-              balances[i].unspent /= (10**8)
-
-              if (balances[i].assets) {
-                for (const [asset, val] of balances[i].assets.entries()) {
-                  balances[i].assets.set(asset, val / (10**8))
-                }
-              }
-            }
-
             res.send(balances);
         }).catch(function(error) {
             res.send(error)
