@@ -114,8 +114,8 @@ module.exports = {
             dbApi.get_address_balance(req.params.address).then(function(balance) {
                 if (balance) {
                     data.assetBalances = balance.assets;
-                    data.assetUnspent = balance.unspent / (10**8);
-                    data.assetReceived = balance.received / (10**8);
+                    data.assetUnspent = balance.unspent;
+                    data.assetReceived = balance.received;
                 }
                 res.send(data);
             }).catch(function(errorBalance) {
