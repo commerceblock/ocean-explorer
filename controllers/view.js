@@ -386,6 +386,7 @@ module.exports = {
                   asset.mass = mapped_asset.mass
                 }
               }
+              asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
               asset.assetamount /= (10**8);
               asset.tokenamount /= (10**8);
               asset.reissuedamount /= (10**8);
@@ -409,6 +410,7 @@ module.exports = {
               asset.mass = mapped_asset.mass
             }
           }
+          asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
           asset.assetamount /= (10**8);
           asset.tokenamount /= (10**8);
           asset.reissuedamount /= (10**8);
@@ -434,9 +436,11 @@ module.exports = {
 
       const generateAssetList = (map_data) => {
         assets.forEach(asset => {
+          asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
           asset.assetamount /= (10**8);
           asset.tokenamount /= (10**8);
           asset.reissuedamount /= (10**8);
+
           if (asset.assetlabel) {
             res.locals.policy_assets.push(asset);
             return;
