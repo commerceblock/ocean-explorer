@@ -136,6 +136,14 @@ router.get("/address/:address", function(req, res, next) {
   return next();
 }, view.loadAddress, view.loadIndex);
 
+router.get("/addresses", function(req, res, next) {
+  res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT
+  res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT
+  res.locals.paginationBaseUrl = "/addresses"
+
+  return next()
+}, view.loadAddresses, view.loadIndex);
+
 // API single block
 router.get("/api/block/:block", function(req, res, next) {
 
@@ -174,6 +182,13 @@ router.get("/api/address/tx/:address", function(req, res, next) {
 
   return next();
 }, api.loadAddress);
+
+router.get("/api/addresses", function(req, res, next) {
+  res.locals.limit = LIMIT_DEFAULT
+  res.locals.offset = req.query.page ? parseInt(req.query.page) * LIMIT_DEFAULT : OFFSET_DEFAULT
+
+  return next();
+}, api.loadAddresses);
 
 // API address utxos
 router.get("/api/address/utxos/:address", function(req, res, next) {

@@ -144,6 +144,36 @@ module.exports = {
             res.send(errorBalance)
         });
     },
+    // Get assets data and dump JSON
+    loadAddresses: function(req, res, next) {
+      const data = {
+          balances: [],
+          totalPages: 0
+      }
+
+      dbApi.get_balances_count().then((count) => {
+          if (count === 0) {
+              res.send(data);
+          }
+
+          data.totalPages = Math.ceil(count / res.locals.limit);
+
+          dbApi.get_balances(res.locals.offset, res.locals.limit).then(function(balances) {
+              if (!balances) {
+                  res.send("Unable to load address information.");
+                  return next();
+              }
+
+              data.balances = balances
+
+              res.send(data);
+          }).catch(function(error) {
+              res.send(error)
+          });
+      }).catch(function(error) {
+          res.send(error)
+      });
+    },
     // Get info data and dump JSON
     loadInfo: function(req, res, next) {
         dbApi.get_blockchain_info().then(function(info) {
