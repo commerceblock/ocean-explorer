@@ -98,14 +98,50 @@ module.exports = {
     },
     // Get address data, include corresponding tx data from tx collection and dump JSON
     loadAddress: function(req, res, next) {
-        dbApi.get_address_txs(req.params.address, res.locals.utxoOnly).then(function(addrTxes) {
-            if (!addrTxes) {
-                res.send("Unable to load address information.");
-                return next();
+      const data = {
+          addrTxs: [],
+          totalPages: 0
+      }
+
+      dbApi.get_address_txs_count(req.params.address).then((count) => {
+          if (count === 0) {
+              res.send(data);
+          }
+
+          data.totalPages = Math.ceil(count / res.locals.limit);
+
+          dbApi.get_address_txs(req.params.address, res.locals.utxoOnly, res.locals.offset, res.locals.limit).then(function(addrTxes) {
+              if (!addrTxes) {
+                  res.send("Unable to load address information.");
+                  return next();
+              }
+
+              data.addrTxs = addrTxes
+
+              res.send(data);
+          }).catch(function(errorAddress) {
+              res.send(errorAddress)
+          });
+      }).catch(function(errorAddress) {
+          res.send(errorAddress)
+      });
+    },
+    loadAddressBalance: function(req, res, next) {
+        const data = {
+            assetBalances: null,
+            assetReceived: 0,
+            assetUnspent: 0
+        };
+
+        dbApi.get_address_balance(req.params.address).then(function(balance) {
+            if (balance) {
+                data.assetBalances = balance.assets;
+                data.assetUnspent = balance.unspent;
+                data.assetReceived = balance.received;
             }
-            res.send(addrTxes);
-        }).catch(function(errorAddress) {
-            res.send(errorAddress)
+            res.send(data);
+        }).catch(function(errorBalance) {
+            res.send(errorBalance)
         });
     },
     // Get info data and dump JSON

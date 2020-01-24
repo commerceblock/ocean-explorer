@@ -129,6 +129,9 @@ router.get("/assets", function(req, res, next) {
 // Address page
 router.get("/address/:address", function(req, res, next) {
   res.locals.address = req.params.address
+  res.locals.limit = (req.query.limit) ? parseInt(req.query.limit) : LIMIT_DEFAULT
+  res.locals.offset = (req.query.offset) ? parseInt(req.query.offset) : OFFSET_DEFAULT
+  res.locals.paginationBaseUrl = "/address/" + req.params.address
 
   return next();
 }, view.loadAddress, view.loadIndex);
@@ -157,16 +160,26 @@ router.get("/api/assets", function(req, res, next) {
   return next();
 }, api.loadAssets);
 
+// API address balance
+router.get("/api/address/balance/:address", function(req, res, next) {
+
+  return next();
+}, api.loadAddressBalance);
+
 // API address txs
-router.get("/api/address/:address", function(req, res, next) {
+router.get("/api/address/tx/:address", function(req, res, next) {
   res.locals.utxoOnly = false   //include UTXOs
+  res.locals.limit = LIMIT_DEFAULT
+  res.locals.offset = req.query.page ? parseInt(req.query.page) * LIMIT_DEFAULT : OFFSET_DEFAULT
 
   return next();
 }, api.loadAddress);
 
 // API address utxos
-router.get("/api/addressutxos/:address", function(req, res, next) {
+router.get("/api/address/utxos/:address", function(req, res, next) {
   res.locals.utxoOnly = true    //do not include UTXOs
+  res.locals.limit = LIMIT_DEFAULT
+  res.locals.offset = req.query.page ? parseInt(req.query.page) * LIMIT_DEFAULT : OFFSET_DEFAULT
 
   return next();
 }, api.loadAddress);

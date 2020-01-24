@@ -386,7 +386,26 @@ module.exports = {
     // Get Balance for address from Balance collection
     get_address_balance: function(address, cb) {
         return new Promise(function(resolve, reject) {
-            Balance.findOne({"address":address}, function(error, balance) {
+            Balance.findOne({"address":address}).map(balance => {
+              if (balance) {
+                balance.received /= (10**8)
+                balance.unspent /= (10**8)
+
+                if (balance.assets) {
+                  const balance_entries = balance.assets.entries()
+                  let refined_balance_entries = []
+                  for (const [asset, val] of balance_entries) {
+                    if (val > 0) {
+                      refined_balance_entries.push([asset, val / (10**8)])
+                    }
+                  }
+
+                  balance.assets = new Map(refined_balance_entries.sort((a, b) => b[1] - a[1]))
+                }
+              }
+
+              return balance
+            }).exec(function(error, balance) {
                 if (error) {
                     reject(error);
                     return;
@@ -419,6 +438,23 @@ module.exports = {
                 resolve(addrTxs);
             });
         });
+    },
+    // Get Txs count for address from AddrTx collection
+    get_address_txs_count: function(address, utxo=false, cb) {
+      let query = { address }
+      if (utxo) {
+        query.spent = ''
+      }
+
+      return new Promise(function(resolve, reject) {
+          AddrTx.countDocuments(query, function(error, addrTxs) {
+              if (error) {
+                  reject(error);
+                  return;
+              }
+              resolve(addrTxs);
+          });
+      });
     },
     // Get blockchain info from Info collection - Info collection should only have 1 entry
     get_blockchain_info: function(cb) {
