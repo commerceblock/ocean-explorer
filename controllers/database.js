@@ -124,7 +124,22 @@ async function new_asset(asset, assetamount, assetlabel, token, tokenamount, iss
     return existing_asset
 }
 
-
+// Process new peg-in using the Asset model and call save method
+async function new_pegin(asset, assetamount) {
+    existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
+    if (existing_asset) {
+        existing_asset.assetamount += assetamount;
+        return await save_asset(existing_asset);
+    }
+    var newasset = new Asset({
+        asset: asset,
+        assetamount: assetamount,
+        assetlabel: "CBT",
+        token: "",
+        issuancetx: ""
+    });
+    return await save_asset(newasset);
+}
 
 // Save new addr using the Address model
 async function save_addr(addrs) {
@@ -452,6 +467,17 @@ module.exports = {
                           result.transactions[i]["txid"],
                           result.transactions[i]["vin"][0]["issuance"]["isreissuance"]
                         )
+                    }
+                    // Check for peg-ins
+                    if (result.transactions[i]["vin"][0]["is_pegin"] != undefined && result.transactions[i]["vin"][0]["is_pegin"]) {
+                        // peg-in
+                        if ("assetlabel" in result.transactions[i]["vout"][0] && result.transactions[i]["vout"][0]["assetlabel"] == "CBT") {
+                            await new_pegin(result.transactions[i]["vout"][0]["asset"], result.transactions[i]["vout"][0]["value"]);
+                        }
+                        // peg-in fee
+                        if ("assetlabel" in result.transactions[i]["vout"][1] && result.transactions[i]["vout"][1]["assetlabel"] == "CBT") {
+                            await new_pegin(result.transactions[i]["vout"][1]["asset"], result.transactions[i]["vout"][1]["value"]);
+                        }
                     }
                     // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
                     vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"].includes("OP_RETURN"))
