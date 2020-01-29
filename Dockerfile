@@ -11,8 +11,7 @@ COPY . /usr/src/ocean-explorer
 WORKDIR /usr/src/ocean-explorer
 
 RUN set -x \
-    && npm install \
-    && npm run prod
+    && npm install
 
 ENTRYPOINT ["/usr/src/ocean-explorer/docker-entrypoint.sh"]
 CMD ["node", "scripts/dbbuilder.js"]
