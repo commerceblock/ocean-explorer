@@ -15,8 +15,9 @@ var mongoose = require('mongoose')
     , Block = require("../models/block")
     , Tx = require("../models/tx")
     , Asset = require("../models/asset")
-    , Addr = require("../models/addr")
+    , AddrTx = require("../models/addrtx")
     , Info = require("../models/info")
+    , Balance = require("../models/balance")
     , dbApi = require("../controllers/database");
 
 // dbbuilder.js usage
@@ -109,15 +110,17 @@ function doWork() {
                         Tx.remove({}, function(errTx) {
                             Block.remove({}, function(errBlock) {
                                 Asset.remove({}, function(errAsset) {
-                                    Addr.remove({}, function(errAddr) {
-                                        dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
-                                            if (error) {
-                                                console.error(error);
-                                                process.exit(1);
-                                            } else {
-                                                console.log("Finished " + mode);
-                                                process.exit(0);
-                                            }
+                                    AddrTx.remove({}, function(errAddr) {
+                                        Balance.remove({}, function(errBalance) {
+                                            dbApi.update_blockchain_data(0, latestInfo.blocks, function(error) { // from start to latest height
+                                                if (error) {
+                                                    console.error(error);
+                                                    process.exit(1);
+                                                } else {
+                                                    console.log("Finished " + mode);
+                                                    process.exit(0);
+                                                }
+                                            });
                                         });
                                     });
                                 });
