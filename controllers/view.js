@@ -371,7 +371,7 @@ module.exports = {
                 res.locals.userMessage = "Failed to load asset "+ res.locals.assetid;
                 return next();
             }
-            asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
+            asset.issuedamount = (asset.assetamount - asset.reissuedamount + asset.destroyedamount) / 10**8;
             asset.assetamount /= (10**8);
             asset.tokenamount /= (10**8);
             asset.reissuedamount /= (10**8);
@@ -382,7 +382,7 @@ module.exports = {
             return next();
         });
       } else {
-        asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
+        asset.issuedamount = (asset.assetamount - asset.reissuedamount + asset.destroyedamount) / 10**8;
         asset.assetamount /= (10**8);
         asset.tokenamount /= (10**8);
         asset.reissuedamount /= (10**8);
@@ -406,12 +406,12 @@ module.exports = {
       res.locals.policy_assets = [];
 
         assets.forEach(asset => {
-          asset.issuedamount = (asset.assetamount - asset.reissuedamount) / 10**8;
+          asset.issuedamount = (asset.assetamount - asset.reissuedamount + asset.destroyedamount) / 10**8;
           asset.assetamount /= (10**8);
           asset.tokenamount /= (10**8);
           asset.reissuedamount /= (10**8);
 
-          if (asset.assetlabel) {
+          if (asset.assetlabel && asset.assetlabel != "CBT") {
             res.locals.policy_assets.push(asset);
             return;
           }

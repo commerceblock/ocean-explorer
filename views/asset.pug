@@ -1,0 +1,15 @@
+extends layout
+
+block headContent
+    title Asset #{asset.asset}
+    style.
+        .field {
+            word-wrap: break-word;
+        }
+
+block content
+    h1(class="h2") Asset
+        br
+        small(class="monospace") #{asset.asset}
+
+    include includes/asset-content.pug

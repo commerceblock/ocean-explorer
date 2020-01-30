@@ -240,7 +240,7 @@ async function update_balance(addrMap, offset) {
             unspent_val = 0;
             for (const unspent of addrMap[addr]["unsp"]) {
                 val = Math.round(unspent.value * (10**8))
-                if (unspent.assetlabel == "" && !unspent.istoken)
+                if ((unspent.assetlabel == "" || unspent.assetlabel =="CBT") && !unspent.istoken)
                     unspent_val += val
                 if (unspent.asset in unspentAssets)
                     unspentAssets[unspent.asset] += val;
@@ -257,7 +257,7 @@ async function update_balance(addrMap, offset) {
             if ("sp" in addrMap[addr]) {
                 for (const spent of addrMap[addr]["sp"]) {
                     spent_val = Math.round(spent.value * (10**8));
-                    if (spent.assetlabel == "" && !spent.istoken)
+                    if ((spent.assetlabel == "" || spent.assetlabel == "CBT") && !spent.istoken)
                         balance.unspent -= spent_val;
                     balance.assets.set(spent.asset, balance.assets.get(spent.asset) - spent_val)
                 }
@@ -265,7 +265,7 @@ async function update_balance(addrMap, offset) {
             if ("unsp" in addrMap[addr]) {
                 for (const unspent of addrMap[addr]["unsp"]) {
                     unspent_val = Math.round(unspent.value * (10**8));
-                    if (unspent.assetlabel == "" && !unspent.istoken) {
+                    if ((unspent.assetlabel == "" || unspent.assetlabel == "CBT") && !unspent.istoken) {
                         balance.unspent += unspent_val;
                         balance.received += unspent_val;
                     }
@@ -694,17 +694,24 @@ module.exports = {
                     if (result.transactions[i]["vin"][0]["is_pegin"] != undefined && result.transactions[i]["vin"][0]["is_pegin"]) {
                         // peg-in
                         if ("assetlabel" in result.transactions[i]["vout"][0] && result.transactions[i]["vout"][0]["assetlabel"] == "CBT") {
-                            await new_pegin(result.transactions[i]["vout"][0]["asset"], result.transactions[i]["vout"][0]["value"]);
+                            await new_pegin(
+                                result.transactions[i]["vout"][0]["asset"],
+                                Math.round(result.transactions[i]["vout"][0]["value"]*(10**8)));
                         }
                         // peg-in fee
                         if ("assetlabel" in result.transactions[i]["vout"][1] && result.transactions[i]["vout"][1]["assetlabel"] == "CBT") {
-                            await new_pegin(result.transactions[i]["vout"][1]["asset"], result.transactions[i]["vout"][1]["value"]);
+                            await new_pegin(
+                                result.transactions[i]["vout"][1]["asset"],
+                                Math.round(result.transactions[i]["vout"][1]["value"]*(10**8)));
                         }
                     }
                     // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
                     vout_OP_RET = result.transactions[i]["vout"].find(item => item["scriptPubKey"]["asm"].includes("OP_RETURN"))
                     if (vout_OP_RET != null && vout_OP_RET["value"] > 0) {
-                        await new_asset(vout_OP_RET["asset"],tx._id,vout_OP_RET["value"],"","","","","",true)
+                        await new_asset(
+                            vout_OP_RET["asset"],
+                            tx._id,
+                            Math.round(vout_OP_RET["value"]*(10**8)),"","","","","",true);
 
                         if ("pegout_hex" in vout_OP_RET["scriptPubKey"] && "assetlabel" in vout_OP_RET && vout_OP_RET["assetlabel"] == "CBT") {
                             await new_pegout(result.transactions[i]["txid"], vout_OP_RET);

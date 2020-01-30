@@ -1,0 +1,12 @@
+div(class="table-container")
+	table(class="table table--primary min-w-700 table-striped")
+		thead
+			tr
+				th(class="data-header") address
+				th(class="data-header") balance
+		tbody
+			each balance in addressBalances
+				tr(class="monospace")
+					td
+						a(href=("/address/" + balance.address)) #{balance.address}
+					td #{balance.unspent}

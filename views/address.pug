@@ -1,0 +1,12 @@
+extends layout
+
+block headContent
+	title Address #{address}
+
+block content
+	h1(class="h2")
+		span Address
+		p(class="monospace text-mu overflow-ellipsis") #{address}
+
+	if addrTxs.length > 0
+		include includes/address-content.pug

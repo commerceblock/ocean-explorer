@@ -1,0 +1,19 @@
+h4(class="h5") Policy Assets
+div(class="table-container")
+	table(class="table table--primary min-w-700 table-striped")
+		thead
+			tr
+				th(class="data-header") asset
+				th(class="data-header") assetlabel
+				th(class="data-header") assetamount
+				th(class="data-header") issuancetx
+		tbody
+			each asset in policy_assets
+				if (asset)
+					tr(class="monospace")
+						td
+							a(href=("/asset/" + asset.asset)) #{asset.asset.slice(0,30)}...
+						td #{asset.assetlabel}
+						td #{asset.assetamount}
+						td
+							a(href=("/tx/" + asset.issuancetx)) #{asset.issuancetx.slice(0,20)}...

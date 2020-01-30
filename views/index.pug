@@ -1,29 +1,26 @@
 extends layout
 
 block headContent
-	title Home
+    title Home
 
 block content
-	h1 Ocean Explorer
-	hr
+    h1 Ocean Explorer
+    hr
 
-	:markdown-it
-		**Ocean Explorer** is an [open-source](http://github.com/commerceblock/ocean-explorer) project designed for [Ocean](https://github.com/commerceblock/ocean) clients. The current implementation is staged on the [Ocean Demo](https://github.com/commerceblock/ocean-demo).
+    :markdown-it
+        **Ocean Explorer** is an [open-source](http://github.com/commerceblock/ocean-explorer) project designed for [Ocean](https://github.com/commerceblock/ocean) clients.
 
-	if (latestBlocks)
-		div(class="row mt-5")
-			div(class="col")
-				h3 Latest Blocks
-					if (getblockchaininfo.initialblockdownload)
-						small  (#{(getblockchaininfo.headers - latestheight).toLocaleString()} behind)
+    div(class="mt-2r c:mt-3r")
+        h3 Latest Blocks
+    include includes/blocks-list.pug
+    if (blockCount > limit)
+        - var pageNumber = offset / limit + 1;
+        - var pageCount = Math.floor(blockCount / limit);
+        - if (pageCount * limit < blockCount) {
+            - pageCount++;
+        - }
+        - var paginationUrlFunction = function(x) {
+            - return paginationBaseUrl + "?limit=" + limit + "&offset=" + ((x - 1) * limit + "&sort=" + sort);
+        - }
 
-			div(class="col")
-				span(style="float: right;")
-					a(href="/blocks") Browse Blocks &raquo;
-
-		hr
-
-		- var blocks = latestBlocks;
-		- var blockOffset = 0;
-
-		include includes/blocks-list.pug
+        include includes/pagination.pug
