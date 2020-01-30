@@ -2,9 +2,8 @@ FROM centos:7.6.1810
 
 RUN set -x \
     && yum install -y epel-release \
-    && curl --silent --location https://rpm.nodesource.com/setup_8.x | bash - \
-    && yum install -y iproute nc make nodejs git \
-    && yum group install -y "Development Tools" \
+    && curl -sL https://rpm.nodesource.com/setup_12.x | bash - \
+    && yum install -y iproute nc make nodejs \
     && yum clean all \
     && rm -rf /var/cache/yum
 

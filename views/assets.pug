@@ -1,0 +1,17 @@
+extends layout
+
+block headContent
+	title Assets
+
+block content
+	h1(class="h2") Assets
+
+	if (assets)
+		include includes/assets-list.pug
+	else
+		p No assets found
+
+	if (policy_assets)
+		include includes/assets-list-policy.pug
+	else
+		p No policy assets found

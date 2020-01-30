@@ -1,86 +1,90 @@
 doctype html
 html
-	head
-		meta(charset="utf-8")
-		meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no")
+    head
+        meta(charset="utf-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no")
 
-		link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css", integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm", crossorigin="anonymous")
-		link(rel="stylesheet", href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
-		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato|Open+Sans|Cousine")
-		link(rel="stylesheet", href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css")
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css", integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm", crossorigin="anonymous")
+        link(rel="stylesheet", href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
+        link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato|Open+Sans|Cousine")
+        link(rel="stylesheet", href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css")
 
-		link(rel='stylesheet', href='/css/styling.css')
-		link(rel="icon", type="image/png", sizes="32x32", href="/img/favicons/favicon-256.png")
-		link(rel="icon", type="image/png", sizes="96x96", href="/img/favicons/favicon-256.png")
-		link(rel="icon", type="image/png", sizes="16x16", href="/img/favicons/favicon-256.png")
+        link(rel='stylesheet', href='/css/styling.css')
+        link(rel="icon", type="image/png", sizes="32x32", href="/img/favicons/favicon-256.png")
+        link(rel="icon", type="image/png", sizes="96x96", href="/img/favicons/favicon-256.png")
+        link(rel="icon", type="image/png", sizes="16x16", href="/img/favicons/favicon-256.png")
 
-		block headContent
-			title Ocean Explorer
+        block headContent
+            title Ocean Explorer
 
-	body
-		nav(class="navbar navbar-expand-lg navbar-custom mb-5")
-			div(class="container")
-				if (env.testnet)
-					div(class="corner-ribbon top-left sticky red shadow")
-						span testnet
+    body
+        nav(class="navbar navbar-expand-lg navbar-custom mb-5")
+            div(class="container")
+                if (env.testnet)
+                    div(class="corner-ribbon top-left sticky red shadow")
+                        span testnet
 
-				a(class="navbar-brand", color=yellow, href="/")
-					span
-						img(src="/img/logo/logo-small.png", class="header-image")
-						span Ocean Explorer
+                a(class="navbar-brand", color=yellow, href="/")
+                    span
+                        img(src="/img/logo/logo-small.png", class="header-image")
+                        span Ocean Explorer
 
-				button(type="button", class="navbar-toggler navbar-toggler-right", data-toggle="collapse", data-target="#navbarNav")
-					span(class="navbar-toggler-icon")
-						i(class="fa fa-navicon")
+                button(type="button", class="navbar-toggler navbar-toggler-right", data-toggle="collapse", data-target="#navbarNav")
+                    span(class="navbar-toggler-icon")
+                        i(class="fa fa-navicon")
 
-				div(class="collapse navbar-collapse", id="navbarNav")
-					ul(class="navbar-nav mr-auto")
-						li(class="nav-item")
-							a(href="/blocks", class="nav-link") Blocks
-						li(class="nav-item")
-							a(href="/mempool-summary", class="nav-link") Mempool
-						li(class="nav-item")
-							a(href="/node-details", class="nav-link") Status
-					form(method="post", action="/search", class="form-inline")
-						div(class="input-group")
-							input(type="text", class="form-control form-control-sm", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
-							span(class="input-group-btn")
-								input(type="submit", class="btn btn-primary", value="Search")
-		div(class="main-content")
+                div(class="collapse navbar-collapse", id="navbarNav")
+                    ul(class="navbar-nav mr-auto")
+                        li(class="nav-item")
+                            a(href="/blocks", class="nav-link") Blocks
+                        li(class="nav-item")
+                            a(href="/assets", class="nav-link") Assets
+                        //li(class="nav-item")
+                            //a(href="/addresses", class="nav-link") Addrs
+                        li(class="nav-item")
+                            a(href="/mempool-summary", class="nav-link") Mempool
+                        li(class="nav-item")
+                            a(href="/node-details", class="nav-link") Status
+                    form(method="post", action="/search", class="form-inline")
+                        div(class="input-group")
+                            input(type="text", class="form-control form-control-sm", name="query", placeholder="Search for block or transaction", value=(query), style="width: 250px;")
+                            span(class="input-group-btn")
+                                input(type="submit", class="btn btn-primary", value="Search")
+        div(class="main-content")
 
-			div(class="container")
-				if (userMessage)
-					div(class="alert", class=(userMessageType ? ("alert-"  + userMessageType) : "alert-info"), role="alert")
-						span !{userMessage}
+            div(class="container")
+                if (userMessage)
+                    div(class="alert", class=(userMessageType ? ("alert-"  + userMessageType) : "alert-info"), role="alert")
+                        span !{userMessage}
 
-			div(class="container")
-				block content
+            div(class="container")
+                block content
 
-		footer(class="footer")
-			div(class="container")
-				span
-					a(href="https://www.commerceblock.com") CommerceBlock
-				span &nbsp;&copy;2018
-				span &nbsp;&ndash;&nbsp;
-				span Source code available on github
-					a(href="https://github.com/commerceblock/ocean-explorer") commerceblock/ocean-explorer
+        footer(class="footer")
+            div(class="container")
+                span
+                    a(href="https://www.commerceblock.com") CommerceBlock
+                span &nbsp;&copy;2020
+                span &nbsp;&ndash;&nbsp;
+                span Source code available on github
+                    a(href="https://github.com/commerceblock/ocean-explorer") commerceblock/ocean-explorer
 
-		script(src="https://code.jquery.com/jquery-3.2.1.min.js", integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=", crossorigin="anonymous")
-		script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q", crossorigin="anonymous")
-		script(src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js", integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb", crossorigin="anonymous")
-		script(src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js", integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl", crossorigin="anonymous")
+        script(src="https://code.jquery.com/jquery-3.2.1.min.js", integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=", crossorigin="anonymous")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js", integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q", crossorigin="anonymous")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js", integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb", crossorigin="anonymous")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js", integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl", crossorigin="anonymous")
 
-		script(src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js")
+        script(src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js")
 
-		script(src="https://cdn.ravenjs.com/3.22.4/raven.min.js", crossorigin="anonymous")
-		script.
-			Raven.config('https://0bf20e8357a748cab8aa9d35c0f790dd@sentry.io/130800').install();
+        script(src="https://cdn.ravenjs.com/3.22.4/raven.min.js", crossorigin="anonymous")
+        script.
+            Raven.config('https://0bf20e8357a748cab8aa9d35c0f790dd@sentry.io/130800').install();
 
-			$(document).ready(function() {
-				$('[data-toggle="tooltip"]').tooltip();
-				$('[data-toggle="popover"]').popover({html:true});
-			});
+            $(document).ready(function() {
+                $('[data-toggle="tooltip"]').tooltip();
+                $('[data-toggle="popover"]').popover({html:true});
+            });
 
-			hljs.initHighlightingOnLoad();
+            hljs.initHighlightingOnLoad();
 
-		block endOfBody
+        block endOfBody
