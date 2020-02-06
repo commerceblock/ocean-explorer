@@ -142,20 +142,24 @@ async function new_asset(asset, offset, assetamount, assetlabel, token, tokenamo
 }
 
 // Process new peg-in using the Asset model and call save method
-async function new_pegin(asset, assetamount) {
+async function new_pegin(asset, offset, assetamount) {
     existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
-    if (existing_asset) {
-        existing_asset.assetamount += assetamount;
-        return await save_asset(existing_asset);
+    if (!existing_asset) {
+        var newasset = new Asset({
+            asset: asset,
+            assetamount: assetamount,
+            assetlabel: "CBT",
+            token: "",
+            issuancetx: ""
+        });
+        return await save_asset(newasset);
     }
-    var newasset = new Asset({
-        asset: asset,
-        assetamount: assetamount,
-        assetlabel: "CBT",
-        token: "",
-        issuancetx: ""
-    });
-    return await save_asset(newasset);
+    if (existing_asset.offset >= offset) {
+        console.log("Pegin already recorded.");
+        return existing_asset;
+    }
+    existing_asset.assetamount += assetamount;
+    return await save_asset(existing_asset);
 }
 
 // Save new addr using the AddressTx model
@@ -696,12 +700,14 @@ module.exports = {
                         if ("assetlabel" in result.transactions[i]["vout"][0] && result.transactions[i]["vout"][0]["assetlabel"] == "CBT") {
                             await new_pegin(
                                 result.transactions[i]["vout"][0]["asset"],
+                                tx._id,
                                 Math.round(result.transactions[i]["vout"][0]["value"]*(10**8)));
                         }
                         // peg-in fee
                         if ("assetlabel" in result.transactions[i]["vout"][1] && result.transactions[i]["vout"][1]["assetlabel"] == "CBT") {
                             await new_pegin(
                                 result.transactions[i]["vout"][1]["asset"],
+                                tx._id,
                                 Math.round(result.transactions[i]["vout"][1]["value"]*(10**8)));
                         }
                     }
