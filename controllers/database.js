@@ -143,6 +143,7 @@ async function new_asset(asset, offset, assetamount, assetlabel, token, tokenamo
 
 // Process new peg-in using the Asset model and call save method
 async function new_pegin(asset, offset, assetamount) {
+    console.log("New pegin for " + assetamount + " amount.")
     existing_asset = await Asset.findOne({asset: asset}); // check first if asset exists
     if (!existing_asset) {
         var newasset = new Asset({
@@ -150,7 +151,8 @@ async function new_pegin(asset, offset, assetamount) {
             assetamount: assetamount,
             assetlabel: "CBT",
             token: "",
-            issuancetx: ""
+            issuancetx: "",
+            offset: offset
         });
         return await save_asset(newasset);
     }
@@ -159,6 +161,7 @@ async function new_pegin(asset, offset, assetamount) {
         return existing_asset;
     }
     existing_asset.assetamount += assetamount;
+    existing_asset.offset = offset;
     return await save_asset(existing_asset);
 }
 
@@ -698,17 +701,19 @@ module.exports = {
                     if (result.transactions[i]["vin"][0]["is_pegin"] != undefined && result.transactions[i]["vin"][0]["is_pegin"]) {
                         // peg-in
                         if ("assetlabel" in result.transactions[i]["vout"][0] && result.transactions[i]["vout"][0]["assetlabel"] == "CBT") {
-                            await new_pegin(
-                                result.transactions[i]["vout"][0]["asset"],
-                                tx._id,
-                                Math.round(result.transactions[i]["vout"][0]["value"]*(10**8)));
-                        }
-                        // peg-in fee
-                        if ("assetlabel" in result.transactions[i]["vout"][1] && result.transactions[i]["vout"][1]["assetlabel"] == "CBT") {
-                            await new_pegin(
-                                result.transactions[i]["vout"][1]["asset"],
-                                tx._id,
-                                Math.round(result.transactions[i]["vout"][1]["value"]*(10**8)));
+                            // peg-in fee
+                            if ("assetlabel" in result.transactions[i]["vout"][1] && result.transactions[i]["vout"][1]["assetlabel"] == "CBT") {
+                                await new_pegin(
+                                    result.transactions[i]["vout"][0]["asset"],
+                                    tx._id,
+                                    Math.round(result.transactions[i]["vout"][0]["value"]*(10**8)
+                                        + result.transactions[i]["vout"][1]["value"]*(10**8)));
+                            } else {
+                                await new_pegin(
+                                    result.transactions[i]["vout"][0]["asset"],
+                                    tx._id,
+                                    Math.round(result.transactions[i]["vout"][0]["value"]*(10**8)));
+                            }
                         }
                     }
                     // Check for asset destroy transaction -> if OP_RETURN vout exists && vout has non-zero vlaue
