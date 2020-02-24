@@ -67,6 +67,13 @@ async function doWork() {
         var gasLimit = ! env.eth.gasLimit ? 210000 : parseInt(env.eth.gasLimit, 10);
         console.log("gasLimit " + gasLimit);
 
+        var syncing = await web3.eth.isSyncing();
+        if (syncing) {
+            console.log("Syncing...");
+            console.log(syncing);
+            return 0;
+        }
+
         // For each pegout create an erc20 payment, sign and send via web3
         for (const pegout of pegouts) {
             var toAddress = pegout["address"];
@@ -79,6 +86,9 @@ async function doWork() {
             console.log("Pegout to " + toAddress);
             console.log("Amount " + pegout["amount"]);
 
+            var mnonce = await web3.eth.getTransactionCount(myAddress);
+            console.log("Tx count " + mnonce);
+
             var rawTransaction = {
                 "from": myAddress,
                 "gasPrice": web3.utils.toHex(gasPrice),  // env or api
@@ -86,24 +96,41 @@ async function doWork() {
                 "to": contractAddress,
                 "value": "0x0",
                 "data": contract.methods.transfer(toAddress, amount).encodeABI(),
-                "nonce": web3.utils.toHex(await web3.eth.getTransactionCount(myAddress))
+                "nonce": web3.utils.toHex(mnonce)
             }
+            var transaction = new Tx(rawTransaction);
 
             if (pegout.eth_txid) {
-                console.log("Sent previously with eth txid " + pegout.eth_txid + ". skipping...");
-                continue;
-            } else {
-                try {
-                    var transaction = new Tx(rawTransaction);
-                    transaction.sign(privateKey)
-
-                    var receipt = await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
-                } catch (ethError) {
-                    console.error(ethError);
-                    pegout.eth_txid = transaction.serialize().toString('hex');
+                console.log("Sent previously with eth txid " + pegout.eth_txid);
+                var check = await web3.eth.getTransactionReceipt('0x' + transaction.hash().toString('hex'));
+                if (check) {
+                    console.log("Confirmed " + check);
+                    pegout.isPaid = true;
+                    pegout.receipt = check;
                     await pegout.save();
                     continue;
                 }
+                // Edge case for stuck transactions with previous tx count as nonce
+                if (pegout.eth_txid == transaction.hash().toString('hex')) {
+                    rawTransaction.nonce = web3.utils.toHex(mnonce + 1);
+                    transaction = new Tx(rawTransaction);
+                    console.log("New nonce " + (mnonce + 1));
+                } else {
+                    // The only thing that could have changed is the nonce
+                    // This means that the old transaction holds an invalid
+                    // nonce, we can therfore continue with the new one
+                    console.log("New tx different. Sending...")
+                }
+            }
+
+            try {
+                transaction.sign(privateKey)
+                var receipt = await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
+            } catch (ethError) {
+                console.error(ethError);
+                pegout.eth_txid = transaction.hash().toString('hex');
+                await pegout.save();
+                continue;
             }
 
             console.log(receipt["transactionHash"]);
