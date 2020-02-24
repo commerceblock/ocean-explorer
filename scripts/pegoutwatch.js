@@ -85,10 +85,17 @@ async function doWork() {
                 "data": contract.methods.transfer(toAddress, amount).encodeABI(),
                 "nonce": web3.utils.toHex(await web3.eth.getTransactionCount(myAddress))
             }
-            var transaction = new Tx(rawTransaction);
-            transaction.sign(privateKey)
 
-            var receipt = await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
+            try {
+                var transaction = new Tx(rawTransaction);
+                transaction.sign(privateKey)
+
+                var receipt = await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
+            } catch (ethError) {
+                console.error(ethError);
+                continue;
+            }
+
             console.log(receipt["transactionHash"]);
             pegout.isPaid = true;
             pegout.receipt = receipt;
