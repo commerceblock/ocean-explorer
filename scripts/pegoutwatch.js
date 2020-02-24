@@ -70,8 +70,11 @@ async function doWork() {
         // For each pegout create an erc20 payment, sign and send via web3
         for (const pegout of pegouts) {
             var toAddress = pegout["address"];
-            var amountBig = new web3.utils.BN(pegout["amount"])
-            var amount = web3.utils.toHex(web3.utils.toWei(amountBig))
+
+            // prev method used - had precision errors
+            //var amountBig = new web3.utils.BN(pegout["amount"])
+            //var amount = web3.utils.toHex(web3.utils.toWei(amountBig))
+            var amount = web3.utils.toHex(web3.utils.toWei(pegout["amount"].toString()))
 
             console.log("Pegout to " + toAddress);
             console.log("Amount " + pegout["amount"]);
