@@ -89,14 +89,21 @@ async function doWork() {
                 "nonce": web3.utils.toHex(await web3.eth.getTransactionCount(myAddress))
             }
 
-            try {
-                var transaction = new Tx(rawTransaction);
-                transaction.sign(privateKey)
-
-                var receipt = await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
-            } catch (ethError) {
-                console.error(ethError);
+            if (pegout.eth_txid) {
+                console.log("Sent previously with eth txid " + pegout.eth_txid + ". skipping...");
                 continue;
+            } else {
+                try {
+                    var transaction = new Tx(rawTransaction);
+                    transaction.sign(privateKey)
+
+                    var receipt = await web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'));
+                } catch (ethError) {
+                    console.error(ethError);
+                    pegout.eth_txid = transaction.serialize().toString('hex');
+                    await pegout.save();
+                    continue;
+                }
             }
 
             console.log(receipt["transactionHash"]);
