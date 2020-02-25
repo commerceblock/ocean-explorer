@@ -16,7 +16,7 @@ var PegoutSchema = new Schema({
     amount:     { type: Number},
     isPaid:     { type: Boolean, default: false},
     receipt:    { type: Object},
-    eth_txid:   { type: String}
+    eth_txid:   { type: String} // prev txid in case of failure
 });
 
 // Pegout model used for saving and/or lookups

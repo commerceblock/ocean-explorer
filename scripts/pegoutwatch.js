@@ -117,6 +117,12 @@ async function doWork() {
                     console.log("New nonce " + (mnonce + 1));
                 } else {
                     // The only thing that could have changed is the nonce
+                    // Check that the previous nonce is invalid
+                    prevtx = await web3.eth.getTransaction('0x' + pegout.eth_txid);
+                    if (prevtx && prevtx.nonce > mnonce) {
+                        console.log("Previous tx nonce " + prevtx.nonce + " higher than current. Skipping...");
+                        continue;
+                    }
                     // This means that the old transaction holds an invalid
                     // nonce, we can therfore continue with the new one
                     console.log("New tx different. Sending...")
