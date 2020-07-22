@@ -20,6 +20,10 @@ if [ -f /run/secrets/eth_priv ]; then
     export ETH_PRIV="$(cat /run/secrets/eth_priv)"
 fi
 
+if [ -f /run/secrets/eth_host ]; then
+    export ETH_HOST="$(cat /run/secrets/eth_host)"
+fi
+
 case "$1" in
         explorer)
             echo "Running explorer"
