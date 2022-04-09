@@ -15,7 +15,7 @@
     "ethereumjs-tx": "^2.1.1",
     "express": "^4.17.1",
     "jstransformer-markdown-it": "^2.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-duration-format": "2.2.2",
     "mongoose": "^5.7.5",
     "morgan": "^1.9.1",
