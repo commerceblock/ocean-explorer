@@ -13,7 +13,7 @@
     "debug": "~2.6.0",
     "decimal.js": "7.2.3",
     "ethereumjs-tx": "^2.1.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "jstransformer-markdown-it": "^2.0.0",
     "moment": "^2.24.0",
     "moment-duration-format": "2.2.2",
